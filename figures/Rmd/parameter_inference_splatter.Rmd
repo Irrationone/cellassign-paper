@@ -1,0 +1,170 @@
+---
+title: "Parameter inference -- splatter"
+output: html_notebook
+---
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE, cache = TRUE, cache.lazy = FALSE, fig.width = 8, fig.height = 4.5)
+```
+
+```{r, echo = FALSE}
+library(knitr)
+library(tidyverse)
+library(tensorflow)
+library(SingleCellExperiment)
+library(scater)
+library(data.table)
+library(pheatmap)
+library(ggrepel)
+library(scran)
+library(BiocParallel)
+library(limma)
+library(edgeR)
+library(GSEABase)
+library(scvis)
+library(future)
+library(splatter)
+
+library(scrna.utils)
+library(scrna.sceutils)
+library(cellassign)
+library(cellassign.utils)
+
+environment(read10xResults2) <- asNamespace("scater")
+
+plan(multiprocess)
+```
+
+## splatter simulate
+
+```{r, echo = FALSE}
+sce_t4k <- readRDS("/datadrive/projects/cellassign-analysis/pipelines/simulate-toil/test/sce_t4k.rds")
+```
+
+```{r, echo = FALSE}
+model_params <- splatEstimate(as.matrix(counts(sce_t4k)))
+```
+
+```{r, echo = FALSE}
+num_groups <- 4
+num_batches <- 1
+num_cells <- 1000
+de_facscale <- 0.8
+de_facloc <- 4
+de_prob <- 0.002
+seed <- 8423
+sim_model <- "splat"
+group_probs <- rep(1/num_groups, num_groups)
+batch_cells <- rep(num_cells/num_batches, num_batches)
+
+model_params_modified <- model_params
+
+model_params_modified@nCells <- num_cells
+model_params_modified@de.prob <- de_prob
+model_params_modified@nBatches <- num_batches
+model_params_modified@batchCells <- batch_cells
+model_params_modified@nGroups <- num_groups
+model_params_modified@group.prob <- group_probs
+
+model_params_modified@de.facLoc <- de_facloc
+model_params_modified@de.facScale <- de_facscale
+
+model_params_modified@seed <- seed
+```
+
+```{r, echo = FALSE}
+sce_sim <- splatSimulate(params = model_params_modified, method = "groups", verbose = TRUE)
+```
+
+```{r, echo = FALSE}
+normalize_sce_sim <- function(sce_sim, run_dimred = TRUE) {
+  sce_sim <- calculateQCMetrics(sce_sim, exprs_values = "counts")
+  norm_factors <- edgeR::calcNormFactors(as.matrix(counts(sce_sim)), method = "TMM")
+  lib_size_factors <- colSums(as.matrix(counts(sce_sim)))
+  
+  sizeFactors(sce_sim) <- norm_factors * lib_size_factors / mean(norm_factors * lib_size_factors)
+  
+  sce_sim_normalized <- normalize(sce_sim)
+  
+  if (length(unique(sce_sim$Batch)) > 1) {
+    design <- model.matrix(~ Batch, as.data.frame(colData(sce_sim_normalized)))
+
+    assay(sce_sim_normalized, "logcounts") <- limma::removeBatchEffect(logcounts(sce_sim_normalized), batch=sce_sim_normalized$Batch)
+  }
+  
+  size_factors <- unlist(scater:::.get_all_sf_sets(sce_sim_normalized)$size.factors)
+  sce_sim_normalized <- sce_sim_normalized %>% scater::mutate(size_factor=size_factors)
+  if (run_dimred) {
+    sce_sim_normalized <- runPCA(sce_sim_normalized, ntop = 500, ncomponents = 50, exprs_values = "logcounts")
+    sce_sim_normalized <- runTSNE(sce_sim_normalized, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+  }
+  
+  return(sce_sim_normalized)
+}
+
+sce_sim <- normalize_sce_sim(sce_sim, run_dimred = TRUE)
+```
+
+```{r, echo = FALSE}
+plotPCA(sce_sim, ncomponents = 2, colour_by = "Group")
+```
+
+```{r, echo = FALSE}
+plotTSNE(sce_sim, ncomponents = 2, colour_by = "Group")
+```
+
+```{r, echo = FALSE}
+s <- sizeFactors(sce_sim)
+B <- 20
+X <- NULL
+
+markers_to_use <- select_markers(sce_sim, percentile = 0, frac_genes = 1, percentile_type = "mean_expr")
+## CONSTRUCT RHO FROM VALUES IN sce_sim -- CHECK OLD CODE
+
+create_rho_matrix <- function(sce_sim, markers_to_use) {
+  rowdat <- rowData(sce_sim)
+  
+  de_df <- rowdat %>% as.data.frame %>%
+    dplyr::filter(Gene %in% markers_to_use) %>% 
+    tibble::column_to_rownames(var = "Gene") %>%
+    dplyr::select(contains("DEFac"))
+  
+  de_df[de_df <= 1] <- 0
+  de_df[de_df > 1] <- 1
+  
+  de_df <- de_df[apply(de_df, 1, function(x) !all(x == x[1])),]
+  
+  de_df <- as.matrix(de_df)
+  
+  return(de_df)
+}
+
+rho <- create_rho_matrix(sce_sim, markers_to_use)
+```
+
+```{r, echo = FALSE}
+res <- cellassign_em(exprs_obj = sce_sim[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = TRUE, verbose = FALSE)
+```
+
+```{r, echo = FALSE}
+extract_delta <- function(sce_cellassign_result, log = FALSE) {
+  sce <- sce_cellassign_result$sce
+  res <- sce_cellassign_result$res
+  
+  rowdat <- as.data.frame(rowData(sce))
+  decols <- colnames(rowdat)[str_detect(colnames(rowdat), "^DEFac")]
+  demat <- rowdat[,decols]
+  rownames(demat) <- rowdat$Gene
+  
+  delta <- res$mle_params$delta
+  demat_subset <- demat[rownames(delta),]
+  colnames(demat_subset) <- str_replace(colnames(demat_subset), "^DEFac", "")
+  
+  if (log) {
+    demat_subset <- log(demat_subset)
+  }
+  return(demat_subset)
+}
+```
+
+
