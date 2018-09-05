@@ -146,11 +146,10 @@ rho <- create_rho_matrix(sce_sim, markers_to_use)
 res <- cellassign_em(exprs_obj = sce_sim[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = TRUE, verbose = FALSE)
 ```
 
+### Delta
+
 ```{r, echo = FALSE}
-extract_delta <- function(sce_cellassign_result, log = FALSE) {
-  sce <- sce_cellassign_result$sce
-  res <- sce_cellassign_result$res
-  
+extract_delta <- function(sce, res, log = FALSE) {
   rowdat <- as.data.frame(rowData(sce))
   decols <- colnames(rowdat)[str_detect(colnames(rowdat), "^DEFac")]
   demat <- rowdat[,decols]
@@ -165,6 +164,33 @@ extract_delta <- function(sce_cellassign_result, log = FALSE) {
   }
   return(demat_subset)
 }
+
+delta_compare <- function(sce, res, high_expr_thres = 0.9) {
+  rowdat <- as.data.frame(rowData(sce))
+  
+  delta <- res$mle_params$delta
+  demat_subset <- extract_delta(sce, res)
+  
+  marker_entries <- delta != 0
+  
+  df <- data.frame(
+    Gene=matrix(rep(rownames(demat_subset), each = ncol(demat_subset)), nrow = nrow(demat_subset), ncol = ncol(demat_subset))[marker_entries],
+    true_delta=log(demat_subset[marker_entries]),
+    inferred_delta=delta[marker_entries]
+  )
+  
+  df <- df %>% plyr::join(rowdat)
+  df <- df %>% dplyr::mutate(high_expr=factor(log10_mean_counts >= quantile(log10_mean_counts, high_expr_thres)))
+  
+  p <- ggplot(df, aes(x=true_delta, y=inferred_delta)) + geom_point(aes(colour=high_expr, shape = high_expr)) + geom_abline(slope = 1) + xlab(expression("True "~delta)) + ylab(expression("Inferred "~delta)) + guides(colour=guide_legend(title = "High mean expression"), shape = FALSE) + theme_bw() + theme_Publication()
+  
+  print(with(df, cor.test(true_delta, inferred_delta)))
+  return(p)
+}
+```
+
+```{r, echo = FALSE}
+delta_compare(sce_sim[rownames(rho),], res)
 ```
 
 
