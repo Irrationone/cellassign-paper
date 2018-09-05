@@ -77,31 +77,6 @@ sce_sim <- splatSimulate(params = model_params_modified, method = "groups", verb
 ```
 
 ```{r, echo = FALSE}
-normalize_sce_sim <- function(sce_sim, run_dimred = TRUE) {
-  sce_sim <- calculateQCMetrics(sce_sim, exprs_values = "counts")
-  norm_factors <- edgeR::calcNormFactors(as.matrix(counts(sce_sim)), method = "TMM")
-  lib_size_factors <- colSums(as.matrix(counts(sce_sim)))
-  
-  sizeFactors(sce_sim) <- norm_factors * lib_size_factors / mean(norm_factors * lib_size_factors)
-  
-  sce_sim_normalized <- normalize(sce_sim)
-  
-  if (length(unique(sce_sim$Batch)) > 1) {
-    design <- model.matrix(~ Batch, as.data.frame(colData(sce_sim_normalized)))
-
-    assay(sce_sim_normalized, "logcounts") <- limma::removeBatchEffect(logcounts(sce_sim_normalized), batch=sce_sim_normalized$Batch)
-  }
-  
-  size_factors <- unlist(scater:::.get_all_sf_sets(sce_sim_normalized)$size.factors)
-  sce_sim_normalized <- sce_sim_normalized %>% scater::mutate(size_factor=size_factors)
-  if (run_dimred) {
-    sce_sim_normalized <- runPCA(sce_sim_normalized, ntop = 500, ncomponents = 50, exprs_values = "logcounts")
-    sce_sim_normalized <- runTSNE(sce_sim_normalized, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
-  }
-  
-  return(sce_sim_normalized)
-}
-
 sce_sim <- normalize_sce_sim(sce_sim, run_dimred = TRUE)
 ```
 
@@ -121,24 +96,6 @@ X <- NULL
 markers_to_use <- select_markers(sce_sim, percentile = 0, frac_genes = 1, percentile_type = "mean_expr")
 ## CONSTRUCT RHO FROM VALUES IN sce_sim -- CHECK OLD CODE
 
-create_rho_matrix <- function(sce_sim, markers_to_use) {
-  rowdat <- rowData(sce_sim)
-  
-  de_df <- rowdat %>% as.data.frame %>%
-    dplyr::filter(Gene %in% markers_to_use) %>% 
-    tibble::column_to_rownames(var = "Gene") %>%
-    dplyr::select(contains("DEFac"))
-  
-  de_df[de_df <= 1] <- 0
-  de_df[de_df > 1] <- 1
-  
-  de_df <- de_df[apply(de_df, 1, function(x) !all(x == x[1])),]
-  
-  de_df <- as.matrix(de_df)
-  
-  return(de_df)
-}
-
 rho <- create_rho_matrix(sce_sim, markers_to_use)
 ```
 
@@ -149,48 +106,7 @@ res <- cellassign_em(exprs_obj = sce_sim[rownames(rho),], s = s, rho = rho, X = 
 ### Delta
 
 ```{r, echo = FALSE}
-extract_delta <- function(sce, res, log = FALSE) {
-  rowdat <- as.data.frame(rowData(sce))
-  decols <- colnames(rowdat)[str_detect(colnames(rowdat), "^DEFac")]
-  demat <- rowdat[,decols]
-  rownames(demat) <- rowdat$Gene
-  
-  delta <- res$mle_params$delta
-  demat_subset <- demat[rownames(delta),]
-  colnames(demat_subset) <- str_replace(colnames(demat_subset), "^DEFac", "")
-  
-  if (log) {
-    demat_subset <- log(demat_subset)
-  }
-  return(demat_subset)
-}
-
-delta_compare <- function(sce, res, high_expr_thres = 0.9) {
-  rowdat <- as.data.frame(rowData(sce))
-  
-  delta <- res$mle_params$delta
-  demat_subset <- extract_delta(sce, res)
-  
-  marker_entries <- delta != 0
-  
-  df <- data.frame(
-    Gene=matrix(rep(rownames(demat_subset), each = ncol(demat_subset)), nrow = nrow(demat_subset), ncol = ncol(demat_subset))[marker_entries],
-    true_delta=log(demat_subset[marker_entries]),
-    inferred_delta=delta[marker_entries]
-  )
-  
-  df <- df %>% plyr::join(rowdat)
-  df <- df %>% dplyr::mutate(high_expr=factor(log10_mean_counts >= quantile(log10_mean_counts, high_expr_thres)))
-  
-  p <- ggplot(df, aes(x=true_delta, y=inferred_delta)) + geom_point(aes(colour=high_expr, shape = high_expr)) + geom_abline(slope = 1) + xlab(expression("True "~delta)) + ylab(expression("Inferred "~delta)) + guides(colour=guide_legend(title = "High mean expression"), shape = FALSE) + theme_bw() + theme_Publication()
-  
-  print(with(df, cor.test(true_delta, inferred_delta)))
-  return(p)
-}
-```
-
-```{r, echo = FALSE}
-delta_compare(sce_sim[rownames(rho),], res)
+delta_compare(sce_sim[rownames(rho),], res, colour_by = "Group", shape_by = "high_expr")
 ```
 
 
