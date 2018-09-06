@@ -52,7 +52,7 @@ num_batches <- 1
 num_cells <- 1500
 de_facscale <- 0.8
 de_facloc <- 2
-de_prob <- 0.01
+de_prob <- 0.001
 seed <- 8423
 sim_model <- "splat"
 rare_type_prevalence <- 0.01
@@ -154,7 +154,10 @@ table(sce_sim$cluster, sce_sim$Group)
 ```
 
 ```{r, echo = FALSE}
-map_and_evaluate_clusters <- function(sce_sim) {
+map_and_evaluate_clusters <- function(sce_sim, min_count = 0) {
+  # Remove genes that are lowly expressed, and cells with no UMIs
+  sce_sim <- sce_sim[rowSums(counts(sce_sim)) >= min_count,colSums(counts(sce_sim)) > 0]
+  
   nclusts <- length(unique(sce_sim$cluster))
   
   if (nclusts > 1) {
@@ -210,7 +213,7 @@ table(sce_sim_markers$cluster, sce_sim_markers$Group)
 ```
 
 ```{r, echo = FALSE}
-evaluation_measures_markers <- map_and_evaluate_clusters(sce_sim_markers)
+evaluation_measures_markers <- map_and_evaluate_clusters(sce_sim_markers, min_count = 1)
 
 evaluation_measures_markers
 ```
