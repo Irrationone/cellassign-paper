@@ -16,3 +16,4 @@ workspaces/
 .ipynb_checkpoints/
 ~$*
 ipynb/*.svg
+intermediates/
