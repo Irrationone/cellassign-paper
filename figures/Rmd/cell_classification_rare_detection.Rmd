@@ -51,7 +51,7 @@ num_groups <- 4
 num_batches <- 1
 num_cells <- 1500
 de_facscale <- 0.18
-de_facloc <- 0.15
+de_facloc <- 0.2
 de_prob <- 0.115
 down_prob <- 0.26
 seed <- 8423
