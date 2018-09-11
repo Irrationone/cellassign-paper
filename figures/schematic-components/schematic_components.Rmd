@@ -1,0 +1,159 @@
+---
+title: "Schematic components"
+output: html_notebook
+---
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE, cache = TRUE, cache.lazy = FALSE, fig.width = 8, fig.height = 4.5)
+```
+
+```{r, echo = FALSE}
+library(knitr)
+library(tidyverse)
+library(tensorflow)
+library(SingleCellExperiment)
+library(scater)
+library(data.table)
+library(pheatmap)
+library(ggrepel)
+library(scran)
+library(BiocParallel)
+library(limma)
+library(edgeR)
+library(GSEABase)
+library(scvis)
+library(future)
+library(splatter)
+library(infotheo)
+
+library(scrna.utils)
+library(scrna.sceutils)
+library(cellassign)
+library(cellassign.utils)
+```
+
+## Raw matrix
+
+```{r}
+set.seed(120)
+
+ncells <- 20
+marker_gene_list <- list(
+  'A'=c("G1", "G2"),
+  'B'=c("G2", "G3"),
+  'C'=c("G3"),
+  'D'=c("G1", "G2", "G3") # Added as an 'uncertain' cluster
+)
+
+genes <- Reduce(union, marker_gene_list)
+G <- length(genes)
+P <- 1
+
+rho <- marker_list_to_mat(marker_gene_list, include_other = FALSE)
+C <- ncol(rho)
+
+rownames(rho) <- NULL
+colnames(rho) <- NULL
+s <- rep(1, ncells)
+pi <- sample(1:C, size = ncells, replace = TRUE, prob = c(0.3, 0.3, 0.3, 0.1))
+
+delta <- rho * 4
+B <- 20
+a <- runif(n = B, min = 0, max = 10)
+
+X <- matrix(1, nrow = ncells, ncol = P)
+beta <- matrix(rnorm(n = G * P,
+                     mean = -1,
+                     sd = 1),
+               nrow = G,
+               ncol = P,
+               byrow = TRUE)
+```
+
+```{r}
+Y <- simulate_cellassign(rho = rho,
+                         s = s,
+                         pi = pi,
+                         delta = delta,
+                         B = B, 
+                         a = a,
+                         beta = beta,
+                         X = X,
+                         min_Y = 0,
+                         max_Y = 250)
+```
+
+```{r, echo = FALSE, fig.width = 1, fig.height = 6}
+mat <- log2(Y + 1)
+colnames(mat) <- genes
+
+pdf("images/raw_matrix.pdf", onefile = FALSE, width = 1, height = 6)
+pheatmap(mat, cluster_rows = FALSE, cluster_cols = FALSE, legend = FALSE, show_colnames = FALSE)
+dev.off()
+```
+
+## TSNE
+
+## splatter simulate
+
+```{r, echo = FALSE}
+sce_t4k <- readRDS("/datadrive/projects/cellassign-analysis/pipelines/simulate-toil/test/sce_t4k.rds")
+```
+
+```{r, echo = FALSE}
+model_params <- splatEstimate(as.matrix(counts(sce_t4k)))
+```
+
+```{r, echo = FALSE}
+num_groups <- 3
+num_batches <- 1
+num_cells <- 1000
+de_facscale <- 0.5
+de_facloc <- 2
+de_prob <- 0.1
+down_prob <- 0.5
+seed <- 8423
+sim_model <- "splat"
+group_probs <- rep(1/num_groups, num_groups)
+batch_cells <- rep(num_cells/num_batches, num_batches)
+
+model_params_modified <- model_params
+
+model_params_modified@nCells <- num_cells
+model_params_modified@de.prob <- de_prob
+model_params_modified@nBatches <- num_batches
+model_params_modified@batchCells <- batch_cells
+model_params_modified@nGroups <- num_groups
+model_params_modified@group.prob <- group_probs
+model_params_modified@de.downProb <- down_prob
+
+model_params_modified@de.facLoc <- de_facloc
+model_params_modified@de.facScale <- de_facscale
+
+model_params_modified@seed <- seed
+```
+
+```{r, echo = FALSE}
+sce_sim <- splatSimulate(params = model_params_modified, method = "groups", verbose = TRUE)
+```
+
+
+```{r, echo = FALSE}
+sce_sim <- normalize_sce_sim(sce_sim, run_dimred = TRUE)
+```
+
+```{r, echo = FALSE}
+plotPCA(sce_sim, ncomponents = 2, colour_by = "Group")
+```
+
+```{r, echo = FALSE}
+p <- plotTSNE(sce_sim, ncomponents = 2, colour_by = "Group", point_size = 2)
+p$layers[[2]] <- NULL
+p <- p + xlab("") + ylab("") + guides(fill = FALSE) + theme(axis.text = element_blank())
+
+pdf("images/tsne.pdf", width = 3, height = 3)
+p 
+dev.off()
+```
+
+
