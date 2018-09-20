@@ -50,10 +50,24 @@ model_params <- splatEstimate(as.matrix(counts(sce_t4k)))
 num_groups <- 3
 num_batches <- 1
 num_cells <- 1500
-de_facscale <- 0.5
-de_facloc <- 0.2
-de_prob <- 0.1
-down_prob <- 0.5
+
+# CellAssign does better. But this is a hard problem because there's usually 1 cluster with no high delta (logFC) relative to the others. 
+naive_cd8_cd4_params <- c('de_facscale'=0.015, 'de_facloc'=0.03, 'de_facnu'=1.5,
+                          'down_prob'=0.12, 'de_prob'=0.07, 'de_max'=100, 'de_min'=1)
+# CellAssign still does better. 
+b_cd8_params <- c('de_facscale'=0.015, 'de_facloc'=0.024, 'de_facnu'=1,
+                          'down_prob'=0.52, 'de_prob'=0.23, 'de_max'=100, 'de_min'=1)
+
+# CellAssign still does better. Harder problem because fewer outliers, but we don't do too poorly. 
+hgsc_mono_cd8_params <- c('de_facscale'=0.11, 'de_facloc'=0.023, 'de_facnu'=2,
+                          'down_prob'=0.7, 'de_prob'=0.11, 'de_max'=100, 'de_min'=1)
+
+hgsc_endo_fibro_params <- c('de_facscale'=0.044, 'de_facloc'=0.07, 'de_facnu'=1.23,
+                          'down_prob'=0.15, 'de_prob'=0.46, 'de_max'=100, 'de_min'=1)
+
+
+params <- hgsc_endo_fibro_params
+
 seed <- 8423
 sim_model <- "splat"
 group_probs <- rep(1/num_groups, num_groups)
@@ -62,15 +76,18 @@ batch_cells <- rep(num_cells/num_batches, num_batches)
 model_params_modified <- model_params
 
 model_params_modified@nCells <- num_cells
-model_params_modified@de.prob <- de_prob
+model_params_modified@de.prob <- params['de_prob']
 model_params_modified@nBatches <- num_batches
 model_params_modified@batchCells <- batch_cells
 model_params_modified@nGroups <- num_groups
 model_params_modified@group.prob <- group_probs
-model_params_modified@de.downProb <- down_prob
+model_params_modified@de.downProb <- params['down_prob']
 
-model_params_modified@de.facLoc <- de_facloc
-model_params_modified@de.facScale <- de_facscale
+model_params_modified@de.facLoc <- params['de_facloc']
+model_params_modified@de.facScale <- params['de_facscale']
+model_params_modified@de.facNu <- params['de_facnu']
+model_params_modified@de.max <- params['de_max']
+model_params_modified@de.min <- params['de_min']
 
 model_params_modified@seed <- seed
 ```
@@ -99,7 +116,7 @@ s <- sizeFactors(sce_sim)
 B <- 20
 X <- NULL
 
-markers_to_use <- select_markers(sce_sim, percentile_fc = 0.9, percentile_meanexpr = 0.8, frac_genes = 1)
+markers_to_use <- select_markers(sce_sim, percentile_fc = 0.95, percentile_meanexpr = 0.9, frac_genes = 1)
 ## CONSTRUCT RHO FROM VALUES IN sce_sim -- CHECK OLD CODE
 
 rho <- create_rho_matrix(sce_sim, markers_to_use)
@@ -123,6 +140,14 @@ delta_compare(sce_sim[rownames(rho),], res, colour_by = "Group", shape_by = "hig
 
 ```{r, echo = FALSE}
 table(res$cell_type, sce_sim$Group)
+```
+
+```{r, echo = FALSE}
+eval_measures <- compute_evaluation_measures(sce_sim, 
+                                             truth_labels = sce_sim$Group,
+                                             inferred_labels = sce_sim$celltype)
+
+eval_measures
 ```
 
 
@@ -188,19 +213,6 @@ map_and_evaluate_clusters <- function(sce_sim, min_count = 0) {
 evaluation_measures <- map_and_evaluate_clusters(sce_sim)
 
 evaluation_measures
-```
-
-As we can see, all the macro accuracy stats are low because the rare class is not accurately called. 
-
-We can specifically consider the accuracy of calling the rare class:
-
-```{r, echo = FALSE}
-rare_group <- names(which.min(table(sce_sim$Group)))
-
-sce_sim2 <- sce_sim %>% scater::mutate(Group = factor(Group == rare_group))
-evaluation_measures2 <- map_and_evaluate_clusters(sce_sim2)
-
-evaluation_measures2
 ```
 
 ## Unsupervised clustering and classification (marker genes)
