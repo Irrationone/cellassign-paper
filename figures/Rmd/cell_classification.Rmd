@@ -43,7 +43,13 @@ sce_t4k <- readRDS("/datadrive/projects/cellassign-analysis/pipelines/simulate-t
 ```
 
 ```{r, echo = FALSE}
-model_params <- splatEstimate(as.matrix(counts(sce_t4k)))
+model_params <- readRDS("/datadrive/projects/cellassign-analysis/pipelines/simulate-toil/test/sce_t4k_params.rds")
+
+#model_params <- splatEstimate(as.matrix(counts(sce_t4k)))
+```
+
+```{r, echo = FALSE}
+#saveRDS(model_params, "/datadrive/projects/cellassign-analysis/pipelines/simulate-toil/test/sce_t4k_params.rds")
 ```
 
 ```{r, echo = FALSE}
@@ -54,19 +60,33 @@ num_cells <- 1500
 # CellAssign does better. But this is a hard problem because there's usually 1 cluster with no high delta (logFC) relative to the others. 
 naive_cd8_cd4_params <- c('de_facscale'=0.015, 'de_facloc'=0.03, 'de_facnu'=1.5,
                           'down_prob'=0.12, 'de_prob'=0.07, 'de_max'=100, 'de_min'=1)
+naive_cd8_cd4_params_v2 <- c('de_facscale'=0.015, 'de_facloc'=0.03, 'de_facnu'=1.3,
+                          'down_prob'=0.12, 'de_prob'=0.14, 'de_max'=1000, 'de_min'=1)
+naive_cd8_cd4_params_v3 <- c('de_facscale'=0.015, 'de_facloc'=0.03, 'de_facnu'=1.3,
+                          'down_prob'=0.12, 'de_prob'=0.21, 'de_max'=1000, 'de_min'=1)
+
 # CellAssign still does better. 
 b_cd8_params <- c('de_facscale'=0.015, 'de_facloc'=0.024, 'de_facnu'=1,
                           'down_prob'=0.52, 'de_prob'=0.23, 'de_max'=100, 'de_min'=1)
+b_cd8_params_v2 <- c('de_facscale'=0.015, 'de_facloc'=0.048, 'de_facnu'=1,
+                          'down_prob'=0.52, 'de_prob'=0.23, 'de_max'=1000, 'de_min'=1)
+b_cd8_params_v3 <- c('de_facscale'=0.015, 'de_facloc'=0.036, 'de_facnu'=1,
+                          'down_prob'=0.52, 'de_prob'=0.23, 'de_max'=1000, 'de_min'=1)
+b_cd8_params_v4 <- c('de_facscale'=0.015, 'de_facloc'=0.030, 'de_facnu'=1,
+                          'down_prob'=0.52, 'de_prob'=0.23, 'de_max'=1000, 'de_min'=1)
 
 # CellAssign still does better. Harder problem because fewer outliers, but we don't do too poorly. 
 hgsc_mono_cd8_params <- c('de_facscale'=0.11, 'de_facloc'=0.023, 'de_facnu'=2,
                           'down_prob'=0.7, 'de_prob'=0.11, 'de_max'=100, 'de_min'=1)
+hgsc_mono_cd8_params_v2 <- c('de_facscale'=0.11, 'de_facloc'=0.035, 'de_facnu'=2,
+                          'down_prob'=0.7, 'de_prob'=0.11, 'de_max'=100, 'de_min'=1)
 
+# CellAssign: use 99% logFC threshold because there are so many genes
 hgsc_endo_fibro_params <- c('de_facscale'=0.044, 'de_facloc'=0.07, 'de_facnu'=1.23,
                           'down_prob'=0.15, 'de_prob'=0.46, 'de_max'=100, 'de_min'=1)
 
 
-params <- hgsc_endo_fibro_params
+params <- hgsc_mono_cd8_params_v2
 
 seed <- 8423
 sim_model <- "splat"
@@ -116,7 +136,7 @@ s <- sizeFactors(sce_sim)
 B <- 20
 X <- NULL
 
-markers_to_use <- select_markers(sce_sim, percentile_fc = 0.95, percentile_meanexpr = 0.9, frac_genes = 1)
+markers_to_use <- select_markers(sce_sim, percentile_fc = 0.95, percentile_meanexpr = 0.9, frac_genes = 1) # 0.99
 ## CONSTRUCT RHO FROM VALUES IN sce_sim -- CHECK OLD CODE
 
 rho <- create_rho_matrix(sce_sim, markers_to_use)
