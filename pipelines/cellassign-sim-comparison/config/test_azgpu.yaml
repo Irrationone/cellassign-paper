@@ -1,12 +1,12 @@
 script_file:
   class: File
-  path: /root/cellassign-paper/pipelines/cellassign-sim-comparison/R/rmarkdown_wrapper.R
+  path: /datadrive/projects/cellassign-paper/pipelines/cellassign-sim-comparison/R/rmarkdown_wrapper.R
 simulate_rmd_file: 
   class: File
-  path: /root/cellassign-paper/pipelines/cellassign-sim-comparison/Rmd/splatter_simulate_from_model.Rmd
+  path: /datadrive/projects/cellassign-paper/pipelines/cellassign-sim-comparison/Rmd/splatter_simulate_from_model.Rmd
 cluster_rmd_file:
   class: File
-  path: /root/cellassign-paper/pipelines/cellassign-sim-comparison/Rmd/cluster_cells.Rmd
+  path: /datadrive/projects/cellassign-paper/pipelines/cellassign-sim-comparison/Rmd/cluster_cells.Rmd
 random_seeds: 
   - 9090
 num_cellss:
@@ -52,4 +52,4 @@ frac_geness:
 max_geness:
   - 150
 base_sce_params:
-  - {class: File, path: /root/cellassign-paper/pipelines/cellassign-sim-comparison/data/sce_t4k_params.rds}
+  - {class: File, path: /datadrive/projects/cellassign-paper/pipelines/cellassign-sim-comparison/data/sce_t4k_params.rds}
