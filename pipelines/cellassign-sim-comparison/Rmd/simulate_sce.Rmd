@@ -15,7 +15,7 @@ params:
   batch_probs: 1
   de_facscale: 0.1
   de_facloc: 1
-  de_facnu: 1
+  de_nu: 1
   de_min: 1
   de_max: 1000
   batch_facscale: 0.1
