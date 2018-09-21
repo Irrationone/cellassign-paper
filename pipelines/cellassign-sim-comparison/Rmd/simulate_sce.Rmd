@@ -133,7 +133,7 @@ model_params_modified <- model_params
 
 model_params_modified@nCells <- num_cells
 model_params_modified@de.prob <- de_prob
-model_params_modified@down.prob <- down_prob
+model_params_modified@de.downProb <- down_prob
 model_params_modified@nBatches <- num_batches
 model_params_modified@nGroups <- num_groups
 model_params_modified@batchCells <- batch_cell_counts
