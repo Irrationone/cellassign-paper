@@ -16,12 +16,10 @@ num_groupss:
   - 3
 num_batchess:
   - 1
-group_probs:
-  - 0.33
-  - 0.33
-  - 0.34
-batch_probs:
-  - 1
+group_probss:
+  - 0.33,0.33,0.34
+batch_probss:
+  - '1'
 de_faclocs:
   - 0.035
 de_facscales:

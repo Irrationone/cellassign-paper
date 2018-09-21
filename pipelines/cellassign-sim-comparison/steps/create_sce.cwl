@@ -55,20 +55,16 @@ inputs:
             prefix: --num_batches
             position: 7
     group_probs: 
-        type: float[]
+        type: string
         doc: Group probabilities
         inputBinding:
             prefix: --group_probs
-            separate: false
-            itemSeparator: ","
             position: 8
     batch_probs:
-        type: float[]
+        type: string
         doc: Batch probabilities
         inputBinding:
             prefix: --batch_probs
-            separate: false
-            itemSeparator: ","
             position: 9
     de_facloc:
         type: float
