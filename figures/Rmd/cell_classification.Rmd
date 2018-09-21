@@ -80,13 +80,17 @@ hgsc_mono_cd8_params <- c('de_facscale'=0.11, 'de_facloc'=0.023, 'de_facnu'=2,
                           'down_prob'=0.7, 'de_prob'=0.11, 'de_max'=100, 'de_min'=1)
 hgsc_mono_cd8_params_v2 <- c('de_facscale'=0.11, 'de_facloc'=0.035, 'de_facnu'=2,
                           'down_prob'=0.7, 'de_prob'=0.11, 'de_max'=100, 'de_min'=1)
+hgsc_mono_cd8_params_v3 <- c('de_facscale'=0.11, 'de_facloc'=0.046, 'de_facnu'=2,
+                          'down_prob'=0.7, 'de_prob'=0.11, 'de_max'=100, 'de_min'=1)
+hgsc_mono_cd8_params_v4 <- c('de_facscale'=0.15, 'de_facloc'=0.023, 'de_facnu'=2,
+                          'down_prob'=0.7, 'de_prob'=0.11, 'de_max'=100, 'de_min'=1)
 
 # CellAssign: use 99% logFC threshold because there are so many genes
 hgsc_endo_fibro_params <- c('de_facscale'=0.044, 'de_facloc'=0.07, 'de_facnu'=1.23,
                           'down_prob'=0.15, 'de_prob'=0.46, 'de_max'=100, 'de_min'=1)
 
 
-params <- hgsc_mono_cd8_params_v2
+params <- hgsc_mono_cd8_params_v4
 
 seed <- 8423
 sim_model <- "splat"
@@ -155,7 +159,9 @@ plotTSNE(sce_sim, colour_by = "celltype")
 ### Delta
 
 ```{r, echo = FALSE}
-delta_compare(sce_sim[rownames(rho),], res, colour_by = "Group", shape_by = "high_expr")
+compare_res <- delta_compare(sce_sim[rownames(rho),], res, colour_by = "Group", shape_by = "high_expr")
+
+compare_res$p
 ```
 
 ```{r, echo = FALSE}
