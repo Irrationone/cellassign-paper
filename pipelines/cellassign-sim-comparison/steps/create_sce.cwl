@@ -55,7 +55,7 @@ inputs:
             prefix: --num_batches
             position: 7
     group_probs: 
-        type: string[]
+        type: float[]
         doc: Group probabilities
         inputBinding:
             prefix: --group_probs
@@ -63,7 +63,7 @@ inputs:
             itemSeparator: ","
             position: 8
     batch_probs:
-        type: string[]
+        type: float[]
         doc: Batch probabilities
         inputBinding:
             prefix: --batch_probs

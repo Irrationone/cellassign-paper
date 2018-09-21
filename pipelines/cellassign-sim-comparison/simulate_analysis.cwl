@@ -13,8 +13,8 @@ inputs:
     sim_model: string
     num_groupss: int[]
     num_batchess: int[]
-    group_probs: string[]
-    batch_probs: string[]
+    group_probs: float[]
+    batch_probs: float[]
     de_faclocs: float[]
     de_facscales: float[]
     de_nus: float[]
