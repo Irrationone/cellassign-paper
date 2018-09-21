@@ -1,0 +1,184 @@
+---
+title: "Simulate from splatter model"
+output: 
+  html_notebook:
+    toc: true
+    toc_depth: 5
+    toc_float: true
+params:
+  base_sce_param: ""
+  num_cells: 100
+  sim_model: "splat"
+  num_groups: 1
+  num_batches: 1
+  group_probs: 1
+  batch_probs: 1
+  de_facscale: 0.1
+  de_facloc: 1
+  de_facnu: 1
+  de_min: 1
+  de_max: 1000
+  batch_facscale: 0.1
+  batch_facloc: 1
+  de_prob: 0.1
+  down_prob: 0.5
+  random_seed: 4242
+---
+
+Simulates single cell RNA-seq data from the splatter model. 
+
+Requires:
+
+* Base SingleCellExperiment object: to estimate most parameters from
+
+The purpose of this is to be able to simulate expression values for ALL genes. 
+
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE, cache = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(scater)
+library(scran)
+library(R.utils)
+
+library(splatter)
+library(cellassign.utils)
+```
+
+## Default parameters
+
+```{r}
+num_groups <- as.numeric(params$num_groups)
+num_batches <- as.numeric(params$num_batches)
+num_cells <- as.numeric(params$num_cells)
+group_probs <- as.numeric(strsplit(params$group_probs, ",")[[1]])
+batch_probs <- as.numeric(strsplit(params$batch_probs, ",")[[1]])
+de_facscale <- as.numeric(params$de_facscale)
+de_facloc <- as.numeric(params$de_facloc)
+de_facnu <- as.numeric(params$de_facnu)
+de_min <- as.numeric(params$de_min)
+de_max <- as.numeric(params$de_max)
+batch_facscale <- as.numeric(params$batch_facscale)
+batch_facloc <- as.numeric(params$batch_facloc)
+de_prob <- as.numeric(params$de_prob)
+down_prob <- as.numeric(params$down_prob)
+seed <- as.numeric(params$random_seed)
+base_sce_param_file <- as.character(params$base_sce_param)
+sim_model <- as.character(params$sim_model)
+
+if (is.null(sim_model)) {
+  sim_model <- "splat"
+}
+if (is.null(num_groups)) {
+  num_groups <- 1
+}
+if (is.null(num_batches)) {
+  num_batches <- 1
+}
+
+param_df <- data.frame(num_groups=num_groups,
+                       num_batches=num_batches,
+                       num_cells=num_cells,
+                       group_probs=params$group_probs,
+                       batch_probs=params$batch_probs,
+                       de_facscale=de_facscale,
+                       de_facloc=de_facloc,
+                       de_facnu=de_facnu,
+                       de_min=de_min,
+                       de_max=de_max,
+                       batch_facscale=batch_facscale,
+                       batch_facloc=batch_facloc,
+                       de_prob=de_prob,
+                       down_prob=down_prob,
+                       seed=seed,
+                       base_sce_param=base_sce_param_file,
+                       sim_model=sim_model, stringsAsFactors = FALSE)
+```
+
+## Estimate parameters
+
+```{r}
+model_params <- readRDS(base_sce_param_file)
+```
+
+```{r}
+print(model_params)
+```
+
+## Generate extra parameters
+
+```{r}
+group_probs <- group_probs/sum(group_probs)
+batch_probs <- batch_probs/sum(batch_probs)
+
+print(group_probs)
+print(batch_probs)
+```
+
+```{r}
+batch_cell_counts <- round(batch_probs * num_cells, 0)
+```
+
+## Simulate data from parameters
+
+```{r}
+num_cells <- sum(batch_cell_counts)
+```
+
+```{r}
+model_params_modified <- model_params
+
+model_params_modified@nCells <- num_cells
+model_params_modified@de.prob <- de_prob
+model_params_modified@down.prob <- down_prob
+model_params_modified@nBatches <- num_batches
+model_params_modified@nGroups <- num_groups
+model_params_modified@batchCells <- batch_cell_counts
+model_params_modified@group.prob <- group_probs
+
+model_params_modified@de.facLoc <- de_facloc
+model_params_modified@de.facScale <- de_facscale
+model_params_modified@de.facNu <- de_facnu
+model_params_modified@de.max <- de_max
+model_params_modified@de.min <- de_min
+model_params_modified@batch.facLoc <- batch_facloc
+model_params_modified@batch.facScale <- batch_facscale
+
+model_params_modified@seed <- seed
+```
+
+```{r}
+sce_sim <- splatSimulate(params = model_params_modified, method = "groups", verbose = TRUE)
+```
+
+```{r}
+print(sce_sim)
+```
+
+## Normalize data
+
+```{r}
+sce_sim <- normalize_sce_sim(sce_sim, run_dimred = TRUE)
+```
+
+```{r}
+plotPCA(sce_sim, ncomponents = 2, colour_by = "Group")
+```
+
+```{r}
+plotTSNE(sce_sim, ncomponents = 2, colour_by = "Group")
+```
+
+## Outputs
+
+```{r}
+sce_sim@metadata$param_df <- param_df
+
+output_rds_file <- "splatter_simulate_from_model.rds"
+
+saveRDS(sce_sim, output_rds_file)
+```
+

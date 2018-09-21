@@ -17,3 +17,6 @@ workspaces/
 ~$*
 ipynb/*.svg
 intermediates/
+
+## Allow
+!sce_t4k_params.rds

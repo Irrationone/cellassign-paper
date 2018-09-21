@@ -1,0 +1,200 @@
+---
+title: "Cluster SingleCellExperiment object"
+output: 
+  html_notebook:
+    toc: true
+    toc_depth: 5
+    toc_float: true
+params:
+  sce: ""
+  dimreduce_method: "PCA"
+  clustering_method: "phenograph"
+  conda_env: ""
+  fc_percentile: 0.8
+  mean_percentile: 0.9
+  frac_genes: 0.5
+  max_genes: 200
+---
+
+Cluster cells in SCE object in dimensionality-reduced space. 
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE, cache = FALSE)
+```
+
+```{r}
+sce <- params$sce # SCE object to preprocess
+
+dimreduce_method <- params$dimreduce_method # Dimensionality reduction method
+clustering_method <- params$clustering_method # Clustering method
+conda_env <- params$conda_env # Tensorflow virtualenv path
+fc_percentile <- as.numeric(params$fc_percentile)
+mean_percentile <- as.numeric(params$mean_percentile)
+frac_genes <- as.numeric(params$frac_genes)
+max_genes <- as.numeric(params$max_genes)
+
+sce <- readRDS(sce)
+```
+
+```{r}
+library(tidyverse)
+library(scater)
+library(scran)
+library(SC3)
+library(Matrix)
+library(mclust)
+library(multiClust)
+library(limma)
+library(edgeR)
+
+library(cellassign)
+library(cellassign.utils)
+library(scrna.sceutils)
+```
+
+```{r}
+cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, conda_env = "r-tensorflow") {
+  if (!is.null(gene_subset)) {
+    sce <- sce[gene_subset,]
+    sce <- runPCA(sce, ntop = 500, ncomponents = 50, exprs_values = "logcounts")
+  }
+  
+  if (clustering_method == "phenograph") {
+    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, conda_env = conda_env, phenograph_module = "scrnatools.methods.clustering.phenograph_analysis")
+  } else if (clustering_method == "dbscan") {
+    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, dbscan_epsilon = 0.5, dbscan_minPoints = 5)
+  } else {
+    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method)
+  }
+  return(sce_clustered)
+}
+
+map_and_evaluate_clusters <- function(sce_sim, min_count = 0) {
+  # Remove genes that are lowly expressed, and cells with no UMIs
+  sce_sim <- sce_sim[rowSums(counts(sce_sim)) >= min_count,colSums(counts(sce_sim)) > 0]
+  
+  nclusts <- length(unique(sce_sim$cluster))
+  
+  if (nclusts > 1) {
+    sce_de <- map_clusters(sce_sim, method = "de2", FDR_cutoff = 0.05)
+    sce_correlation <- map_clusters(sce_sim, method = "correlation", min_correlation = 0)
+  } else {
+    max_group <- names(which.max(table(sce_sim$Group)))[1]
+    
+    sce_de <- sce %>% scater::mutate(inferred_group=max_group)
+    sce_correlation <- map_clusters(sce_sim, method = "correlation", min_correlation = 0)
+  }
+  
+  de_evaluation_measures <- compute_evaluation_measures(sce_de, 
+                                                         truth_labels = sce_de$Group,
+                                                         inferred_labels = sce_de$inferred_group)
+  corr_evaluation_measures <- compute_evaluation_measures(sce_correlation, 
+                                                           truth_labels = sce_correlation$Group,
+                                                           inferred_labels = sce_correlation$inferred_group)
+  
+  evaluation_measures <- rbind(data.frame(mapping_type = "de", de_evaluation_measures, stringsAsFactors = FALSE), data.frame(mapping_type = "correlation", corr_evaluation_measures, stringsAsFactors = FALSE))
+  
+  return(evaluation_measures)
+}
+```
+
+## Cluster cells
+
+```{r}
+rowData(sce)$Symbol <- rowData(sce)$Gene
+
+## Temporary fix for Matrix's rowSums not being properly applied -- shouldn't be happening
+counts(sce) <- as.matrix(counts(sce))
+
+markers_to_use <- select_markers(sce_sim, percentile_fc = fc_percentile, percentile_meanexpr = mean_percentile, frac_genes = frac_genes, max_genes = max_genes)
+
+rho <- create_rho_matrix(sce, markers_to_use)
+
+s <- sizeFactors(sce)
+B <- 20
+X <- NULL
+
+if (clustering_method == "cellassign") {
+  res <- cellassign_em(exprs_obj = sce[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = FALSE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, min_delta = 0)
+  
+  sce$cluster <- res$cell_type
+  
+  plotPCA(sce, colour_by = "cluster")
+  plotTSNE(sce, colour_by = "cluster")
+  
+  evaluation_measures <- compute_evaluation_measures(sce, 
+                                                     truth_labels = sce$Group,
+                                                     inferred_labels = sce$cluster)
+  
+  delta_compare_res <- delta_compare(sce[rownames(rho),], res, colour_by = "Group", shape_by = "high_expr")
+  
+  print(delta_compare_res$p)
+  delta_compare_df <- delta_compare_res$df
+} else if (clustering_method == "cellassign_shrinkage") {
+  res <- cellassign_em(exprs_obj = sce[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, min_delta = 0)
+  
+  sce$cluster <- res$cell_type
+  plotPCA(sce, colour_by = "cluster")
+  plotTSNE(sce, colour_by = "cluster")
+  
+  evaluation_measures <- compute_evaluation_measures(sce, 
+                                                     truth_labels = sce$Group,
+                                                     inferred_labels = sce$cluster)
+  
+  delta_compare_res <- delta_compare(sce[rownames(rho),], res, colour_by = "Group", shape_by = "high_expr")
+  
+  print(delta_compare_res$p)
+  delta_compare_df <- delta_compare_res$df
+} else {
+  sce_sim_full <- cluster_wrapper(sce_sim, gene_subset = NULL, dimreduce_method = dimreduce_method, clustering_method = clustering_method)
+  plotPCA(sce_sim_full, colour_by = "cluster")
+  plotTSNE(sce_sim_full, colour_by = "cluster")
+  
+  print(with(sce_sim_full, table(cluster, Group)))
+  evaluation_measures_full <- map_and_evaluate_clusters(sce_sim_full)
+  
+  sce_sim_markers <- cluster_wrapper(sce_sim, gene_subset = markers_to_use, dimreduce_method = dimreduce_method, clustering_method = clustering_method)
+  plotPCA(sce_sim_markers, colour_by = "cluster")
+  plotTSNE(sce_sim_markers, colour_by = "cluster")
+  
+  print(with(sce_sim_markers, table(cluster, Group)))
+  evaluation_measures_markers <- map_and_evaluate_clusters(sce_sim_markers)
+  
+  evaluation_measures <- rbind(data.frame(evaluation_measures_full, gene_set="full"),
+                               data.frame(evaluation_measures_markers, gene_set="markers"))
+  
+  sce <- sce_sim_full
+  delta_compare_df <- data.frame()
+}
+```
+
+## Save data
+
+```{r}
+sce@metadata$param_df <- data.frame(sce@metadata$param_df,
+                                    dimreduce_method=dimreduce_method,
+                                    clustering_method=clustering_method,
+                                    frac_genes=frac_genes,
+                                    max_genes=max_genes,
+                                    fc_percentile=fc_percentile,
+                                    mean_percentile=mean_percentile,
+                                    num_markers=length(markers_to_use),
+                                    stringsAsFactors = FALSE)
+
+output_rds_file <- "cluster_cells.rds"
+
+saveRDS(sce, output_rds_file)
+```
+
+```{r}
+eval_measures_file <- "cluster_cells_eval_measures.tsv"
+param_file <- "cluster_cells_params.tsv"
+delta_compare_file <- "cluster_cells_delta_compare.tsv"
+
+write.table(evaluation_measures, file = eval_measures_file, sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+write.table(sce@metadata$param_df, file = param_file, sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+write.table(delta_compare_df, file = delta_compare_file, sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+```
+
+
+

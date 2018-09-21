@@ -1,0 +1,55 @@
+script_file:
+  class: File
+  path: /root/cellassign-analysis/pipelines/cellassign-sim-comparison/R/rmarkdown_wrapper.R
+simulate_rmd_file: 
+  class: File
+  path: /root/cellassign-analysis/pipelines/cellassign-sim-comparison/Rmd/splatter_simulate_from_model.Rmd
+cluster_rmd_file:
+  class: File
+  path: /root/cellassign-analysis/pipelines/cellassign-sim-comparison/Rmd/cluster_cells.Rmd
+random_seeds: 
+  - 9090
+num_cellss:
+  - 1500
+sim_model: splat
+num_groupss:
+  - 3
+num_batchess:
+  - 1
+group_probs:
+  - 0.33
+  - 0.33
+  - 0.34
+batch_probs:
+  - 1
+de_faclocs:
+  - 0.035
+de_facscales:
+  - 0.015
+de_nus:
+  - 1.5
+de_min: 1
+de_max: 1000
+batch_faclocs:
+  - 1
+batch_facscales:
+  - 1
+de_probs:
+  - 0.15
+down_probs:
+  - 0.5
+dimreduce_methods:
+  - PCA
+clustering_methods:
+  - cellassign
+conda_env: r-tensorflow
+fc_percentiles:
+  - 0.95
+expr_percentiles: 
+  - 0.9
+frac_geness:
+  - 0.5
+max_geness:
+  - 150
+base_sce_params:
+  - {class: File, path: /root/cellassign-analysis/pipelines/cellassign-sim-comparison/data/sce_t4k_params.rds}
