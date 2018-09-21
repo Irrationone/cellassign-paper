@@ -17,7 +17,7 @@ inputs:
     batch_probs: string[]
     de_faclocs: float[]
     de_facscales: float[]
-    de_facnus: float[]
+    de_nus: float[]
     de_min: float
     de_max: float
     de_probs: float[]
@@ -53,7 +53,7 @@ steps:
             batch_probs: batch_probs
             de_facloc: de_faclocs
             de_facscale: de_facscales
-            de_nu: de_facnus
+            de_nu: de_nus
             de_min: de_min
             de_max: de_max
             de_prob: de_probs
