@@ -11,7 +11,7 @@ params:
   clustering_method: "phenograph"
   conda_env: ""
   fc_percentile: 0.8
-  mean_percentile: 0.9
+  expr_percentile: 0.9
   frac_genes: 0.5
   max_genes: 200
 ---
@@ -29,7 +29,7 @@ dimreduce_method <- params$dimreduce_method # Dimensionality reduction method
 clustering_method <- params$clustering_method # Clustering method
 conda_env <- params$conda_env # Tensorflow virtualenv path
 fc_percentile <- as.numeric(params$fc_percentile)
-mean_percentile <- as.numeric(params$mean_percentile)
+expr_percentile <- as.numeric(params$expr_percentile)
 frac_genes <- as.numeric(params$frac_genes)
 max_genes <- as.numeric(params$max_genes)
 
@@ -106,7 +106,7 @@ rowData(sce)$Symbol <- rowData(sce)$Gene
 ## Temporary fix for Matrix's rowSums not being properly applied -- shouldn't be happening
 counts(sce) <- as.matrix(counts(sce))
 
-markers_to_use <- select_markers(sce_sim, percentile_fc = fc_percentile, percentile_meanexpr = mean_percentile, frac_genes = frac_genes, max_genes = max_genes)
+markers_to_use <- select_markers(sce_sim, percentile_fc = fc_percentile, percentile_meanexpr = expr_percentile, frac_genes = frac_genes, max_genes = max_genes)
 
 rho <- create_rho_matrix(sce, markers_to_use)
 
@@ -177,7 +177,7 @@ sce@metadata$param_df <- data.frame(sce@metadata$param_df,
                                     frac_genes=frac_genes,
                                     max_genes=max_genes,
                                     fc_percentile=fc_percentile,
-                                    mean_percentile=mean_percentile,
+                                    expr_percentile=expr_percentile,
                                     num_markers=length(markers_to_use),
                                     stringsAsFactors = FALSE)
 
