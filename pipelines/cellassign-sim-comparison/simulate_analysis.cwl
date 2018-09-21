@@ -53,7 +53,7 @@ steps:
             batch_probs: batch_probs
             de_facloc: de_faclocs
             de_facscale: de_facscales
-            de_facnu: de_facnus
+            de_nu: de_facnus
             de_min: de_min
             de_max: de_max
             de_prob: de_probs
@@ -61,7 +61,7 @@ steps:
             batch_facloc: batch_faclocs
             batch_facscale: batch_facscales
             base_sce_param: base_sce_params
-        scatter: [random_seed, num_cells, num_groups, num_batches, de_facloc, de_facscale, de_facnu, de_prob, down_prob, batch_facloc, batch_facscale, base_sce_param]
+        scatter: [random_seed, num_cells, num_groups, num_batches, de_facloc, de_facscale, de_nu, de_prob, down_prob, batch_facloc, batch_facscale, base_sce_param]
         scatterMethod: flat_crossproduct
 
         out:
