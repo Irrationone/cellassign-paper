@@ -58,7 +58,7 @@ group_probs <- as.numeric(strsplit(params$group_probs, ",")[[1]])
 batch_probs <- as.numeric(strsplit(params$batch_probs, ",")[[1]])
 de_facscale <- as.numeric(params$de_facscale)
 de_facloc <- as.numeric(params$de_facloc)
-de_facnu <- as.numeric(params$de_facnu)
+de_nu <- as.numeric(params$de_nu)
 de_min <- as.numeric(params$de_min)
 de_max <- as.numeric(params$de_max)
 batch_facscale <- as.numeric(params$batch_facscale)
@@ -86,7 +86,7 @@ param_df <- data.frame(num_groups=num_groups,
                        batch_probs=params$batch_probs,
                        de_facscale=de_facscale,
                        de_facloc=de_facloc,
-                       de_facnu=de_facnu,
+                       de_nu=de_nu,
                        de_min=de_min,
                        de_max=de_max,
                        batch_facscale=batch_facscale,
@@ -141,7 +141,7 @@ model_params_modified@group.prob <- group_probs
 
 model_params_modified@de.facLoc <- de_facloc
 model_params_modified@de.facScale <- de_facscale
-model_params_modified@de.facNu <- de_facnu
+model_params_modified@de.facNu <- de_nu
 model_params_modified@de.max <- de_max
 model_params_modified@de.min <- de_min
 model_params_modified@batch.facLoc <- batch_facloc
