@@ -10,7 +10,7 @@ cluster_rmd_file:
 random_seeds: 
   - 9090
 num_cellss:
-  - 1500
+  - 1000
 sim_model: splat
 num_groupss:
   - 3
@@ -40,6 +40,7 @@ dimreduce_methods:
   - PCA
 clustering_methods:
   - cellassign
+  - phenograph
 conda_env: r-tensorflow
 fc_percentiles:
   - 0.95
@@ -48,6 +49,6 @@ expr_percentiles:
 frac_geness:
   - 0.5
 max_geness:
-  - 150
+  - 20
 base_sce_params:
   - {class: File, path: /datadrive/projects/cellassign-paper/pipelines/cellassign-sim-comparison/data/sce_t4k_params.rds}
