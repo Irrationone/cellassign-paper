@@ -40,13 +40,17 @@ sce <- readRDS(sce)
 library(tidyverse)
 library(scater)
 library(scran)
+library(SingleCellExperiment)
 library(SC3)
 library(Matrix)
 library(mclust)
 library(multiClust)
 library(limma)
 library(edgeR)
+library(infotheo)
+library(future)
 
+library(scrna.utils)
 library(cellassign)
 library(cellassign.utils)
 library(scrna.sceutils)
@@ -106,7 +110,7 @@ rowData(sce)$Symbol <- rowData(sce)$Gene
 ## Temporary fix for Matrix's rowSums not being properly applied -- shouldn't be happening
 counts(sce) <- as.matrix(counts(sce))
 
-markers_to_use <- select_markers(sce_sim, percentile_fc = fc_percentile, percentile_meanexpr = expr_percentile, frac_genes = frac_genes, max_genes = max_genes)
+markers_to_use <- select_markers(sce, percentile_fc = fc_percentile, percentile_meanexpr = expr_percentile, frac_genes = frac_genes, max_genes = max_genes)
 
 rho <- create_rho_matrix(sce, markers_to_use)
 
@@ -146,18 +150,18 @@ if (clustering_method == "cellassign") {
   print(delta_compare_res$p)
   delta_compare_df <- delta_compare_res$df
 } else {
-  sce_sim_full <- cluster_wrapper(sce_sim, gene_subset = NULL, dimreduce_method = dimreduce_method, clustering_method = clustering_method)
+  sce_sim_full <- cluster_wrapper(sce, gene_subset = NULL, dimreduce_method = dimreduce_method, clustering_method = clustering_method)
   plotPCA(sce_sim_full, colour_by = "cluster")
   plotTSNE(sce_sim_full, colour_by = "cluster")
   
-  print(with(sce_sim_full, table(cluster, Group)))
+  print(with(colData(sce_sim_full), table(cluster, Group)))
   evaluation_measures_full <- map_and_evaluate_clusters(sce_sim_full)
   
-  sce_sim_markers <- cluster_wrapper(sce_sim, gene_subset = markers_to_use, dimreduce_method = dimreduce_method, clustering_method = clustering_method)
+  sce_sim_markers <- cluster_wrapper(sce, gene_subset = markers_to_use, dimreduce_method = dimreduce_method, clustering_method = clustering_method)
   plotPCA(sce_sim_markers, colour_by = "cluster")
   plotTSNE(sce_sim_markers, colour_by = "cluster")
   
-  print(with(sce_sim_markers, table(cluster, Group)))
+  print(with(colData(sce_sim_markers), table(cluster, Group)))
   evaluation_measures_markers <- map_and_evaluate_clusters(sce_sim_markers)
   
   evaluation_measures <- rbind(data.frame(evaluation_measures_full, gene_set="full"),
