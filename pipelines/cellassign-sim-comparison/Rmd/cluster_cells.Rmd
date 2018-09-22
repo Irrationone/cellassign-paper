@@ -60,14 +60,16 @@ library(scrna.sceutils)
 ```
 
 ```{r}
-cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, conda_env = "r-tensorflow") {
+cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, conda_env = "r-tensorflow", conda_binary = "/home/rstudio/miniconda/bin/conda") {
   if (!is.null(gene_subset)) {
     sce <- sce[gene_subset,]
     sce <- runPCA(sce, ntop = 500, ncomponents = 50, exprs_values = "logcounts")
   }
   
   if (clustering_method == "phenograph") {
-    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, conda_env = conda_env, phenograph_module = "scrnatools.methods.clustering.phenograph_analysis")
+    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, conda_env = conda_env, 
+      conda_binary = conda_binary,
+      phenograph_module = "scrnatools.methods.clustering.phenograph_analysis")
   } else if (clustering_method == "dbscan") {
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, dbscan_epsilon = 0.5, dbscan_minPoints = 5)
   } else {
