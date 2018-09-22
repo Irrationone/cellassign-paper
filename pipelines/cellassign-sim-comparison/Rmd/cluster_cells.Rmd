@@ -49,6 +49,7 @@ library(limma)
 library(edgeR)
 library(infotheo)
 library(future)
+library(tensorflow)
 
 library(scrna.utils)
 library(cellassign)
@@ -117,6 +118,8 @@ rho <- create_rho_matrix(sce, markers_to_use)
 s <- sizeFactors(sce)
 B <- 20
 X <- NULL
+
+print(reticulate:::py_config())
 
 if (clustering_method == "cellassign") {
   res <- cellassign_em(exprs_obj = sce[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = FALSE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, min_delta = 0)
