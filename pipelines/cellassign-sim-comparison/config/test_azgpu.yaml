@@ -39,7 +39,6 @@ down_probs:
 dimreduce_methods:
   - PCA
 clustering_methods:
-  - cellassign
   - phenograph
 conda_env: r-tensorflow
 fc_percentiles:
