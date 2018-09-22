@@ -3,7 +3,7 @@ class: CommandLineTool
 
 hints:
     DockerRequirement:
-        dockerPull: alzhang/scrna-analysis
+        dockerPull: alzhang/scrna-analysis-sim-3.5
 
 requirements:
     ResourceRequirement:
