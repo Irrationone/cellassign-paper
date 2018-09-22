@@ -39,7 +39,7 @@ down_probs:
 dimreduce_methods:
   - PCA
 clustering_methods:
-  - cellassign
+  - phenograph
 conda_env: r-tensorflow
 fc_percentiles:
   - 0.95
@@ -48,6 +48,6 @@ expr_percentiles:
 frac_geness:
   - 0.5
 max_geness:
-  - 150
+  - 50
 base_sce_params:
   - {class: File, path: /root/cellassign-paper/pipelines/cellassign-sim-comparison/data/sce_t4k_params.rds}
