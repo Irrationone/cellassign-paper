@@ -85,6 +85,7 @@ outputs:
             - "^.nb.html"
             - "^_eval_measures.tsv"
             - "^_params.tsv"
+            - "^_delta_compare.tsv"
     stderr_file:
         type: stderr
     stdout_file:
