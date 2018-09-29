@@ -90,7 +90,7 @@ hgsc_endo_fibro_params <- c('de_facscale'=0.044, 'de_facloc'=0.07, 'de_facnu'=1.
                           'down_prob'=0.15, 'de_prob'=0.46, 'de_max'=100, 'de_min'=1)
 
 
-params <- hgsc_mono_cd8_params_v4
+params <- b_cd8_params
 
 seed <- 8423
 sim_model <- "splat"
@@ -140,7 +140,7 @@ s <- sizeFactors(sce_sim)
 B <- 20
 X <- NULL
 
-markers_to_use <- select_markers(sce_sim, percentile_fc = 0.95, percentile_meanexpr = 0.9, frac_genes = 1) # 0.99
+markers_to_use <- select_markers(sce_sim, percentile_fc = 0.95, percentile_meanexpr = 0.8, frac_genes = 1) # 0.99
 ## CONSTRUCT RHO FROM VALUES IN sce_sim -- CHECK OLD CODE
 
 rho <- create_rho_matrix(sce_sim, markers_to_use)
@@ -155,6 +155,7 @@ sce_sim$celltype <- res$cell_type
 
 plotTSNE(sce_sim, colour_by = "celltype")
 ```
+
 
 ### Delta
 
@@ -180,7 +181,7 @@ eval_measures
 ## Unsupervised clustering and classification (all genes)
 
 ```{r, echo = FALSE}
-cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method) {
+cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, seurat_resolution = 0.6) {
   if (!is.null(gene_subset)) {
     sce <- sce[gene_subset,]
     sce <- runPCA(sce, ntop = 500, ncomponents = 50, exprs_values = "logcounts")
@@ -190,6 +191,9 @@ cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clusterin
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, conda_env = "r-tensorflow", phenograph_module = "scrnatools.methods.clustering.phenograph_analysis")
   } else if (clustering_method == "dbscan") {
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, dbscan_epsilon = 0.5, dbscan_minPoints = 5)
+  } else if (clustering_method == "seurat") {
+    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
+                                   seurat_resolution = seurat_resolution)
   } else {
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method)
   }
@@ -258,4 +262,182 @@ evaluation_measures_markers
 ```
 
 
+## Seurat testing
+
+```{r, echo = FALSE}
+sce_seurat_test <- cluster_wrapper(sce_sim, dimreduce_method = "PCA", clustering_method = "seurat", seurat_resolution = 0.6)
+```
+
+IGNORE THE BELOW. 
+
+```{r}
+# devtools::install_github('satijalab/Seurat', ref = "release/3.0")
+# devtools::install("/datadrive/projects/seurat")
+
+library(Seurat)
+
+sce_sim_minimal <- sce_sim
+#reducedDims(sce_sim_minimal) <- NULL
+#n_top_genes <- 1000
+
+seurat_sim <- Convert(from = sce_sim_minimal, to = "seurat")
+seurat_sim <- FindVariableGenes(object = seurat_sim,
+                                mean.function = ExpMean,
+                                dispersion.function = LogVMR,
+                                x.low.cutoff = 0.0125,
+                                x.high.cutoff = 3,
+                                y.cutoff = 0.5)
+
+#top_genes <- rownames(HVFInfo(object = seurat_sim))[which(HVFInfo(object = seurat_sim)[["variance"]] > sort(HVFInfo(object = seurat_sim)[["variance"]], decreasing = TRUE)[n_top_genes])]
+seurat_sim <- ScaleData(object = seurat_sim, vars.to.regress = c()) #c("total_counts")
+
+seurat_sim <- RunPCA(object = seurat_sim, pc.genes = seurat_sim@var.genes, pcs.compute = 50)
+
+resolutions <- seq(0.3, 1.5, 0.1)
+
+#seurat_sim <- BuildSNN(seurat_sim)
+seurat_sim <- FindClusters(seurat_sim, reduction.type = 'PCA', dims.use = 1:50, resolution = 0.9)
+```
+
+```{r}
+DimPlot(object = seurat_sim, reduction = 'PCA')
+```
+
+```{r}
+sce_sim_minimal$cluster <- seurat_sim@meta.data$res.0.9
+```
+
+```{r, echo = FALSE}
+table(sce_sim_minimal$cluster, sce_sim_minimal$Group)
+```
+
+```{r, echo = FALSE}
+evaluation_measures_seurat <- map_and_evaluate_clusters(sce_sim_minimal, min_count = 1)
+
+evaluation_measures_seurat
+```
+
+```{r}
+library(scmap)
+library(splitstackshape)
+library(MetaNeighbor)
+
+# devtools::install_github('IMB-Computational-Genomics-Lab/scPred')
+```
+
+```{r}
+truth_proportion <- 0.5
+
+coldat <- as.data.frame(colData(sce_sim))
+
+sets <- splitstackshape::stratified(coldat, group = "Group", size = truth_proportion, bothSets = TRUE)
+
+rowData(sce_sim)$feature_symbol <- rowData(sce_sim)$Gene
+
+sim_train <- sce_sim[,which(as.character(colData(sce_sim)$Cell) %in% as.character(sets$SAMP1$Cell))]
+sim_test <- sce_sim[,which(as.character(colData(sce_sim)$Cell) %in% as.character(sets$SAMP2$Cell))]
+```
+
+```{r}
+sim_train <- scmap::selectFeatures(sim_train, suppress_plot = TRUE)
+sim_train <- scmap::indexCluster(sim_train, cluster_col = "Group")
+```
+
+```{r}
+heatmap(as.matrix(metadata(sim_train)$scmap_cluster_index))
+```
+
+```{r}
+test_to_train <- scmap::scmapCluster(
+  projection = sim_test, 
+  index_list = list(
+    sim_train = metadata(sim_train)$scmap_cluster_index
+  )
+)
+
+sim_test$cluster <- factor(test_to_train$scmap_cluster_labs)
+```
+
+```{r, echo = FALSE}
+table(sim_test$cluster, sim_test$Group)
+```
+
+```{r, echo = FALSE}
+evaluation_measures_test <- map_and_evaluate_clusters(sim_test, min_count = 1)
+
+evaluation_measures_test
+```
+
+```{r, echo = FALSE}
+library(scPred)
+
+train_data <- t(logcounts(sim_train))
+test_data <- t(logcounts(sim_test))
+train_metadata <- as.data.frame(colData(sim_train)) 
+test_metadata <- as.data.frame(colData(sim_test))
+train_metadata$Group <- factor(train_metadata$Group)
+test_metadata$Group <- factor(test_metadata$Group)
+
+set.seed(1234)
+scp <- eigenDecompose(train_data, n = 10, pseudo = FALSE)
+scPred::metadata(scp) <- train_metadata
+scp <- getFeatureSpace(scp, pVar = "Group")
+```
+
+```{r}
+scp <- trainModel(scp, seed = 66)
+```
+
+```{r}
+predictions <- scPredict(scp, newData = test_data, threshold = 0.9)
+
+sim_test$cluster <- predictions$predClass
+```
+
+```{r, echo = FALSE}
+table(sim_test$cluster, sim_test$Group)
+```
+
+## Max correlation method
+
+```{r}
+## TODO: Make some of my own methods that do min-distance or max correlation when mapping
+## i.e. map each cell to its max correlation true cluster
+
+max_cor_clustering <- function(train_data, test_data, train_metadata, min_cor = 0, cluster_col = "Group") {
+  # Compute cluster means
+  unique_clusters <- unique(train_metadata[,cluster_col])
+  cluster_means <- do.call(rbind, lapply(unique_clusters, function(clust) {
+    idx <- which(train_metadata[,cluster_col] == clust)
+    exprs <- colMeans(train_data[idx,])
+    return(exprs)
+  }))
+  rownames(cluster_means) <- unique_clusters
+  
+  # Map each cell to its max cor cluster
+  cors <- cor(t(test_data), t(cluster_means))
+  mapped_groups <- apply(cors, 1, function(x) ifelse(max(x) >= min_cor, colnames(cors)[which.max(x)], NA))
+  
+  return(mapped_groups)
+}
+
+mapped_clusters <- max_cor_clustering(train_data, test_data, train_metadata, 
+                                      min_cor = 0, cluster_col = "Group")
+
+sim_test$cluster <- mapped_clusters
+```
+
+```{r}
+plotTSNE(sim_test, colour_by = "cluster")
+```
+
+```{r, echo = FALSE}
+table(sim_test$cluster, sim_test$Group)
+```
+
+```{r, echo = FALSE}
+evaluation_measures_test <- map_and_evaluate_clusters(sim_test, min_count = 1)
+
+evaluation_measures_test
+```
 

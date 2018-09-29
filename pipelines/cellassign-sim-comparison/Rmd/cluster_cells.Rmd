@@ -60,7 +60,7 @@ library(scrna.sceutils)
 ```
 
 ```{r}
-cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, conda_env = "r-tensorflow", conda_binary = "/home/rstudio/miniconda/bin/conda") {
+cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, conda_env = "r-tensorflow", conda_binary = "/home/rstudio/miniconda/bin/conda", seurat_resolution = 0.6) {
   if (!is.null(gene_subset)) {
     sce <- sce[gene_subset,]
     sce <- runPCA(sce, ntop = 500, ncomponents = 50, exprs_values = "logcounts")
@@ -72,6 +72,9 @@ cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clusterin
       phenograph_module = "scrnatools.methods.clustering.phenograph_analysis")
   } else if (clustering_method == "dbscan") {
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, dbscan_epsilon = 0.5, dbscan_minPoints = 5)
+  } else if (clustering_method == "seurat") {
+    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
+                                   seurat_resolution = seurat_resolution)
   } else {
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method)
   }
@@ -156,6 +159,28 @@ if (clustering_method == "cellassign") {
   
   print(delta_compare_res$p)
   delta_compare_df <- delta_compare_res$df
+} else if (str_detect(clustering_method, "^seurat_")) {
+  seurat_resolution <- as.numeric(str_replace(clustering_method, "^seurat_", ""))
+  
+  sce_sim_full <- cluster_wrapper(sce, gene_subset = NULL, dimreduce_method = dimreduce_method, clustering_method = "seurat", seurat_resolution = seurat_resolution)
+  plotPCA(sce_sim_full, colour_by = "cluster")
+  plotTSNE(sce_sim_full, colour_by = "cluster")
+  
+  print(with(colData(sce_sim_full), table(cluster, Group)))
+  evaluation_measures_full <- map_and_evaluate_clusters(sce_sim_full)
+  
+  sce_sim_markers <- cluster_wrapper(sce, gene_subset = markers_to_use, dimreduce_method = dimreduce_method, clustering_method = "seurat", seurat_resolution = seurat_resolution)
+  plotPCA(sce_sim_markers, colour_by = "cluster")
+  plotTSNE(sce_sim_markers, colour_by = "cluster")
+  
+  print(with(colData(sce_sim_markers), table(cluster, Group)))
+  evaluation_measures_markers <- map_and_evaluate_clusters(sce_sim_markers)
+  
+  evaluation_measures <- rbind(data.frame(evaluation_measures_full, gene_set="full"),
+                               data.frame(evaluation_measures_markers, gene_set="markers"))
+  
+  sce <- sce_sim_full
+  delta_compare_df <- data.frame()
 } else {
   sce_sim_full <- cluster_wrapper(sce, gene_subset = NULL, dimreduce_method = dimreduce_method, clustering_method = clustering_method)
   plotPCA(sce_sim_full, colour_by = "cluster")
