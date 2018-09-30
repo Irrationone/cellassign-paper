@@ -60,7 +60,7 @@ fc_percentiles:
 expr_percentiles: 
   - 0.9
 frac_geness:
-  - 0.5
+  - 1
 max_geness:
   - 50
 base_sce_params:
