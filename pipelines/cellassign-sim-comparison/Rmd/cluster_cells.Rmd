@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE
 ```
 
 ```{r}
-sce <- params$sce # SCE object to preprocess
+sce_file <- params$sce # SCE object to preprocess
 
 dimreduce_method <- params$dimreduce_method # Dimensionality reduction method
 clustering_method <- params$clustering_method # Clustering method
@@ -35,7 +35,7 @@ frac_genes <- as.numeric(params$frac_genes)
 max_genes <- as.numeric(params$max_genes)
 test_proportion <- as.numeric(params$test_proportion)
 
-sce <- readRDS(sce)
+sce_total <- readRDS(sce_file)
 ```
 
 ```{r}
@@ -65,7 +65,22 @@ library(Seurat)
 ```
 
 ```{r}
-cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, conda_env = "r-tensorflow", conda_binary = "/home/rstudio/miniconda/bin/conda", seurat_resolution = 0.6) {
+coldat <- as.data.frame(colData(sce_total))
+sets <- splitstackshape::stratified(coldat, group = "Group", size = (1-test_proportion), bothSets = TRUE)
+
+rowData(sce_total)$feature_symbol <- rowData(sce_total)$Gene
+rowData(sce_total)$Symbol <- rowData(sce_total)$Gene
+
+## Temporary fix for Matrix's rowSums not being properly applied -- shouldn't be happening
+counts(sce_total) <- as.matrix(counts(sce_total))
+
+sce_train <- sce_total[,which(as.character(colData(sce_total)$Cell) %in% as.character(sets$SAMP1$Cell))]
+sce <- sce_total[,which(as.character(colData(sce_total)$Cell) %in% as.character(sets$SAMP2$Cell))]
+```
+
+```{r}
+cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, conda_env = "r-tensorflow", conda_binary = "/home/rstudio/miniconda/bin/conda", seurat_resolution = 0.6,
+                            object2 = NULL, object2_cluster_label = "Group") {
   if (!is.null(gene_subset)) {
     sce <- sce[gene_subset,]
     sce <- runPCA(sce, ntop = 500, ncomponents = 50, exprs_values = "logcounts")
@@ -80,6 +95,9 @@ cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clusterin
   } else if (clustering_method == "seurat") {
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
                                    seurat_resolution = seurat_resolution)
+  } else if (clustering_method %in% c("Zheng_cor", "scmap")) {
+    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
+                                   object2 = object2, object2_cluster_label = object2_cluster_label)
   } else {
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method)
   }
@@ -118,14 +136,9 @@ map_and_evaluate_clusters <- function(sce_sim, min_count = 0) {
 ## Cluster cells
 
 ```{r}
-rowData(sce)$Symbol <- rowData(sce)$Gene
+markers_to_use <- select_markers(sce_total, percentile_fc = fc_percentile, percentile_meanexpr = expr_percentile, frac_genes = frac_genes, max_genes = max_genes)
 
-## Temporary fix for Matrix's rowSums not being properly applied -- shouldn't be happening
-counts(sce) <- as.matrix(counts(sce))
-
-markers_to_use <- select_markers(sce, percentile_fc = fc_percentile, percentile_meanexpr = expr_percentile, frac_genes = frac_genes, max_genes = max_genes)
-
-rho <- create_rho_matrix(sce, markers_to_use)
+rho <- create_rho_matrix(sce_total, markers_to_use)
 
 s <- sizeFactors(sce)
 B <- 20
@@ -186,6 +199,26 @@ if (clustering_method == "cellassign") {
   
   sce <- sce_sim_full
   delta_compare_df <- data.frame()
+} else if (clustering_method %in% c("Zheng_cor", "scmap")) {
+  sce_sim_full <- cluster_wrapper(sce, gene_subset = NULL, dimreduce_method = dimreduce_method, clustering_method = clustering_method, object2 = sce_train, object2_cluster_label = "Group")
+  plotPCA(sce_sim_full, colour_by = "cluster")
+  plotTSNE(sce_sim_full, colour_by = "cluster")
+  
+  print(with(colData(sce_sim_full), table(cluster, Group)))
+  evaluation_measures_full <- map_and_evaluate_clusters(sce_sim_full)
+  
+  sce_sim_markers <- cluster_wrapper(sce, gene_subset = markers_to_use, dimreduce_method = dimreduce_method, clustering_method = clustering_method, object2 = sce_train, object2_cluster_label = "Group")
+  plotPCA(sce_sim_markers, colour_by = "cluster")
+  plotTSNE(sce_sim_markers, colour_by = "cluster")
+  
+  print(with(colData(sce_sim_markers), table(cluster, Group)))
+  evaluation_measures_markers <- map_and_evaluate_clusters(sce_sim_markers)
+  
+  evaluation_measures <- rbind(data.frame(evaluation_measures_full, gene_set="full"),
+                               data.frame(evaluation_measures_markers, gene_set="markers"))
+  
+  sce <- sce_sim_full
+  delta_compare_df <- data.frame()
 } else {
   sce_sim_full <- cluster_wrapper(sce, gene_subset = NULL, dimreduce_method = dimreduce_method, clustering_method = clustering_method)
   plotPCA(sce_sim_full, colour_by = "cluster")
@@ -220,6 +253,7 @@ sce@metadata$param_df <- data.frame(sce@metadata$param_df,
                                     fc_percentile=fc_percentile,
                                     expr_percentile=expr_percentile,
                                     num_markers=length(markers_to_use),
+                                    test_proportion=test_proportion,
                                     stringsAsFactors = FALSE)
 
 output_rds_file <- "cluster_cells.rds"
