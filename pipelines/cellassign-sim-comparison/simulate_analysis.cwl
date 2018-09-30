@@ -32,6 +32,7 @@ inputs:
     expr_percentiles: float[]
     frac_geness: float[]
     max_geness: float[]
+    test_proportions: float[]
 
 outputs:
     sce_cluster:
@@ -80,7 +81,8 @@ steps:
             expr_percentile: expr_percentiles
             frac_genes: frac_geness
             max_genes: max_geness
-        scatter: [sce, dimreduce_method, clustering_method, fc_percentile, expr_percentile, frac_genes, max_genes]
+            test_proportion: test_proportions
+        scatter: [sce, dimreduce_method, clustering_method, fc_percentile, expr_percentile, frac_genes, max_genes, test_proportion]
         scatterMethod: flat_crossproduct
 
         out:

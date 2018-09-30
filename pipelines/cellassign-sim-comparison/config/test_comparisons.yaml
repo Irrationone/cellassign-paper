@@ -11,7 +11,8 @@ random_seeds:
   - 9090
 num_cellss:
   - 2000
-test_proportion: 0.5
+test_proportions: 
+  - 0.5
 sim_model: splat
 num_groupss:
   - 3
