@@ -74,6 +74,12 @@ inputs:
         inputBinding:
             prefix: --max_genes
             position: 10
+    test_proportion:
+        type: float
+        doc: Proportion of genes to use for testing
+        inputBinding:
+            prefix: --test_proportion
+            position: 11
 
 
 outputs:

@@ -10,7 +10,8 @@ cluster_rmd_file:
 random_seeds: 
   - 9090
 num_cellss:
-  - 1500
+  - 2000
+test_proportion: 0.5
 sim_model: splat
 num_groupss:
   - 3
@@ -34,10 +35,6 @@ batch_facscales:
   - 1
 de_probs:
   - 0.07
-  - 0.14
-  - 0.21
-  - 0.28
-  - 0.35
 down_probs:
   - 0.12
 dimreduce_methods:
@@ -54,6 +51,8 @@ clustering_methods:
   - densitycut
   - dynamicTreeCut
   - gaussian
+  - scmap
+  - Zheng_cor
 conda_env: r-tensorflow
 fc_percentiles:
   - 0.95

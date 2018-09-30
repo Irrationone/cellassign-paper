@@ -14,6 +14,7 @@ params:
   expr_percentile: 0.9
   frac_genes: 0.5
   max_genes: 200
+  test_proportion: 0.5
 ---
 
 Cluster cells in SCE object in dimensionality-reduced space. 
@@ -32,6 +33,7 @@ fc_percentile <- as.numeric(params$fc_percentile)
 expr_percentile <- as.numeric(params$expr_percentile)
 frac_genes <- as.numeric(params$frac_genes)
 max_genes <- as.numeric(params$max_genes)
+test_proportion <- as.numeric(params$test_proportion)
 
 sce <- readRDS(sce)
 ```
@@ -52,11 +54,14 @@ library(edgeR)
 library(infotheo)
 library(future)
 library(tensorflow)
+library(crch)
+library(splitstackshape)
 
 library(scrna.utils)
 library(cellassign)
 library(cellassign.utils)
 library(scrna.sceutils)
+library(Seurat)
 ```
 
 ```{r}

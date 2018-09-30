@@ -10,7 +10,8 @@ cluster_rmd_file:
 random_seeds: 
   - 9090
 num_cellss:
-  - 1000
+  - 1500
+test_prop: 0.5
 sim_model: splat
 num_groupss:
   - 3
