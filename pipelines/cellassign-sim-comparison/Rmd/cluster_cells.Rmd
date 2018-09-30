@@ -84,6 +84,10 @@ cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clusterin
   if (!is.null(gene_subset)) {
     sce <- sce[gene_subset,]
     sce <- runPCA(sce, ntop = 500, ncomponents = 50, exprs_values = "logcounts")
+    
+    if (!is.null(object2)) {
+      object2 <- object2[gene_subset,]
+    }
   }
   
   if (clustering_method == "phenograph") {
@@ -143,8 +147,6 @@ rho <- create_rho_matrix(sce_total, markers_to_use)
 s <- sizeFactors(sce)
 B <- 20
 X <- NULL
-
-message(reticulate:::py_config())
 
 if (clustering_method == "cellassign") {
   res <- cellassign_em(exprs_obj = sce[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = FALSE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, min_delta = 0)
