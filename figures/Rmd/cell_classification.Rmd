@@ -181,10 +181,14 @@ eval_measures
 ## Unsupervised clustering and classification (all genes)
 
 ```{r, echo = FALSE}
-cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, seurat_resolution = 0.6) {
+cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, seurat_resolution = 0.6, object2 = NULL, object2_cluster_label = "Group") {
   if (!is.null(gene_subset)) {
     sce <- sce[gene_subset,]
     sce <- runPCA(sce, ntop = 500, ncomponents = 50, exprs_values = "logcounts")
+    
+    if (!is.null(object2)) {
+      object2 <- object2[gene_subset,]
+    }
   }
   
   if (clustering_method == "phenograph") {
@@ -194,6 +198,9 @@ cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clusterin
   } else if (clustering_method == "seurat") {
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
                                    seurat_resolution = seurat_resolution)
+  } else if (clustering_method %in% c("Zheng_cor", "scmap")) {
+    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
+                                   object2 = object2, object2_cluster_label = object2_cluster_label)
   } else {
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method)
   }
@@ -368,15 +375,17 @@ evaluation_measures_test <- map_and_evaluate_clusters(sim_test, min_count = 1)
 evaluation_measures_test
 ```
 
-```{r, echo = FALSE}
-library(scPred)
-
+```{r}
 train_data <- t(logcounts(sim_train))
 test_data <- t(logcounts(sim_test))
 train_metadata <- as.data.frame(colData(sim_train)) 
 test_metadata <- as.data.frame(colData(sim_test))
 train_metadata$Group <- factor(train_metadata$Group)
 test_metadata$Group <- factor(test_metadata$Group)
+```
+
+```{r, echo = FALSE}
+library(scPred)
 
 set.seed(1234)
 scp <- eigenDecompose(train_data, n = 10, pseudo = FALSE)
@@ -437,6 +446,34 @@ table(sim_test$cluster, sim_test$Group)
 
 ```{r, echo = FALSE}
 evaluation_measures_test <- map_and_evaluate_clusters(sim_test, min_count = 1)
+
+evaluation_measures_test
+```
+
+```{r, echo = FALSE}
+sce_sim_cor <- cluster_wrapper(sim_test, gene_subset = markers_to_use, dimreduce_method = "PCA", clustering_method = "Zheng_cor", object2 = sim_train, object2_cluster_label = "Group")
+```
+
+```{r, echo = FALSE}
+table(sce_sim_cor$cluster, sce_sim_cor$Group)
+```
+
+```{r, echo = FALSE}
+evaluation_measures_test <- map_and_evaluate_clusters(sce_sim_cor, min_count = 1)
+
+evaluation_measures_test
+```
+
+```{r, echo = FALSE}
+sce_sim_scmap <- cluster_wrapper(sim_test, gene_subset = markers_to_use, dimreduce_method = "PCA", clustering_method = "scmap", object2 = sim_train, object2_cluster_label = "Group")
+```
+
+```{r, echo = FALSE}
+table(sce_sim_scmap$cluster, sce_sim_scmap$Group)
+```
+
+```{r, echo = FALSE}
+evaluation_measures_test <- map_and_evaluate_clusters(sce_sim_scmap, min_count = 1)
 
 evaluation_measures_test
 ```
