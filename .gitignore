@@ -17,6 +17,8 @@ workspaces/
 ~$*
 ipynb/*.svg
 intermediates/
+.bin
+.weights
 
 ## Allow
 !sce_t4k_params.rds
