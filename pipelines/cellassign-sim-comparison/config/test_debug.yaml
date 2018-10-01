@@ -41,10 +41,10 @@ down_probs:
 dimreduce_methods:
   - PCA
 clustering_methods:
-  - seurat_0.4
-  - densitycut
-  - scmap
-  - Zheng_cor
+  - phenograph
+  - dynamicTreeCut
+  - gaussian
+  - kmeans
 conda_env: r-tensorflow
 fc_percentiles:
   - 0.95
