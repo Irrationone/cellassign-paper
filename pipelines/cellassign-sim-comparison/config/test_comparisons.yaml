@@ -50,7 +50,6 @@ clustering_methods:
   - seurat_0.8
   - seurat_1.2
   - densitycut
-  - dynamicTreeCut
   - gaussian
   - scmap
   - Zheng_cor

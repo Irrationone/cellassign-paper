@@ -20,6 +20,7 @@ intermediates/
 *.bin
 *.weights
 *.tree
+*.log
 
 ## Allow
 !sce_t4k_params.rds
