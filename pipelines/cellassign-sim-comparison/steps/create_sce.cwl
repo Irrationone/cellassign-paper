@@ -7,7 +7,9 @@ hints:
 
 requirements:
     ResourceRequirement:
-        ramMin: 4000
+        ramMin: 16000
+        tmpdirMin: 14000
+        outdirMin: 4000
         coresMin: 1
 
 baseCommand: Rscript
