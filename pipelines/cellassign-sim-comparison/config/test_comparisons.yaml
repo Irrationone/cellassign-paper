@@ -11,6 +11,10 @@ random_seeds:
   - 8123
   - 3143
   - 8423
+  - 1719
+  - 5011
+  - 1594
+  - 3419
 num_cellss:
   - 2000
 test_proportions: 
