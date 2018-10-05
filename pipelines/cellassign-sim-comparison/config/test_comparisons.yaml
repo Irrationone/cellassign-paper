@@ -7,10 +7,10 @@ simulate_rmd_file:
 cluster_rmd_file:
   class: File
   path: /root/cellassign-paper/pipelines/cellassign-sim-comparison/Rmd/cluster_cells.Rmd
-random_seeds: 
-  - 9090
+random_seeds:
   - 8123
   - 3143
+  - 8423
 num_cellss:
   - 2000
 test_proportions: 
@@ -38,6 +38,11 @@ batch_facscales:
   - 1
 de_probs:
   - 0.07
+  - 0.14
+  - 0.21
+  - 0.28
+  - 0.35
+  - 0.42
 down_probs:
   - 0.12
 dimreduce_methods:
