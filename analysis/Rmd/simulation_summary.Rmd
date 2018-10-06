@@ -1,0 +1,80 @@
+---
+title: "Simulation result summary"
+output: html_notebook
+---
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE, cache = TRUE, cache.lazy = FALSE, fig.width = 8, fig.height = 4.5)
+```
+
+```{r, echo = FALSE}
+library(knitr)
+library(tidyverse)
+library(tensorflow)
+library(SingleCellExperiment)
+library(scater)
+library(data.table)
+library(pheatmap)
+library(ggrepel)
+library(grid)
+
+library(scrna.utils)
+library(scrna.sceutils)
+library(cellassign)
+library(cellassign.utils)
+library(vdj.utils)
+```
+
+## Functions
+
+```{r}
+load_annotation_files <- function(output_dir, pattern = "*_eval_measures.tsv") {
+  param_files <- Sys.glob(file.path(output_dir, "*", "*_params.tsv"))
+  ann_files <- Sys.glob(file.path(output_dir, "*", pattern))
+  
+  params <- plyr::rbind.fill(lapply(param_files, function(f) {
+    params <- fread(f)
+    data.frame(root=dirname(f), params)
+  }))
+  
+  anns <- plyr::rbind.fill(lapply(ann_files, function(f) {
+    anns <- tryCatch({
+      df <- fread(f)
+      return(data.frame(root=dirname(f), df))
+    }, error = function(e) {
+      return(data.frame())
+    })
+  }))
+  
+  result <- anns %>% plyr::join(params, by = "root")
+  return(result)
+}
+```
+
+## DE prob simulation results
+
+```{r, echo = FALSE}
+output_dir <- "/datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob"
+
+eval_measures <- load_annotation_files(output_dir, pattern = "*_eval_measures.tsv")
+delta_vals <- load_annotation_files(output_dir, pattern = "*_delta_compare.tsv")
+```
+
+```{r, fig.width = 6, fig.height = 15}
+eval_measures_markers_de <- eval_measures %>%
+  dplyr::filter(is.na(mapping_type) | mapping_type == "de") %>%
+  dplyr::filter(is.na(gene_set) | gene_set == "markers")
+
+ggplot(eval_measures_markers_de, aes(x=clustering_method, y = v_measure)) + 
+  geom_boxplot(outlier.size = -1) + 
+  geom_jitter(position = position_jitter(width = 0.3, height = 0)) + 
+  theme_bw() + 
+  theme_Publication() + 
+  facet_wrap(~ de_prob, scales = "free", ncol = 1) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+
+
