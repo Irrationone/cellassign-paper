@@ -7,8 +7,8 @@ hints:
 
 requirements:
     ResourceRequirement:
-        ramMin: 18000
-        tmpdirMin: 14000
+        ramMin: 20000
+        tmpdirMin: 15000
         outdirMin: 4000
         coresMin: 1
 
