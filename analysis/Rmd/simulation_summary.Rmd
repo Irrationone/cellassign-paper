@@ -54,7 +54,7 @@ load_annotation_files <- function(output_dir, pattern = "*_eval_measures.tsv") {
 ## DE prob simulation results
 
 ```{r, echo = FALSE}
-output_dir <- "/datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob"
+output_dir <- "/datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob2"
 
 eval_measures <- load_annotation_files(output_dir, pattern = "*_eval_measures.tsv")
 delta_vals <- load_annotation_files(output_dir, pattern = "*_delta_compare.tsv")
@@ -74,7 +74,19 @@ ggplot(eval_measures_markers_de, aes(x=clustering_method, y = v_measure)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+```{r, fig.width = 6, fig.height = 15}
+eval_measures_full_de <- eval_measures %>%
+  dplyr::filter(is.na(mapping_type) | mapping_type == "de") %>%
+  dplyr::filter(is.na(gene_set) | gene_set == "full")
 
+ggplot(eval_measures_full_de, aes(x=clustering_method, y = v_measure)) + 
+  geom_boxplot(outlier.size = -1) + 
+  geom_jitter(position = position_jitter(width = 0.3, height = 0)) + 
+  theme_bw() + 
+  theme_Publication() + 
+  facet_wrap(~ de_prob, scales = "free", ncol = 1) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
 
 

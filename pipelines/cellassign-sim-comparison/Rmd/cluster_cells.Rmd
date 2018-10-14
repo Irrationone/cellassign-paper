@@ -15,6 +15,7 @@ params:
   frac_genes: 0.5
   max_genes: 200
   test_proportion: 0.5
+  wrong_marker_proportion: 0
 ---
 
 Cluster cells in SCE object in dimensionality-reduced space. 
@@ -34,6 +35,7 @@ expr_percentile <- as.numeric(params$expr_percentile)
 frac_genes <- as.numeric(params$frac_genes)
 max_genes <- as.numeric(params$max_genes)
 test_proportion <- as.numeric(params$test_proportion)
+wrong_marker_proportion <- as.numeric(params$wrong_marker_proportion)
 
 sce_total <- readRDS(sce_file)
 ```
@@ -140,9 +142,9 @@ map_and_evaluate_clusters <- function(sce_sim, min_count = 0) {
 ## Cluster cells
 
 ```{r}
-markers_to_use <- select_markers(sce_total, percentile_fc = fc_percentile, percentile_meanexpr = expr_percentile, frac_genes = frac_genes, max_genes_per_class = max_genes)
+markers_to_use <- select_markers(sce_total, percentile_fc = fc_percentile, percentile_meanexpr = expr_percentile, frac_genes = frac_genes, max_genes_per_class = floor(max_genes * (1+wrong_marker_proportion)))
 
-rho <- create_rho_matrix(sce_total, markers_to_use)
+rho <- create_rho_matrix(sce_total, markers_to_use, wrong_proportion = wrong_marker_proportion)
 
 s <- sizeFactors(sce)
 B <- 20
