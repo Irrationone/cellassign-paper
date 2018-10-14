@@ -80,6 +80,12 @@ inputs:
         inputBinding:
             prefix: --test_proportion
             position: 11
+    wrong_marker_proportion:
+        type: float
+        doc: Additional proportion of wrong markers to use
+        inputBinding:
+            prefix: --wrong_marker_proportion
+            position: 12
 
 
 outputs:

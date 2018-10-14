@@ -33,6 +33,7 @@ inputs:
     frac_geness: float[]
     max_geness: float[]
     test_proportions: float[]
+    wrong_marker_proportions: float[]
 
 outputs:
     sce_cluster:
@@ -82,7 +83,8 @@ steps:
             frac_genes: frac_geness
             max_genes: max_geness
             test_proportion: test_proportions
-        scatter: [sce, dimreduce_method, clustering_method, fc_percentile, expr_percentile, frac_genes, max_genes, test_proportion]
+            wrong_marker_proportion: wrong_marker_proportions
+        scatter: [sce, dimreduce_method, clustering_method, fc_percentile, expr_percentile, frac_genes, max_genes, test_proportion, wrong_marker_proportion]
         scatterMethod: flat_crossproduct
 
         out:

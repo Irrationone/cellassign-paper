@@ -242,6 +242,7 @@ sce@metadata$param_df <- data.frame(sce@metadata$param_df,
                                     expr_percentile=expr_percentile,
                                     num_markers=length(markers_to_use),
                                     test_proportion=test_proportion,
+                                    wrong_marker_proportion=wrong_marker_proportion,
                                     stringsAsFactors = FALSE)
 
 output_rds_file <- "cluster_cells.rds"
