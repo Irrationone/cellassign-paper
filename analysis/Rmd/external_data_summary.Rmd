@@ -1,0 +1,119 @@
+---
+title: "External data summary"
+output: html_notebook
+---
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE, cache = TRUE, cache.lazy = FALSE, fig.width = 8, fig.height = 4.5)
+
+knitr::opts_template$set(evalfig = list(fig.height = 6, fig.width = 7))
+```
+
+```{r, echo = FALSE}
+library(knitr)
+library(tidyverse)
+library(tensorflow)
+library(SingleCellExperiment)
+library(scater)
+library(data.table)
+library(pheatmap)
+library(ggrepel)
+library(grid)
+
+library(scrna.utils)
+library(scrna.sceutils)
+library(cellassign)
+library(cellassign.utils)
+library(vdj.utils)
+
+library(ExperimentHub)
+library(TabulaMurisData)
+```
+
+#  Tabula Muris (2018, Nature)
+
+```{r, echo = FALSE}
+eh <- ExperimentHub()
+query(eh, "TabulaMurisData")
+
+droplet <- eh[["EH1617"]]
+```
+
+```{r, echo = FALSE}
+droplet$cell_ontology_class %>% table
+```
+
+```{r, echo = FALSE}
+cell_type_map <- c('T cell'='T cell', 
+                   'B cell'='B cell',
+                   'non-classical monocyte'='monocyte',
+                   'monocyte'='monocyte',
+                   'classical monocyte'='monocyte',
+                   'epithelial cell'='epithelial cell',
+                   'endothelial cell'='endothelial cell',
+                   'dendritic cell'='dendritic cell',
+                   'natural killer cell'='NK cell',
+                   'fibroblast'='fibroblast',
+                   'granulocyte'='granulocyte'
+)
+
+droplet <- droplet %>% 
+  scater::mutate(
+    celltype=plyr::mapvalues(cell_ontology_class, from = names(cell_type_map),
+                             to = unname(cell_type_map))
+  )
+
+droplet_filtered <- droplet %>%
+  scater::filter(celltype %in% unname(cell_type_map))
+```
+
+```{r, echo = FALSE}
+norm_factors <- edgeR::calcNormFactors(as.matrix(counts(droplet_filtered)), 
+                                       method = "TMM")
+lib_size_factors <- colSums(as.matrix(counts(droplet_filtered)))
+sizeFactors(droplet_filtered) <- norm_factors * lib_size_factors/mean(norm_factors * 
+                                                                        lib_size_factors)
+droplet_normalized <- normalize(droplet_filtered)
+droplet_normalized <- runPCA(droplet_normalized, ntop = 500, 
+                             ncomponents = 50, exprs_values = "logcounts")
+droplet_normalized <- runTSNE(droplet_normalized, use_dimred = "PCA", 
+                              n_dimred = 50, ncomponents = 2)
+```
+
+```{r, echo = FALSE}
+plotTSNE(droplet_normalized, colour_by = "channel")
+```
+
+
+```{r, echo = FALSE}
+plotTSNE(droplet_normalized, colour_by = "celltype")
+```
+
+```{r, echo = FALSE}
+marker_list <- list(
+  'T cell'=c('Cd3d', 'Cd3e'),
+  'Epithelial cell'=c('Epcam'),
+  
+)
+```
+
+
+TODO: Reduce this set down to a list of basic cell TYPES.
+TODO: Come up with a marker gene set off the literature. (ACTUALLY: Tabula Muris themselves use a marker gene set (step 8 in their Methods))
+TODO: Test on this data.
+
+# Koh et al. (2016, Scientific Data)
+
+Referenced in Soneson/Robinson F1000 (2018). 
+
+```{r, echo = FALSE}
+
+```
+
+
+# Zheng et al. (2017, Nature Comms)
+
+Artificially combine from multiple purified datasets like Soneson/Robinson did. 
+
+
+
