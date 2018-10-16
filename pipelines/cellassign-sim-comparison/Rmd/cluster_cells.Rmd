@@ -151,7 +151,7 @@ B <- 20
 X <- NULL
 
 if (clustering_method == "cellassign") {
-  res <- cellassign_em(exprs_obj = sce[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = FALSE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, min_delta = 0, num_runs = 3)
+  res <- cellassign_em(exprs_obj = sce[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = FALSE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, min_delta = 0, num_runs = 5)
   
   sce$cluster <- str_replace(res$cell_type, "^DEFac", "")
   
@@ -164,7 +164,7 @@ if (clustering_method == "cellassign") {
   print(delta_compare_res$p)
   delta_compare_df <- delta_compare_res$df
 } else if (clustering_method == "cellassign_shrinkage") {
-  res <- cellassign_em(exprs_obj = sce[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, min_delta = 0, num_runs = 3)
+  res <- cellassign_em(exprs_obj = sce[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, min_delta = 0, num_runs = 5)
   
   sce$cluster <- str_replace(res$cell_type, "^DEFac", "")
   
