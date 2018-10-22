@@ -34,6 +34,9 @@ library(MultiAssayExperiment)
 library(infotheo)
 library(DuoClustering2018)
 library(lmerTest)
+
+# BiocManager::install(c("ExperimentHub", "TabulaMurisData", "DuoClustering2018", "MultiAssayExperiment"))
+# install.packages(c("lmerTest", "aricode"))
 ```
 
 #  Tabula Muris (2018, Nature)
@@ -472,13 +475,18 @@ ribo_genes <- as.character(rowData(sce_pbmc)$Symbol[str_detect(rowData(sce_pbmc)
 sce_pbmc <- calculateQCMetrics(sce_pbmc, exprs_values = "counts", feature_controls =
                                  list(mitochondrial=mito_genes, ribosomal=ribo_genes))
 
-sce_pbmc_filtered <- filter_cells(sce_pbmc, nmads = 3, type = "lower", log = TRUE, max_mito = 5, max_ribo = 60)
+sce_pbmc_filtered <- filter_cells(sce_pbmc, nmads = 3, type = "lower", log = TRUE, max_mito = 5, max_ribo = 60, batch = sce_pbmc$celltype)
 ```
 
 ```{r, echo = FALSE}
+# sample_df <- colData(sce_pbmc_filtered) %>%
+#   as.data.frame %>%
+#   splitstackshape::stratified(group = "celltype", size = 1000)
+
 sample_df <- colData(sce_pbmc_filtered) %>%
   as.data.frame %>%
-  splitstackshape::stratified(group = "celltype", size = 2000)
+  dplyr::group_by(celltype) %>%
+  top_n(n = 1000, wt = log10_total_counts)
 
 colnames(sce_pbmc_filtered) <- sce_pbmc_filtered$sample_barcode
 sce_pbmc_sample <- sce_pbmc_filtered[,sample_df$sample_barcode]
@@ -497,7 +505,53 @@ sce_pbmc_normalized <- runTSNE(sce_pbmc_normalized, use_dimred = "PCA",
                                n_dimred = 50, ncomponents = 2)
 ```
 
+```{r, echo = FALSE}
+plotTSNE(sce_pbmc_normalized, colour_by = "celltype", point_alpha = 0.3)
+```
 
+
+```{r, echo = FALSE}
+marker_list <- list(
+  'naive_cytotoxic_cells'=c("CD3D", "CD3E", "CD3G", "CD8A", "CD8B", "S100B"),
+  't_reg_cells'=c("CD3D", "CD3E", "CD3G", "CD4", "IL2RA", "FOXP3", "TNFRSF4", "BIRC3"), # CD5, IFI44L, IL4R, LAIR2
+  'cd56_nk_cells'=c("GZMB", "PRF1", "NKG7", "GNLY", "S100B", "KLRC1", "KLRD1"), # LAIR2
+  'b_cells'=c("MS4A1", "CD19", "CD79A", "CD74", "BIRC3"), # IL4R
+  'cd14_monocytes'=c("LYZ", "CD14", "CD74", "S100A8", "CD4") # IL4R #S100A9
+)
+
+sce_pbmc_use <- sce_pbmc_normalized %>%
+  scater::filter(celltype %in% names(marker_list))
+
+rho <- marker_list_to_mat(marker_list ,include_other = FALSE)
+```
+
+```{r, echo = FALSE}
+B <- 40
+s <- sizeFactors(sce_pbmc_use)
+sce <- sce_pbmc_use[get_ensembl_id(rownames(rho), rowData(sce_pbmc_use), symbol_name = "Symbol", gene_name = "ID")]
+rownames(sce) <- rownames(rho)
+counts(sce) <- as.matrix(counts(sce))
+
+pbmc_res <- cellassign_em(exprs_obj = sce, s = s, rho = rho, X = NULL, B = B, use_priors = FALSE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, num_runs = 1, min_delta = log(2))
+```
+
+```{r, echo = FALSE}
+sce_pbmc_use$cluster <- pbmc_res$cell_type
+
+evaluation_measures <- compute_evaluation_measures(sce_pbmc_use, 
+                                                   truth_labels = sce_pbmc_use$celltype,
+                                                   inferred_labels = sce_pbmc_use$cluster)
+```
+
+TODO: Use naive cytotoxic and naive CD4+ instead of the two classes I used here. 
+
+```{r, echo = FALSE}
+plotTSNE(sce_pbmc_use, colour_by = "celltype")
+```
+
+```{r, echo = FALSE}
+plotTSNE(sce_pbmc_use, colour_by = "cluster")
+```
 
 # Scratch
 
@@ -520,9 +574,14 @@ plotTSNE(sce_full_Zhengmix4eq, colour_by = "celltype")
 ```
 
 ```{r, echo = FALSE}
-
+marker_tables <- lapply(marker_df, function(x) {
+  x <- x %>% 
+    as.data.frame %>%
+    tibble::rownames_to_column(var = "ID") %>%
+    dplyr::mutate(Symbol=df_as_map(rowData(sce_pbmc_normalized) %>% as.data.frame, ID, from = "ID", to = "Symbol"))
+  return(x)
+})
 ```
-
 
 
 
