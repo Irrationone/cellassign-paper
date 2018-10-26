@@ -1,5 +1,5 @@
 ---
-title: "Follicular data"
+title: "Follicular: FL1018"
 output: html_notebook
 ---
 
@@ -31,9 +31,6 @@ library(Seurat)
 
 library(infotheo)
 library(lmerTest)
-
-# BiocManager::install(c("ExperimentHub", "TabulaMurisData", "DuoClustering2018", "MultiAssayExperiment"))
-# install.packages(c("lmerTest", "aricode"))
 ```
 
 # Introduction
@@ -46,20 +43,6 @@ library(lmerTest)
 * Preliminary analysis
 * Next steps
 
-## Experimental substrates
-
-Data for 5 pre- and post-treatment pairs:
-
-Transformed FL:
-=
-* FL1004
-* FL1012
-* FL1018
-
-Progressed FL:
-
-* FL2001
-
 # Data
 
 ```{r, echo = FALSE, eval = FALSE}
@@ -67,47 +50,25 @@ data_dir <- "/datadrive/data/follicular"
 filtered_matrix_dirs <- Sys.glob(file.path(data_dir, "*", "filtered_gene_bc_matrices", "GRCh38"))
 
 names(filtered_matrix_dirs) <- stringr::str_extract(filtered_matrix_dirs, "(?<=follicular\\/).*(?=\\/filtered_gene_bc_matrices)")
+
+filtered_matrix_dirs <- filtered_matrix_dirs[c("FL1018T1", "FL1018T2")]
 ```
 
 ```{r, echo = FALSE, eval = FALSE}
-sce_follicular <- DropletUtils::read10xCounts(unname(filtered_matrix_dirs))
-sce_follicular <- sce_follicular %>% scater::mutate(
+sce <- DropletUtils::read10xCounts(unname(filtered_matrix_dirs))
+sce <- sce %>% scater::mutate(
   dataset = str_extract(Sample, "FL[0-9]+[A-Z0-9_]+"),
   sample_barcode = paste(dataset, Barcode, sep = "_")
 )
 
-sce_follicular$patient <- str_extract(sce_follicular$dataset, "^FL[0-9]+")
-sce_follicular$timepoint <- str_extract(sce_follicular$dataset, "T[1-2](?=(_R[0-9]+)?$)")
-sce_follicular$replicate <- str_extract(sce_follicular$dataset, "R[0-9]+$")
-sce_follicular$replicate[is.na(sce_follicular$replicate)] <- "R1"
-sce_follicular$transformed_progressed <- ifelse(str_detect(sce_follicular$patient, "^FL1"), "Transformed", "Progressed")
-sce_follicular$status <- with(colData(sce_follicular), ifelse(timepoint == "T2", transformed_progressed, "Primary"))
+sce$patient <- str_extract(sce$dataset, "^FL[0-9]+")
+sce$timepoint <- str_extract(sce$dataset, "T[1-2](?=(_R[0-9]+)?$)")
+sce$replicate <- str_extract(sce$dataset, "R[0-9]+$")
+sce$replicate[is.na(sce$replicate)] <- "R1"
+sce$transformed_progressed <- ifelse(str_detect(sce$patient, "^FL1"), "Transformed", "Progressed")
+sce$status <- with(colData(sce), ifelse(timepoint == "T2", transformed_progressed, "Primary"))
 ```
 
-```{r, echo = FALSE}
-batches <- list('1'=c("FL1004T1", "FL1004T2", "FL1012T1", "FL1012T2", "FL1018T1", "FL1018T2"),
-                '2'=c("FL2001T1", "FL2001T2", "FL2002T2"),
-                '3'=c("FL2002T1"),
-                '4'=c("FL1256T1_R1", "FL1256T1_R2", "FL1256T2_R1", "FL1256T2_R2"))
-
-batch_map <- data.frame(rep(names(batches), sapply(batches, length)), unlist(batches)) 
-colnames(batch_map) <- c("batch", "dataset")
-
-sce_follicular <- sce_follicular %>% scater::mutate(batch=df_as_map(batch_map, dataset, from = "dataset", to = "batch"))
-
-print(sce_follicular)
-```
-
-```{r, echo = FALSE}
-sce_follicular_filt1 <- sce_follicular %>% scater::filter(dataset %in% c("FL1004T1",
-                                                                         "FL1004T2",
-                                                                         "FL1012T1",
-                                                                         "FL1012T2",
-                                                                         "FL1018T1",
-                                                                         "FL1018T2",
-                                                                         "FL2001T1",
-                                                                         "FL2001T2"))
-```
 
 ```{r, echo = FALSE}
 get_ensembl_id <- function(x, rowdat, symbol_name = "Symbol", gene_name = "ID") {
@@ -115,24 +76,24 @@ get_ensembl_id <- function(x, rowdat, symbol_name = "Symbol", gene_name = "ID") 
   df_as_map(rowdat %>% subset(x %in% rowdat[,symbol_name]), x, from = symbol_name, to = gene_name)
 }
 
-mito_genes <- as.character(rowData(sce_follicular)$Symbol[str_detect(rowData(sce_follicular)$Symbol, "^MT\\-")]) %>% 
-  get_ensembl_id(rowData(sce_follicular))
+mito_genes <- as.character(rowData(sce)$Symbol[str_detect(rowData(sce)$Symbol, "^MT\\-")]) %>% 
+  get_ensembl_id(rowData(sce))
 
-ribo_genes <- as.character(rowData(sce_follicular)$Symbol[str_detect(rowData(sce_follicular)$Symbol, "^RP(L|S)")]) %>%
-  get_ensembl_id(rowData(sce_follicular))
+ribo_genes <- as.character(rowData(sce)$Symbol[str_detect(rowData(sce)$Symbol, "^RP(L|S)")]) %>%
+  get_ensembl_id(rowData(sce))
 
-sce_follicular_filt1 <- calculateQCMetrics(sce_follicular_filt1, exprs_values = "counts", feature_controls =
-                                             list(mitochondrial=mito_genes, ribosomal=ribo_genes))
+sce <- calculateQCMetrics(sce, exprs_values = "counts", feature_controls =
+                            list(mitochondrial=mito_genes, ribosomal=ribo_genes))
 ```
 
 ## Mitochondrial counts
 
 ```{r, echo = FALSE}
-df <- with(colData(sce_follicular_filt1), data.frame(pct_mitochondrial=pct_counts_mitochondrial,
-                                            pct_ribosomal=pct_counts_ribosomal,
-                                            set_id=dataset))
+df <- with(colData(sce), data.frame(pct_mitochondrial=pct_counts_mitochondrial,
+                                    pct_ribosomal=pct_counts_ribosomal,
+                                    set_id=dataset))
 
-mito_thres <- 5
+mito_thres <- 10
 
 ggplot(df, aes(x=pct_mitochondrial)) + geom_histogram(aes(fill=set_id)) + theme_bw() + theme_Publication() + scale_x_continuous(breaks = log_scale_breaks(), labels = log_scale_labels(), trans = "log") + geom_vline(aes(xintercept=mito_thres), colour = "red") + xlab("% mito")
 ```
@@ -148,35 +109,38 @@ ggplot(df, aes(x=pct_ribosomal)) + geom_histogram(aes(fill=set_id)) + theme_bw()
 ## Filtering
 
 ```{r, echo = FALSE}
-sce_follicular_filt2 <- filter_cells(sce_follicular_filt1, nmads = 3, type = "lower", log = TRUE, max_mito = mito_thres, max_ribo = ribo_thres)
+sce_filtered <- filter_cells(sce, nmads = 3, type = "lower", log = TRUE, max_mito = mito_thres, max_ribo = ribo_thres)
 ```
 
 ## Normalization
 
 ```{r, echo = FALSE}
-norm_factors <- edgeR::calcNormFactors(as.matrix(counts(sce_follicular_filt2)), method = "TMM")
-lib_size_factors <- colSums(as.matrix(counts(sce_follicular_filt2)))
-sizeFactors(sce_follicular_filt2) <- norm_factors * lib_size_factors / mean(norm_factors * lib_size_factors)
+qclust <- quickCluster(sce_filtered, min.size = 30)
+sce_filtered <- computeSumFactors(sce_filtered, clusters = qclust)
 
-sce_follicular_filt2$size_factor <- sizeFactors(sce_follicular_filt2)
+sce_filtered$size_factor <- sizeFactors(sce_filtered)
 ```
 
 ```{r, echo = FALSE, eval = FALSE}
-sce_follicular_normalized <- normalise(sce_follicular_filt2)
+sce_normalized <- normalise(sce_filtered)
 
-sce_follicular_normalized <- runPCA(sce_follicular_normalized, ntop = 1000, ncomponents = 50, exprs_values = "logcounts")
-sce_follicular_normalized <- runTSNE(sce_follicular_normalized, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+sce_normalized <- runPCA(sce_normalized, ntop = 1000, ncomponents = 50, exprs_values = "logcounts")
+sce_normalized <- runTSNE(sce_normalized, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+sce_normalized <- runUMAP(sce_normalized, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
 ```
 
 ```{r, echo = FALSE}
-plotTSNE(sce_follicular_normalized, colour_by = "dataset", ncomponents = 2)
+plotTSNE(sce_normalized, colour_by = "dataset", ncomponents = 2)
 ```
 
+```{r, echo = FALSE}
+plotUMAP(sce_normalized, colour_by = "dataset", ncomponents = 2)
+```
 
 ## Total number of UMIs
 
 ```{r, echo = FALSE}
-plotPCA(sce_follicular_normalized, colour_by = "log10_total_counts")
+plotPCA(sce_normalized, colour_by = "log10_total_counts")
 ```
 
 ## Cell cycle
@@ -184,90 +148,23 @@ plotPCA(sce_follicular_normalized, colour_by = "log10_total_counts")
 ```{r, echo = FALSE, eval = FALSE}
 hs.pairs <- readRDS(system.file("exdata", "human_cycle_markers.rds", package="scran"))
 
-assignments <- cyclone(sce_follicular_normalized, hs.pairs, gene.names=rowData(sce_follicular_normalized)$ID, min.iter = 10, iter = 100, verbose = TRUE, BPPARAM = MulticoreParam(15))
+assignments <- cyclone(sce_normalized, hs.pairs, gene.names=rowData(sce_normalized)$ID, min.iter = 10, iter = 100, verbose = TRUE, BPPARAM = MulticoreParam(15))
 
-sce_follicular_normalized@colData <- bind_cols(sce_follicular_normalized@colData %>% as.data.frame, assignments$normalized.scores) %>% DataFrame
-sce_follicular_normalized <- scater::mutate(sce_follicular_normalized, Cell_Cycle = assignments$phases)
+sce_normalized@colData <- bind_cols(sce_normalized@colData %>% as.data.frame, assignments$normalized.scores) %>% DataFrame
+sce_normalized <- scater::mutate(sce_normalized, Cell_Cycle = assignments$phases)
 ```
 
 
 ```{r, echo = FALSE}
-plotPCA(sce_follicular_normalized, colour_by = "Cell_Cycle")
+plotPCA(sce_normalized, colour_by = "Cell_Cycle")
 ```
 
 ```{r, echo = FALSE}
-plotTSNE(sce_follicular_normalized, colour_by = "Cell_Cycle")
+plotTSNE(sce_normalized, colour_by = "Cell_Cycle")
 ```
 
 ```{r, echo = FALSE, results = 'asis'}
-knitr::kable(t(with(colData(sce_follicular_normalized), table(Cell_Cycle, dataset))))
-```
-
-# Batch correction (for visualization)
-
-## Mutual nearest neighbours
-
-Mutual nearest neighbours is a batch correction method that finds nearest neighbours across batches to correct other cells by. 
-
-We don't have spikes to use here, so we're making an assumption that most noise is technical even for endogenous genes. 
-
-```{r, echo = FALSE, eval = FALSE}
-fit <- trendVar(sce_follicular_normalized, parametric=TRUE, use.spikes = FALSE, block = factor(sce_follicular_normalized$batch))
-decomp <- decomposeVar(sce_follicular_normalized, fit)
-decomp$Symbol <- rowData(sce_follicular_normalized)$Symbol
-
-decomp_chosen <- decomp %>% subset(bio > 0)
-chosen <- rownames(decomp_chosen)
-```
-
-```{r, echo = FALSE, eval = FALSE}
-set.seed(100) 
-
-batches <- unique(sce_follicular_normalized$batch)
-
-expr_matrices <- lapply(batches, function(bat) {
-  sce_subset <- sce_follicular_normalized %>% scater::filter(batch == bat)
-  mat <- as.matrix(logcounts(sce_subset)[chosen,])
-  return(mat)
-})
-
-mnn.out <- do.call(mnnCorrect, c(expr_matrices, list(k=20, BPPARAM = MulticoreParam(15))))
-```
-
-
-```{r, echo = FALSE, eval = FALSE}
-indices <- lapply(batches, function(bat) {
-  sce_subset <- sce_follicular_normalized %>% scater::filter(batch == bat)
-  idx <- unname(sapply(colData(sce_subset)$sample_barcode, function(x) which(sce_follicular_normalized$sample_barcode == x)))
-  return(idx)
-})
-
-expr_mat_combined_mnn <- matrix(NA, nrow = nrow(mnn.out$corrected[[1]]), ncol = length(unlist(indices)))
-for (i in seq_along(indices)) {
-  expr_mat_combined_mnn[,indices[[i]]] <- mnn.out$corrected[[i]]
-}
-rownames(expr_mat_combined_mnn) <- rownames(mnn.out$corrected[[1]])
-
-sce_mnn <- SingleCellExperiment(assays = list(mnn=expr_mat_combined_mnn),
-                                colData = colData(sce_follicular_normalized))
-
-sce_mnn <- runPCA(sce_mnn, exprs_values = "mnn", ntop = 1000, ncomponents = 50)
-sce_mnn <- runTSNE(sce_mnn, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
-sce_mnn <- runUMAP(sce_mnn, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
-```
-
-```{r, echo = FALSE}
-reducedDim(sce_follicular_normalized, "PCA_mnn") <- reducedDim(sce_mnn, "PCA")
-reducedDim(sce_follicular_normalized, "TSNE_mnn") <- reducedDim(sce_mnn, "TSNE")
-reducedDim(sce_follicular_normalized, "UMAP_mnn") <- reducedDim(sce_mnn, "UMAP")
-```
-
-```{r, echo = FALSE}
-plotReducedDim(sce_follicular_normalized, use_dimred = "TSNE_mnn", ncomponents = 2, colour_by = "dataset")
-```
-
-```{r, echo = FALSE}
-plotReducedDim(sce_follicular_normalized, use_dimred = "UMAP_mnn", ncomponents = 2, colour_by = "dataset")
+knitr::kable(t(with(colData(sce_normalized), table(Cell_Cycle, dataset))))
 ```
 
 # CellAssign
@@ -277,8 +174,7 @@ plotReducedDim(sce_follicular_normalized, use_dimred = "UMAP_mnn", ncomponents =
 ```{r, echo = FALSE}
 follicular_markers1 <- list(
   'B cells'=c("CD19", "MS4A1", "CD79A", "CD79B", "IGKC", "IGLC2", "IGLC3", "CD74"),
-  'T cells'=c("CD3D", "CD3E", "CD3G", "CD28", "TRAC"),
-  'Myeloid'=c("CD14", "CD68", "CD33", "CD74", "LYZ", "S100A9", "S100A8")
+  'T cells'=c("CD3D", "CD3E", "CD3G", "CD28", "TRAC")
 )
 
 follicular_rho1 <- marker_list_to_mat(follicular_markers1, include_other = FALSE)
@@ -291,8 +187,8 @@ knitr::kable(follicular_rho1)
 
 ```{r, echo = FALSE}
 B <- 40
-s <- sizeFactors(sce_follicular_normalized)
-sce <- sce_follicular_normalized[get_ensembl_id(rownames(follicular_rho1), rowData(sce_follicular_normalized)),]
+s <- sizeFactors(sce_normalized)
+sce <- sce_normalized[get_ensembl_id(rownames(follicular_rho1), rowData(sce_normalized)),]
 rownames(sce) <- rownames(follicular_rho1)
 counts(sce) <- as.matrix(counts(sce))
 
@@ -300,22 +196,22 @@ cellassign_res <- cellassign_em(exprs_obj = sce, s = s, rho = follicular_rho1, X
 ```
 
 ```{r, echo = FALSE, eval = FALSE}
-sce_follicular_normalized_labeled <- sce_follicular_normalized
+sce_normalized_labeled <- sce_normalized
 
-sce_follicular_normalized_labeled$cellassign_cluster <- factor(cellassign_res$cell_type)
-sce_follicular_normalized_labeled@colData <- bind_cols(sce_follicular_normalized_labeled@colData %>% as.data.frame, as.data.frame(cellassign_res$mle_params$gamma)) %>% DataFrame(check.names = FALSE)
+sce_normalized_labeled$cellassign_cluster <- factor(cellassign_res$cell_type)
+sce_normalized_labeled@colData <- bind_cols(sce_normalized_labeled@colData %>% as.data.frame, as.data.frame(cellassign_res$mle_params$gamma)) %>% DataFrame(check.names = FALSE)
 ```
 
 ```{r, echo = FALSE, out.width = '75%'}
-plotPCA(sce_follicular_normalized_labeled, ncomponents = 2, colour_by = "cellassign_cluster")
+plotPCA(sce_normalized_labeled, ncomponents = 2, colour_by = "cellassign_cluster")
 ```
 
 ```{r, echo = FALSE, out.width = '75%'}
-plotTSNE(sce_follicular_normalized_labeled, ncomponents = 2, colour_by = "cellassign_cluster")
+plotTSNE(sce_normalized_labeled, ncomponents = 2, colour_by = "cellassign_cluster")
 ```
 
 ```{r, echo = FALSE, results = 'asis'}
-knitr::kable(t(table(sce_follicular_normalized_labeled$cellassign_cluster)))
+knitr::kable(t(table(sce_normalized_labeled$cellassign_cluster)))
 ```
 
 ### T-cell subclustering
@@ -323,33 +219,28 @@ knitr::kable(t(table(sce_follicular_normalized_labeled$cellassign_cluster)))
 ```{r, echo = FALSE}
 celltype_prob_threshold <- 0.9
 
-sce_t_cells <- sce_follicular_normalized_labeled %>% 
+sce_t_cells <- sce_normalized_labeled %>% 
   scater::filter(T.cells >= celltype_prob_threshold)
 
-sce_t_cells <- runPCA(sce_t_cells, ntop = 1000, ncomponents = 50)
+sce_t_cells <- runPCA(sce_t_cells, ntop = 500, ncomponents = 50)
 sce_t_cells <- runTSNE(sce_t_cells, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
-
-sce_mnn_t <- sce_mnn[,sce_follicular_normalized_labeled$`T cells` >= 0.9]
-
-sce_mnn_t <- runPCA(sce_mnn_t, ntop = 1000, ncomponents = 50, exprs_values = "mnn")
-sce_mnn_t <- runTSNE(sce_mnn_t, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
-sce_mnn_t <- runUMAP(sce_mnn_t, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
-
-reducedDim(sce_t_cells, "PCA_mnn") <- reducedDim(sce_mnn_t, "PCA")
-reducedDim(sce_t_cells, "TSNE_mnn") <- reducedDim(sce_mnn_t, "TSNE")
-reducedDim(sce_t_cells, "UMAP_mnn") <- reducedDim(sce_mnn_t, "UMAP")
+sce_t_cells <- runUMAP(sce_t_cells, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
 ```
 
 ```{r, echo = FALSE, eval = FALSE}
-sce_t_cells <- cluster_wrapper(sce_t_cells, gene_subset = NULL, dimreduce_method = "PCA_mnn", clustering_method = "phenograph")
+sce_t_cells <- cluster_wrapper(sce_t_cells, gene_subset = NULL, dimreduce_method = "PCA", clustering_method = "phenograph")
 ```
 
 ```{r, echo = FALSE, out.width = '75%'}
-plotReducedDim(sce_t_cells, use_dimred = "TSNE_mnn", colour_by = "dataset")
+plotPCA(sce_t_cells, colour_by = "dataset")
 ```
 
 ```{r, echo = FALSE, out.width = '75%'}
-plotReducedDim(sce_t_cells, use_dimred = "TSNE_mnn", colour_by = "cluster")
+plotTSNE(sce_t_cells, colour_by = "cluster")
+```
+
+```{r, echo = FALSE, out.width = '75%'}
+plotUMAP(sce_t_cells, colour_by = "cluster")
 ```
 
 ```{r, echo = FALSE}
@@ -369,16 +260,12 @@ marker_tables <- lapply(marker_tables, function(x) {
 ```{r, echo = FALSE}
 follicular_markers2 <- list(
   'B cells'=c("CD19", "MS4A1", "CD79A", "CD79B", "IGKC", "IGLC2", "IGLC3", "CD74", "SELL", "CCR7", "CXCR5"),
-  'Tc1'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD8A", "CD8B", "GZMA", "GZMK", "NKG7", "CCL5", "EOMES", "IFNG"),
-  'Tc2'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD8A", "CD8B", "GZMA", "GZMK", "NKG7", "CCL5", "EOMES"),
-  'Naive/CM CD4'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "SELL", "CCR7", "TCF7"),
-  'T regs'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "FOXP3", "IL2RA", "TNFRSF4"),
-  'Tfh'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "CXCR5", "PDCD1", "TCF7", "CXCL13", "TNFRSF4", "ST8SIA1"), # ST8SIA1 very specific according to LM22
-  'Myeloid'=c("CD14", "CD68", "CD33", "CD74", "LYZ", "S100A9", "S100A8", "CD4"),
-  'T gamma delta'=c("CD2", "CD3D", "CD3E", "CD3G", "TRDC", "NKG7", "GNLY", "CCL5", "GZMA"),
-  'CD8 memory/Tc17'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD8A", "CD8B", "CCL5", "KLRB1"),
-  'Th17'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "KLRB1", "TNFRSF4"),
-  'T_other'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC")
+  'Cytotoxic T cells (activated)'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD8A", "CD8B", "GZMA", "NKG7", "CCL5", "EOMES", "IFNG", "CD69"),
+  'Cytotoxic T cells'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD8A", "CD8B", "GZMA", "NKG7", "CCL5", "EOMES"),
+  'Naive/resting CD4'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "SELL", "CCR7", "IL7R"),
+  'CD4 (activated)'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "IL7R", "CD69"),
+  'Tfh'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "CXCR5", "PDCD1", "TNFRSF4", "ST8SIA1", "ICA1", "ICOS", "CD69") # ST8SIA1 and ICA1 very specific according to LM22
+  #'T_other'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC")
   # T gamma delta -- TRDC
   # KLRB1-expressing cluster (CD4 memory T cells?? check literature) ## KLRB1 == CD161
   # KLRB1-expressing CCL5 and CD8 cluster?
@@ -398,8 +285,8 @@ knitr::kable(follicular_rho2)
 
 ```{r, echo = FALSE}
 B <- 40
-s <- sizeFactors(sce_follicular_normalized)
-sce <- sce_follicular_normalized[get_ensembl_id(rownames(follicular_rho2), rowData(sce_follicular_normalized)),]
+s <- sizeFactors(sce_normalized)
+sce <- sce_normalized[get_ensembl_id(rownames(follicular_rho2), rowData(sce_normalized)),]
 rownames(sce) <- rownames(follicular_rho2)
 counts(sce) <- as.matrix(counts(sce))
 
@@ -409,20 +296,20 @@ cellassign_res_full <- cellassign_em(exprs_obj = sce, s = s, rho = follicular_rh
 ```
 
 ```{r, echo = FALSE, eval = FALSE}
-sce_follicular_normalized_labeled_full <- sce_follicular_normalized
+sce_normalized_labeled_full <- sce_normalized
 
-sce_follicular_normalized_labeled_full$cellassign_cluster <- factor(cellassign_res_full$cell_type)
-sce_follicular_normalized_labeled_full@colData <- bind_cols(sce_follicular_normalized_labeled_full@colData %>% as.data.frame, as.data.frame(cellassign_res_full$mle_params$gamma)) %>% DataFrame(check.names = FALSE)
+sce_normalized_labeled_full$cellassign_cluster <- factor(cellassign_res_full$cell_type)
+sce_normalized_labeled_full@colData <- bind_cols(sce_normalized_labeled_full@colData %>% as.data.frame, as.data.frame(cellassign_res_full$mle_params$gamma)) %>% DataFrame(check.names = FALSE)
 ```
 
 ```{r, echo = FALSE, out.width = '75%'}
-plotTSNE(sce_follicular_normalized_labeled_full, ncomponents = 2, colour_by = "cellassign_cluster")
+plotTSNE(sce_normalized_labeled_full, ncomponents = 2, colour_by = "cellassign_cluster")
 ```
 
 ### Probabilities
 
 ```{r, echo = FALSE}
-ph <- plot_gamma_heatmap(cellassign_res_full, sce_follicular_normalized_labeled_full, stratified = FALSE, n_sample = 3000)
+ph <- plot_gamma_heatmap(cellassign_res_full, sce_normalized_labeled_full, stratified = FALSE, n_sample = 3000)
 
 grid.newpage()
 grid.draw(ph)
@@ -432,7 +319,7 @@ grid.draw(ph)
 
 ```{r, echo = FALSE}
 cellassign_cols <- c("cellassign_cluster", colnames(follicular_rho2))
-cellassign_tab <- colData(sce_follicular_normalized_labeled_full) %>%
+cellassign_tab <- colData(sce_normalized_labeled_full) %>%
   data.frame(check.names = FALSE) %>%
   dplyr::select(c("sample_barcode", cellassign_cols)) %>%
   dplyr::rename(cellassign_cluster_full=cellassign_cluster)
@@ -445,12 +332,15 @@ colData(sce_t_cells_labeled) <- colData(sce_t_cells) %>%
 ```
 
 ```{r, echo = FALSE}
-plotReducedDim(sce_t_cells_labeled, use_dimred = "TSNE_mnn", colour_by = "cluster")
+plotUMAP(sce_t_cells_labeled, colour_by = "cluster")
 ```
 
 ```{r, echo = FALSE}
-plotReducedDim(sce_t_cells_labeled, use_dimred = "TSNE_mnn", colour_by = "cellassign_cluster_full")
+plotUMAP(sce_t_cells_labeled, colour_by = "cellassign_cluster_full")
 ```
+
+Why is vimentin not expressed in the Tfh cells?
+Why is CXCR4 expressed in the memory + Tc1 populations? 
 
 # Malignant vs. nonmalignant B cell identification
 
