@@ -345,139 +345,42 @@ Why is CXCR4 expressed in the memory + Tc1 populations?
 # Malignant vs. nonmalignant B cell identification
 
 ```{r, echo = FALSE}
-sce_b_cells <- sce_follicular_normalized_labeled %>% 
+sce_b_cells <- sce_normalized_labeled %>% 
   scater::filter(B.cells >= celltype_prob_threshold)
-
-sce_b_cells <- runPCA(sce_b_cells, ntop = 1000, ncomponents = 50)
-sce_b_cells <- runTSNE(sce_b_cells, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
-
-sce_mnn_b <- sce_mnn[,sce_follicular_normalized_labeled$`B cells` >= 0.9]
-
-sce_mnn_b <- runPCA(sce_mnn_b, ntop = 1000, ncomponents = 50, exprs_values = "mnn")
-sce_mnn_b <- runTSNE(sce_mnn_b, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
-
-reducedDim(sce_b_cells, "PCA_mnn") <- reducedDim(sce_mnn_b, "PCA")
-reducedDim(sce_b_cells, "TSNE_mnn") <- reducedDim(sce_mnn_b, "TSNE")
 ```
 
 ```{r, echo = FALSE}
-plotReducedDim(sce_b_cells, use_dimred = "TSNE_mnn", colour_by = "dataset")
+plotUMAP(sce_b_cells, colour_by = "dataset")
 ```
 
-## Patient-by-patient analysis
-
-### FL1004
-
-```{r, echo = FALSE}
-sce_FL1004_B <- sce_b_cells %>% 
-  scater::filter(patient == "FL1004")
-
-# This does way better than running PCA + TSNE again (on the non-MNN data)
-plotReducedDim(sce_FL1004_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "dataset")
-```
 
 ```{r, echo = FALSE}
 set.seed(101)
-sce_FL1004_B <- cluster_wrapper(sce_FL1004_B, gene_subset = NULL, dimreduce_method = "PCA_mnn", clustering_method = "phenograph")
+sce_b_cells <- cluster_wrapper(sce_b_cells, gene_subset = NULL, dimreduce_method = "PCA", clustering_method = "phenograph")
 
-plotReducedDim(sce_FL1004_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "cluster")
+plotUMAP(sce_b_cells, ncomponents = 2, colour_by = "dataset")
 ```
 
 ```{r, echo = FALSE}
-nonmalignant_clusters <- c("3")
+plotUMAP(sce_b_cells, ncomponents = 2, colour_by = "cluster")
+```
 
-FL1004_B_mapping <- colData(sce_FL1004_B) %>%
+```{r, echo = FALSE}
+nonmalignant_clusters <- c("6")
+
+B_mapping <- colData(sce_b_cells) %>%
   data.frame(check.names = FALSE) %>%
   dplyr::select(sample_barcode, cluster) %>%
   dplyr::mutate(malignant_status_manual=ifelse(cluster %in% nonmalignant_clusters, "nonmalignant", "malignant"))
 ```
 
-### FL1012
-
-```{r, echo = FALSE}
-sce_FL1012_B <- sce_b_cells %>% 
-  scater::filter(patient == "FL1012")
-
-set.seed(101)
-sce_FL1012_B <- cluster_wrapper(sce_FL1012_B, gene_subset = NULL, dimreduce_method = "PCA_mnn", clustering_method = "phenograph")
-
-plotReducedDim(sce_FL1012_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "dataset")
-```
-
-```{r, echo = FALSE}
-plotReducedDim(sce_FL1012_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "cluster")
-```
-
-```{r, echo = FALSE}
-nonmalignant_clusters <- c("2", "7", "11")
-
-FL1012_B_mapping <- colData(sce_FL1012_B) %>%
-  data.frame(check.names = FALSE) %>%
-  dplyr::select(sample_barcode, cluster) %>%
-  dplyr::mutate(malignant_status_manual=ifelse(cluster %in% nonmalignant_clusters, "nonmalignant", "malignant"))
-```
-
-
-### FL1018
-
-```{r, echo = FALSE}
-sce_FL1018_B <- sce_b_cells %>% 
-  scater::filter(patient == "FL1018")
-
-set.seed(101)
-sce_FL1018_B <- cluster_wrapper(sce_FL1018_B, gene_subset = NULL, dimreduce_method = "PCA_mnn", clustering_method = "phenograph")
-
-plotReducedDim(sce_FL1018_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "dataset")
-```
-
-```{r, echo = FALSE}
-plotReducedDim(sce_FL1018_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "cluster")
-```
-
-```{r, echo = FALSE}
-nonmalignant_clusters <- c("8")
-
-FL1018_B_mapping <- colData(sce_FL1018_B) %>%
-  data.frame(check.names = FALSE) %>%
-  dplyr::select(sample_barcode, cluster) %>%
-  dplyr::mutate(malignant_status_manual=ifelse(cluster %in% nonmalignant_clusters, "nonmalignant", "malignant"))
-```
-
-### FL2001
-
-```{r, echo = FALSE}
-sce_FL2001_B <- sce_b_cells %>% 
-  scater::filter(patient == "FL2001")
-
-set.seed(101)
-sce_FL2001_B <- cluster_wrapper(sce_FL2001_B, gene_subset = NULL, dimreduce_method = "PCA_mnn", clustering_method = "phenograph")
-
-plotReducedDim(sce_FL2001_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "dataset")
-```
-
-```{r, echo = FALSE}
-plotReducedDim(sce_FL2001_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "cluster")
-```
-
-```{r, echo = FALSE}
-nonmalignant_clusters <- c("2", "9")
-
-FL2001_B_mapping <- colData(sce_FL2001_B) %>%
-  data.frame(check.names = FALSE) %>%
-  dplyr::select(sample_barcode, cluster) %>%
-  dplyr::mutate(malignant_status_manual=ifelse(cluster %in% nonmalignant_clusters, "nonmalignant", "malignant"))
-```
-
-```{r, echo = FALSE}
-B_mapping <- do.call(rbind,
-                     list(FL1004_B_mapping, FL1012_B_mapping, FL1018_B_mapping, FL2001_B_mapping))
-
-colData(sce_follicular_normalized_labeled) <- colData(sce_follicular_normalized_labeled) %>%
+```{r}
+colData(sce_normalized_labeled) <- colData(sce_normalized_labeled) %>%
   data.frame(check.names = FALSE) %>%
   dplyr::left_join(B_mapping %>% dplyr::select(-c(cluster))) %>%
   DataFrame
 
-colData(sce_follicular_normalized_labeled_full) <- colData(sce_follicular_normalized_labeled_full) %>%
+colData(sce_normalized_labeled_full) <- colData(sce_normalized_labeled_full) %>%
   data.frame(check.names = FALSE) %>%
   dplyr::left_join(B_mapping %>% dplyr::select(-c(cluster))) %>%
   DataFrame
@@ -489,7 +392,7 @@ colData(sce_b_cells) <- colData(sce_b_cells) %>%
 ```
 
 ```{r, echo = FALSE}
-plotReducedDim(sce_b_cells, use_dimred = "TSNE_mnn", colour_by = "malignant_status_manual")
+plotUMAP(sce_b_cells, colour_by = "malignant_status_manual")
 ```
 
 
@@ -511,11 +414,11 @@ compute_celltype_proportions <- function(sce, celltype_col = "cellassign_cluster
 ```
 
 ```{r, echo = FALSE}
-sce_follicular_normalized_labeled_full$celltype <- sce_follicular_normalized_labeled_full$cellassign_cluster
+sce_normalized_labeled_full$celltype <- sce_normalized_labeled_full$cellassign_cluster
 ```
 
 ```{r, echo = FALSE}
-scrna_prop <- compute_celltype_proportions(sce_follicular_normalized_labeled_full, celltype_col = "celltype")
+scrna_prop <- compute_celltype_proportions(sce_normalized_labeled_full, celltype_col = "celltype")
 ```
 
 ```{r, echo = FALSE}
@@ -575,18 +478,25 @@ add_symbol <- function(de_result, filter_ribo = TRUE, filter_mito = TRUE, rowdat
 filter_ribo <- TRUE
 filter_mito <- TRUE
 
-pathway_timepoint_tfh <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "Tfh"), 
+pathway_timepoint_cytotoxic <- gage_analysis(sce = sce_normalized_labeled_full %>% scater::filter(celltype %in% c("Cytotoxic T cells (activated)", "Cytotoxic T cells")), 
                                               comparison_type = "timepoint",
                                               filter_ribo = filter_ribo,
                                               filter_mito = filter_mito,
                                               gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
-                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+                                       rowdat = rowData(sce_normalized_labeled_full))
 
-plot_markers(pathway_timepoint_tfh$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
+plot_markers(pathway_timepoint_cytotoxic$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "all")
 ```
 
+```{r, echo = FALSE}
+plot_markers(pathway_timepoint_cytotoxic$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "IFNG", "CD69", "LAG3", "HAVCR2"))
+```
+
+TODO: Story can be that there's more cytotoxic activation in T2 > T1, and correspondingly HLA downregulation in T2 > T1. 
+
+
 ```{r}
-pathway_timepoint_cytotoxic <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "Cytotoxic T cells"), 
+pathway_timepoint_cytotoxic <- gage_analysis(sce = sce_normalized_labeled_full %>% scater::filter(celltype == "Cytotoxic T cells"), 
                                               comparison_type = "timepoint",
                                               filter_ribo = filter_ribo,
                                               filter_mito = filter_mito,
