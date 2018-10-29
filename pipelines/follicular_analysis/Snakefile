@@ -122,9 +122,3 @@ rule annotate_follicular:
     shell:
         ''
 
-## FIGURE A
-
-rule follicular_celltype_assignments:
-
-## FIGURE B
-
