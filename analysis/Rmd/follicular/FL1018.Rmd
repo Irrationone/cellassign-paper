@@ -1,6 +1,14 @@
 ---
 title: "Follicular: FL1018"
-output: html_notebook
+author: Allen Zhang
+date: October 29, 2018
+output: 
+  revealjs::revealjs_presentation:
+    css: styles.css
+    reveal_options:
+      slideNumber: true
+      previewLinks: true
+      mathjax: default
 ---
 
 
@@ -31,19 +39,14 @@ library(Seurat)
 
 library(infotheo)
 library(lmerTest)
+library(DT)
 ```
 
 # Introduction
 
+## Data
 
-## Outline
-
-* Experimental substrates
-* QC stats
-* Preliminary analysis
-* Next steps
-
-# Data
+We have data for 2 FL samples: `FL1018T1` and `FL1018T2`. This patient has transformed FL. 
 
 ```{r, echo = FALSE, eval = FALSE}
 data_dir <- "/datadrive/data/follicular"
@@ -67,10 +70,7 @@ sce$replicate <- str_extract(sce$dataset, "R[0-9]+$")
 sce$replicate[is.na(sce$replicate)] <- "R1"
 sce$transformed_progressed <- ifelse(str_detect(sce$patient, "^FL1"), "Transformed", "Progressed")
 sce$status <- with(colData(sce), ifelse(timepoint == "T2", transformed_progressed, "Primary"))
-```
 
-
-```{r, echo = FALSE}
 get_ensembl_id <- function(x, rowdat, symbol_name = "Symbol", gene_name = "ID") {
   rowdat <- as.data.frame(rowdat)
   df_as_map(rowdat %>% subset(x %in% rowdat[,symbol_name]), x, from = symbol_name, to = gene_name)
@@ -108,13 +108,21 @@ ggplot(df, aes(x=pct_ribosomal)) + geom_histogram(aes(fill=set_id)) + theme_bw()
 
 ## Filtering
 
-```{r, echo = FALSE}
+We filter on a mitochondrial threshold of `r mito_thres`% and a ribosomal threshold of `r ribo_thres`%. These thresholds were indicated in the previous plots. 
+
+```{r, echo = FALSE, eval = FALSE}
 sce_filtered <- filter_cells(sce, nmads = 3, type = "lower", log = TRUE, max_mito = mito_thres, max_ribo = ribo_thres)
 ```
 
 ## Normalization
 
-```{r, echo = FALSE}
+We normalize by:
+
+* Computing size factors with `scran` (after `quickCluster`)
+* Using `scater::normalize`
+* Running PCA, t-SNE, and UMAP for dimensionality reduction
+
+```{r, echo = FALSE, eval = FALSE}
 qclust <- quickCluster(sce_filtered, min.size = 30)
 sce_filtered <- computeSumFactors(sce_filtered, clusters = qclust)
 
@@ -129,15 +137,19 @@ sce_normalized <- runTSNE(sce_normalized, use_dimred = "PCA", n_dimred = 50, nco
 sce_normalized <- runUMAP(sce_normalized, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
 ```
 
+## t-SNE
+
 ```{r, echo = FALSE}
 plotTSNE(sce_normalized, colour_by = "dataset", ncomponents = 2)
 ```
+
+## UMAP
 
 ```{r, echo = FALSE}
 plotUMAP(sce_normalized, colour_by = "dataset", ncomponents = 2)
 ```
 
-## Total number of UMIs
+## Total number of UMIs (PCA)
 
 ```{r, echo = FALSE}
 plotPCA(sce_normalized, colour_by = "log10_total_counts")
@@ -145,31 +157,38 @@ plotPCA(sce_normalized, colour_by = "log10_total_counts")
 
 ## Cell cycle
 
+We use `cyclone` to assign cells to cell cycle states. 
+
 ```{r, echo = FALSE, eval = FALSE}
 hs.pairs <- readRDS(system.file("exdata", "human_cycle_markers.rds", package="scran"))
 
-assignments <- cyclone(sce_normalized, hs.pairs, gene.names=rowData(sce_normalized)$ID, min.iter = 10, iter = 100, verbose = TRUE, BPPARAM = MulticoreParam(15))
+assignments <- cyclone(sce_normalized, hs.pairs, gene.names=rowData(sce_normalized)$ID, min.iter = 10, verbose = TRUE, BPPARAM = MulticoreParam(15))
 
 sce_normalized@colData <- bind_cols(sce_normalized@colData %>% as.data.frame, assignments$normalized.scores) %>% DataFrame
 sce_normalized <- scater::mutate(sce_normalized, Cell_Cycle = assignments$phases)
 ```
 
+## Cell cycle (PCA)
 
 ```{r, echo = FALSE}
 plotPCA(sce_normalized, colour_by = "Cell_Cycle")
 ```
 
+## Cell cycle (t-SNE)
+
 ```{r, echo = FALSE}
 plotTSNE(sce_normalized, colour_by = "Cell_Cycle")
 ```
 
-```{r, echo = FALSE, results = 'asis'}
-knitr::kable(t(with(colData(sce_normalized), table(Cell_Cycle, dataset))))
+## Cell cycle (UMAP)
+
+```{r, echo = FALSE}
+plotUMAP(sce_normalized, colour_by = "Cell_Cycle")
 ```
 
-# CellAssign
+# CellAssign (conservative)
 
-## Conservative
+## Marker gene matrix
 
 ```{r, echo = FALSE}
 follicular_markers1 <- list(
@@ -180,12 +199,13 @@ follicular_markers1 <- list(
 follicular_rho1 <- marker_list_to_mat(follicular_markers1, include_other = FALSE)
 ```
 
-
 ```{r, echo = FALSE, results = 'asis'}
 knitr::kable(follicular_rho1)
 ```
 
-```{r, echo = FALSE}
+## Cell assignments (MAP, PCA)
+
+```{r, echo = FALSE, eval = FALSE}
 B <- 40
 s <- sizeFactors(sce_normalized)
 sce <- sce_normalized[get_ensembl_id(rownames(follicular_rho1), rowData(sce_normalized)),]
@@ -206,17 +226,21 @@ sce_normalized_labeled@colData <- bind_cols(sce_normalized_labeled@colData %>% a
 plotPCA(sce_normalized_labeled, ncomponents = 2, colour_by = "cellassign_cluster")
 ```
 
+## Cell assignments (MAP, t-SNE)
+
 ```{r, echo = FALSE, out.width = '75%'}
 plotTSNE(sce_normalized_labeled, ncomponents = 2, colour_by = "cellassign_cluster")
 ```
+
+## Cell assignments (MAP)
 
 ```{r, echo = FALSE, results = 'asis'}
 knitr::kable(t(table(sce_normalized_labeled$cellassign_cluster)))
 ```
 
-### T-cell subclustering
+## T-cell subclustering (phenograph, PCA)
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 celltype_prob_threshold <- 0.9
 
 sce_t_cells <- sce_normalized_labeled %>% 
@@ -235,15 +259,13 @@ sce_t_cells <- cluster_wrapper(sce_t_cells, gene_subset = NULL, dimreduce_method
 plotPCA(sce_t_cells, colour_by = "dataset")
 ```
 
-```{r, echo = FALSE, out.width = '75%'}
-plotTSNE(sce_t_cells, colour_by = "cluster")
-```
+## T-cell subclustering (phenograph, UMAP)
 
 ```{r, echo = FALSE, out.width = '75%'}
 plotUMAP(sce_t_cells, colour_by = "cluster")
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 marker_tables <- findMarkers(sce_t_cells, clusters = sce_t_cells$cluster, direction = "up")
 
 marker_tables <- lapply(marker_tables, function(x) {
@@ -255,7 +277,9 @@ marker_tables <- lapply(marker_tables, function(x) {
 })
 ```
 
-## Full
+# CellAssign (full)
+
+## Marker gene matrix { #markertablebig }
 
 ```{r, echo = FALSE}
 follicular_markers2 <- list(
@@ -275,15 +299,25 @@ follicular_markers2 <- list(
 
 # P2RX5 in Tfh and B cells
 
+## UPDATE THESE WHEN A CHANGE TO RHO IS MADE
+t_cell_subtypes <- c("Cytotoxic T cells (activated)",
+                     "Cytotoxic T cells",
+                     "Naive/resting CD4",
+                     "CD4 (activated)",
+                     "Tfh")
+b_cell_subtypes <- c("B cells",
+                     "B cells (malignant)")
+
 follicular_rho2 <- marker_list_to_mat(follicular_markers2, include_other = TRUE)
 ```
-
 
 ```{r, echo = FALSE, results = 'asis'}
 knitr::kable(follicular_rho2)
 ```
 
-```{r, echo = FALSE}
+## Cell assignments (MAP, UMAP)
+
+```{r, echo = FALSE, eval = FALSE}
 B <- 40
 s <- sizeFactors(sce_normalized)
 sce <- sce_normalized[get_ensembl_id(rownames(follicular_rho2), rowData(sce_normalized)),]
@@ -303,10 +337,10 @@ sce_normalized_labeled_full@colData <- bind_cols(sce_normalized_labeled_full@col
 ```
 
 ```{r, echo = FALSE, out.width = '75%'}
-plotTSNE(sce_normalized_labeled_full, ncomponents = 2, colour_by = "cellassign_cluster")
+plotUMAP(sce_normalized_labeled_full, ncomponents = 2, colour_by = "cellassign_cluster")
 ```
 
-### Probabilities
+## Probabilities
 
 ```{r, echo = FALSE}
 ph <- plot_gamma_heatmap(cellassign_res_full, sce_normalized_labeled_full, stratified = FALSE, n_sample = 3000)
@@ -315,9 +349,9 @@ grid.newpage()
 grid.draw(ph)
 ```
 
-### Match to unsupervised clusters
+## T-cell unsupervised clusters (UMAP)
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 cellassign_cols <- c("cellassign_cluster", colnames(follicular_rho2))
 cellassign_tab <- colData(sce_normalized_labeled_full) %>%
   data.frame(check.names = FALSE) %>%
@@ -335,16 +369,20 @@ colData(sce_t_cells_labeled) <- colData(sce_t_cells) %>%
 plotUMAP(sce_t_cells_labeled, colour_by = "cluster")
 ```
 
+## T-cell subtype assignments (UMAP)
+
 ```{r, echo = FALSE}
 plotUMAP(sce_t_cells_labeled, colour_by = "cellassign_cluster_full")
 ```
 
-Why is vimentin not expressed in the Tfh cells?
-Why is CXCR4 expressed in the memory + Tc1 populations? 
+* Why is vimentin not expressed in the Tfh cells?
+* Why is CXCR4 expressed in the memory + Tc1 populations? 
 
 # Malignant vs. nonmalignant B cell identification
 
-```{r, echo = FALSE}
+## B cells (UMAP)
+
+```{r, echo = FALSE, eval = FALSE}
 sce_b_cells <- sce_normalized_labeled %>% 
   scater::filter(B.cells >= celltype_prob_threshold)
 ```
@@ -353,17 +391,36 @@ sce_b_cells <- sce_normalized_labeled %>%
 plotUMAP(sce_b_cells, colour_by = "dataset")
 ```
 
+## B cell unsupervised clustering (phenograph, UMAP)
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 set.seed(101)
 sce_b_cells <- cluster_wrapper(sce_b_cells, gene_subset = NULL, dimreduce_method = "PCA", clustering_method = "phenograph")
-
-plotUMAP(sce_b_cells, ncomponents = 2, colour_by = "dataset")
 ```
 
 ```{r, echo = FALSE}
 plotUMAP(sce_b_cells, ncomponents = 2, colour_by = "cluster")
 ```
+
+## IGKC expression
+
+```{r, echo = FALSE}
+plotUMAP(sce_b_cells, ncomponents = 2, colour_by = get_ensembl_id("IGKC", rowData(sce_b_cells)))
+```
+
+## IGLC2 expression
+
+```{r, echo = FALSE}
+plotUMAP(sce_b_cells, ncomponents = 2, colour_by = get_ensembl_id("IGLC2", rowData(sce_b_cells)))
+```
+
+## IGLC3 expression
+
+```{r, echo = FALSE}
+plotUMAP(sce_b_cells, ncomponents = 2, colour_by = get_ensembl_id("IGLC3", rowData(sce_b_cells)))
+```
+
+## Manual identification of malignant vs. nonmalignant clusters (UMAP)
 
 ```{r, echo = FALSE}
 nonmalignant_clusters <- c("6")
@@ -374,7 +431,7 @@ B_mapping <- colData(sce_b_cells) %>%
   dplyr::mutate(malignant_status_manual=ifelse(cluster %in% nonmalignant_clusters, "nonmalignant", "malignant"))
 ```
 
-```{r}
+```{r, echo = FALSE, eval = FALSE}
 colData(sce_normalized_labeled) <- colData(sce_normalized_labeled) %>%
   data.frame(check.names = FALSE) %>%
   dplyr::left_join(B_mapping %>% dplyr::select(-c(cluster))) %>%
@@ -395,31 +452,76 @@ colData(sce_b_cells) <- colData(sce_b_cells) %>%
 plotUMAP(sce_b_cells, colour_by = "malignant_status_manual")
 ```
 
+# Celltype proportion changes between timepoints
 
-# Proportions and differential expression
+## Introduction
+
+We'll look to see how celltype proportions change between timepoints.
 
 ```{r, echo = FALSE}
-compute_celltype_proportions <- function(sce, celltype_col = "cellassign_cluster") {
+sce_normalized_labeled_full$celltype <- sce_normalized_labeled_full$cellassign_cluster
+
+compute_celltype_proportions <- function(sce, celltype_col = "cellassign_cluster", suffix = "") {
   celltype_counts <- as.data.frame(table(colData(sce)[,"dataset"], colData(sce)[,celltype_col])) %>%
     dplyr::rename(dataset=Var1, celltype=Var2, count=Freq) %>%
     dplyr::group_by(dataset) %>%
     dplyr::mutate(proportion=count/sum(count)) %>%
     dplyr::ungroup() %>%
-    dplyr::mutate(celltype=paste0(celltype, " (scrna)"))
+    dplyr::mutate(celltype=paste0(celltype, suffix))
   
   df <- reshape2::dcast(celltype_counts, formula = dataset ~ celltype, value.var = "proportion")
   
   return(df)
 }
+
+scrna_prop <- compute_celltype_proportions(sce_normalized_labeled_full, celltype_col = "celltype_full", suffix = " (scrna)")
+scrna_prop2 <- compute_celltype_proportions(sce_normalized_labeled_full, celltype_col = "celltype_full", suffix = "")
 ```
 
-```{r, echo = FALSE}
-sce_normalized_labeled_full$celltype <- sce_normalized_labeled_full$cellassign_cluster
+## Overall proportions
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable(((scrna_prop2 %>% 
+               tibble::column_to_rownames(var = "dataset") %>%
+               t) * 100) %>%
+               round(2))
 ```
 
-```{r, echo = FALSE}
-scrna_prop <- compute_celltype_proportions(sce_normalized_labeled_full, celltype_col = "celltype")
+## T cell percentages
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable(scrna_prop2 %>% 
+               dplyr::select(c("dataset", t_cell_subtypes)) %>%
+               dplyr::mutate(T_total=rowSums(.[names(.) %in% t_cell_subtypes])) %>%
+               dplyr::mutate_at(vars(one_of(t_cell_subtypes)), function(x) 100*x/.$T_total) %>%
+               dplyr::select(c("dataset", t_cell_subtypes)) %>%
+               tibble::column_to_rownames(var = "dataset") %>%
+               t %>%
+               round(2))
 ```
+
+## B cell percentages
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable(scrna_prop2 %>% 
+               dplyr::select(c("dataset", b_cell_subtypes)) %>%
+               dplyr::mutate(B_total=rowSums(.[names(.) %in% b_cell_subtypes])) %>%
+               dplyr::mutate_at(vars(one_of(b_cell_subtypes)), function(x) 100*x/.$B_total) %>%
+               dplyr::select(c("dataset", b_cell_subtypes)) %>%
+               tibble::column_to_rownames(var = "dataset") %>%
+               t %>%
+               round(2))
+```
+
+The nonmalignant fraction of B cells becomes virtually nonexistant in T2. 
+
+# Differential expression between malignant and nonmalignant B cells
+
+## Introduction
+
+We'll look at genes that are differentially expressed between malignant and nonmalignant B cells. We treat timepoint as a blocking variable. 
+
+In the plots that follow, genes that are **upregulated** in malignant cells relative to nonmalignant cells have **positive** logFC values. 
 
 ```{r, echo = FALSE}
 gage_analysis <- function(sce, comparison_type = "timepoint", filter_ribo = TRUE, filter_mito = TRUE, gene_set_path, rowdat) {
@@ -432,7 +534,11 @@ gage_analysis <- function(sce, comparison_type = "timepoint", filter_ribo = TRUE
   } else if (comparison_type == "malignant") {
     sce <- sce %>% scater::filter(malignant_status %in% c("malignant", "nonmalignant"))
     
-    de_table <- findMarkers(sce, clusters = sce$malignant_status, block = factor(sce$patient))
+    if (length(unique(sce$dataset)) > 1) {
+      de_table <- findMarkers(sce, clusters = sce$malignant_status, block = factor(sce$dataset))
+    } else {
+      de_table <- findMarkers(sce, clusters = sce$malignant_status)
+    }
     de_table <- add_symbol(de_table, filter_mito = filter_mito, filter_ribo = filter_ribo, rowdat)
     
     df <- de_table$malignant
@@ -474,11 +580,72 @@ add_symbol <- function(de_result, filter_ribo = TRUE, filter_mito = TRUE, rowdat
 }
 ```
 
+```{r, echo = FALSE, eval = FALSE}
+sce_normalized_labeled_full$malignant_status_manual[is.na(sce_normalized_labeled_full$malignant_status_manual)] <- "nonmalignant"
+
+sce_normalized_labeled_full <- sce_normalized_labeled_full %>%
+  scater::mutate(
+    celltype_full=ifelse(malignant_status_manual == "malignant", "B cells (malignant)", as.character(celltype))
+  )
+```
+
+## Pathways
+
+```{r, echo = FALSE}
+## Only look at T1
+pathway_malignant_vs_nonmalignant <- gage_analysis(sce = sce_normalized_labeled_full %>% scater::filter(celltype_full %in% c("B cells", "B cells (malignant)")) %>% scater::mutate(malignant_status=malignant_status_manual), 
+                                              comparison_type = "malignant",
+                                              filter_ribo = filter_ribo,
+                                              filter_mito = filter_mito,
+                                              gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
+                                       rowdat = rowData(sce_normalized_labeled_full))
+```
+
+```{r, echo = FALSE}
+plot_markers(pathway_malignant_vs_nonmalignant$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "Malignant vs. nonmalignant", top_direction = "all")
+```
+
+## Genes
+
+```{r, echo = FALSE}
+plot_markers(pathway_malignant_vs_nonmalignant$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "CD69", "CD274", "PAX5", "ID2", "SMAD1", "NR2F6", "CDKN2A", "CDKN1A", "MNDA", "S100A9", "S100A8"))
+```
+
+Some key genes for which we see consistent observations are BCL2, BCL6, and ID-2. 
+
+Refer to http://www.bloodjournal.org/content/99/1/282 for a more comprehensive list of markers to check.
+
+## Table of significant genes {#scrolltable6}
+
+```{r, echo = FALSE}
+## TODO: Add scrollable table for genes cause there will be people who will want to look at that
+datatable(pathway_malignant_vs_nonmalignant$genes %>%
+            as.data.frame %>%
+            dplyr::filter(FDR < 0.05) %>%
+            dplyr::mutate(logFC.nonmalignant=format(logFC.nonmalignant, digits=2),
+                          p.value=format(p.value, digits=2),
+                          FDR=format(FDR, digits=2)) %>%
+            dplyr::rename(logFC=logFC.nonmalignant), options = list(pagelength = 5))
+```
+
+## Key points
+
+* Upregulation of BCL2 and BCL6 in malignant cells
+* Upregulation of ID-2 in malignant cells
+
+# Differential expression within celltypes
+
+## Introduction
+
+For each celltype, we ask what genes and pathways are differentially expressed between timepoints. In the plots that follow, genes that are **upregulated** in T2 relative to T1 will have **positive** logFC values. 
+
+## CD8 T cells (pathways)
+
 ```{r, echo = FALSE}
 filter_ribo <- TRUE
 filter_mito <- TRUE
 
-pathway_timepoint_cytotoxic <- gage_analysis(sce = sce_normalized_labeled_full %>% scater::filter(celltype %in% c("Cytotoxic T cells (activated)", "Cytotoxic T cells")), 
+pathway_timepoint_cytotoxic <- gage_analysis(sce = sce_normalized_labeled_full %>% scater::filter(celltype_full %in% c("Cytotoxic T cells (activated)", "Cytotoxic T cells")), 
                                               comparison_type = "timepoint",
                                               filter_ribo = filter_ribo,
                                               filter_mito = filter_mito,
@@ -488,174 +655,385 @@ pathway_timepoint_cytotoxic <- gage_analysis(sce = sce_normalized_labeled_full %
 plot_markers(pathway_timepoint_cytotoxic$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "all")
 ```
 
+
+## CD8 T cells (genes)
+
 ```{r, echo = FALSE}
 plot_markers(pathway_timepoint_cytotoxic$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "IFNG", "CD69", "LAG3", "HAVCR2"))
 ```
 
-TODO: Story can be that there's more cytotoxic activation in T2 > T1, and correspondingly HLA downregulation in T2 > T1. 
+Upregulation of CD8 T effector activity in T2? 
 
+## CD8 T cells (table of significant entries) {#scrolltable5}
 
-```{r}
-pathway_timepoint_cytotoxic <- gage_analysis(sce = sce_normalized_labeled_full %>% scater::filter(celltype == "Cytotoxic T cells"), 
+```{r, echo = FALSE}
+## TODO: Add scrollable table for genes cause there will be people who will want to look at that
+datatable(pathway_timepoint_cytotoxic$genes %>%
+            as.data.frame %>%
+            dplyr::filter(FDR < 0.05) %>%
+            dplyr::mutate(logFC.T1=format(logFC.T1, digits=2),
+                          p.value=format(p.value, digits=2),
+                          FDR=format(FDR, digits=2)) %>%
+            dplyr::rename(logFC=logFC.T1), options = list(pagelength = 5))
+```
+
+## Malignant B cells (pathways)
+
+```{r, echo = FALSE}
+pathway_timepoint_malignant <- gage_analysis(sce = sce_normalized_labeled_full %>% scater::filter(celltype_full == "B cells (malignant)"), 
                                               comparison_type = "timepoint",
                                               filter_ribo = filter_ribo,
                                               filter_mito = filter_mito,
                                               gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
-                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+                                       rowdat = rowData(sce_normalized_labeled_full))
 
-plot_markers(pathway_timepoint_cytotoxic$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
+plot_markers(pathway_timepoint_malignant$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
 ```
+
+## Malignant B cells (genes)
 
 ```{r, echo = FALSE}
-pathway_timepoint_cytotoxic$pathways %>% dplyr::arrange(-mean_logFC) %>% head
+plot_markers(pathway_timepoint_malignant$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "IFNG", "CD69", "LAG3", "HAVCR2"))
 ```
 
-Upregulation of PD-1 (PD-1 blockade?) in cytotoxic T cells at T2? CHECK if this corresponds to membership in the IFNG-containing subcluster of CD8 T cells. 
+Downregulation in antigen presentation -- perhaps due to corresponding upregulation of T effector response in T2? 
 
-```{r}
-pathway_timepoint_naive <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "Naive/CM CD4"), 
+## Malignant B cells (table of significant entries) {#scrolltable4}
+
+```{r, echo = FALSE}
+## TODO: Add scrollable table for genes cause there will be people who will want to look at that
+datatable(pathway_timepoint_malignant$genes %>%
+            as.data.frame %>%
+            dplyr::filter(FDR < 0.05) %>%
+            dplyr::mutate(logFC.T1=format(logFC.T1, digits=2),
+                          p.value=format(p.value, digits=2),
+                          FDR=format(FDR, digits=2)) %>%
+            dplyr::rename(logFC=logFC.T1), options = list(pagelength = 5))
+```
+
+## CD4 T cells (pathways)
+
+```{r, echo = FALSE}
+pathway_timepoint_helper <- gage_analysis(sce = sce_normalized_labeled_full %>% scater::filter(celltype_full %in% c("Naive/resting CD4", "CD4 (activated)")), 
                                               comparison_type = "timepoint",
                                               filter_ribo = filter_ribo,
                                               filter_mito = filter_mito,
                                               gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
-                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+                                       rowdat = rowData(sce_normalized_labeled_full))
 
-plot_markers(pathway_timepoint_naive$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
+plot_markers(pathway_timepoint_helper$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
 ```
 
-```{r}
-pathway_timepoint_naive$pathways %>% dplyr::filter(q.val < 0.05) %>% dplyr::arrange(-mean_logFC) %>% head(10)
+Nothing significant. 
+
+## CD4 T cells (genes)
+
+```{r, echo = FALSE}
+plot_markers(pathway_timepoint_helper$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "IFNG", "CD69", "LAG3", "HAVCR2"))
 ```
 
+Looks like heat shock proteins `HSPA1A`, `HSPA1B`, and `HSPH1` are downregulated in T2. May be an artifact of processing. We can see if this is consistent with other celltypes. Note that CD69 is also upregulated in T2 relative to T1 -- activation of CD4 T cells in T2 as well. We need to give a thought to the CXCR4 population though. Are those Tfh's or just T mem's? Not well described in the literature as far as I'm aware. 
 
-```{r}
-pathway_timepoint_malignantb <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "B cells" & malignant_status_manual == "malignant"), 
+## CD4 T cells (table of significant entries) {#scrolltable3}
+
+```{r, echo = FALSE}
+## TODO: Add scrollable table for genes cause there will be people who will want to look at that
+datatable(pathway_timepoint_helper$genes %>%
+            as.data.frame %>%
+            dplyr::filter(FDR < 0.05) %>%
+            dplyr::mutate(logFC.T1=format(logFC.T1, digits=2),
+                          p.value=format(p.value, digits=2),
+                          FDR=format(FDR, digits=2)) %>%
+            dplyr::rename(logFC=logFC.T1), options = list(pagelength = 5))
+```
+
+## T follicular helper cells (pathways)
+
+```{r, echo = FALSE}
+pathway_timepoint_tfh <- gage_analysis(sce = sce_normalized_labeled_full %>% scater::filter(celltype_full == "Tfh"), 
                                               comparison_type = "timepoint",
                                               filter_ribo = filter_ribo,
                                               filter_mito = filter_mito,
                                               gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
-                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+                                       rowdat = rowData(sce_normalized_labeled_full))
 
-plot_markers(pathway_timepoint_malignantb$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
+plot_markers(pathway_timepoint_tfh$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
 ```
+
+Nothing significant. 
+
+## T follicular helper cells (genes)
 
 ```{r, echo = FALSE}
-plot_markers(pathway_timepoint_malignantb$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74"))
+plot_markers(pathway_timepoint_tfh$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "IFNG", "CD69", "LAG3", "HAVCR2"))
 ```
 
-```{r}
-pathway_timepoint_malignantb$pathways %>% dplyr::filter(q.val < 0.05) %>% dplyr::arrange(-mean_logFC) %>% head(10)
+Again, we see the heat shock response downregulated in T2 relative to T1. However, JUN is also upregulated in T2 -- could be biological or batch-associated. Once again -- CD69 is upregulated in T2. 
+
+## T follicular helper cells (table of significant entries) {#scrolltable1}
+
+```{r, echo = FALSE}
+## TODO: Add scrollable table for genes cause there will be people who will want to look at that
+datatable(pathway_timepoint_tfh$genes %>%
+            as.data.frame %>%
+            dplyr::filter(FDR < 0.05) %>%
+            dplyr::mutate(logFC.T1=format(logFC.T1, digits=2),
+                          p.value=format(p.value, digits=2),
+                          FDR=format(FDR, digits=2)) %>%
+            dplyr::rename(logFC=logFC.T1), options = list(pagelength = 5))
 ```
 
-```{r}
-pathway_timepoint_nonmalignantb <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "B cells" & malignant_status_manual == "nonmalignant"), 
+## Nonmalignant B cells (pathways)
+
+```{r, echo = FALSE}
+pathway_timepoint_nonmalignant <- gage_analysis(sce = sce_normalized_labeled_full %>% scater::filter(celltype_full == "B cells"), 
                                               comparison_type = "timepoint",
                                               filter_ribo = filter_ribo,
                                               filter_mito = filter_mito,
                                               gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
-                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+                                       rowdat = rowData(sce_normalized_labeled_full))
 
-plot_markers(pathway_timepoint_nonmalignantb$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
+plot_markers(pathway_timepoint_nonmalignant$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
 ```
 
-```{r}
-pathway_timepoint_FL1018malignantb <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "B cells" & malignant_status_manual == "malignant" & patient == "FL1018"), 
-                                              comparison_type = "timepoint",
-                                              filter_ribo = filter_ribo,
-                                              filter_mito = filter_mito,
-                                              gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
-                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+Nothing significant. However, do notice that the number of nonmalignant B cells has dropped quite precipitously, especially in relation to the discordant rise in malignant B cell prevalence. 
+
+## Nonmalignant B cells (genes)
+
+```{r, echo = FALSE}
+plot_markers(pathway_timepoint_nonmalignant$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "IFNG", "CD69", "LAG3", "HAVCR2"))
+```
+
+No HLA loss or anything of much interest here, I think. `TCL1A` and `FCER2` might be interesting though, with more FL knowledge. 
+
+## Nonmalignant B cells (table of significant entries) {#scrolltable2}
+
+```{r, echo = FALSE}
+## TODO: Add scrollable table for genes cause there will be people who will want to look at that
+datatable(pathway_timepoint_nonmalignant$genes %>%
+            as.data.frame %>%
+            dplyr::filter(FDR < 0.05) %>%
+            dplyr::mutate(logFC.T1=format(logFC.T1, digits=2),
+                          p.value=format(p.value, digits=2),
+                          FDR=format(FDR, digits=2)) %>%
+            dplyr::rename(logFC=logFC.T1), options = list(pagelength = 5))
+```
+
+# Cycling cells
+
+Another finding of interest is the proportion of cycling cells for each celltype/dataset. 
+
+## Counts (by celltype)
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable(with(colData(sce_normalized_labeled_full), table(celltype_full, Cell_Cycle)))
+```
+
+## Percentages (by celltype)
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable((with(colData(sce_normalized_labeled_full), table(celltype_full, Cell_Cycle))/rowSums(with(colData(sce_normalized_labeled_full), table(celltype_full, Cell_Cycle))) * 100) %>% round(2))
+```
+
+As expected (perhaps), cancer cells have the highest percentage of cycling cells. Overall though, we may be overestimating the percentage of cycling cells -- check and see what is going on with `cyclone` here.  
+
+## Counts (by sample)
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable(with(colData(sce_normalized_labeled_full), table(dataset, Cell_Cycle)))
+```
+
+## Percentages (by sample)
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable((with(colData(sce_normalized_labeled_full), table(dataset, Cell_Cycle))/rowSums(with(colData(sce_normalized_labeled_full), table(dataset, Cell_Cycle))) * 100) %>% round(2))
+```
+
+There's a higher percentage of cycling cells in T2 -- consistent with disease transformation and worsening patient prognosis. 
+
+## Generalized linear model
+
+We can go deeper into investigating this and see if ALL cells in T2 have higher cycling percentages, or only cancer cells. 
+
+Fixed effects: timepoint, celltype
+Interaction terms: none (a timepoint*celltype interaction term would overparametrize)
+
+Response family: binomial
+
+```{r, echo = FALSE}
+cycling_stats <- with(colData(sce_normalized_labeled_full), table(dataset, celltype_full, Cell_Cycle)) %>% 
+  as.data.frame %>%
+  dplyr::rename(count=Freq) %>%
+  dplyr::group_by(dataset, celltype_full) %>% 
+  dplyr::mutate(total_count=sum(count)) %>%
+  dplyr::ungroup()
+
+cycling_summary <- cycling_stats %>% 
+  dplyr::filter(Cell_Cycle %in% c("S", "G2M")) %>% 
+  dplyr::group_by(dataset, celltype_full, total_count) %>%
+  dplyr::summarise(cycling_count=sum(count)) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(cycling_prop=cycling_count/total_count,
+                timepoint=str_extract(dataset, "T[0-9]+$"))
 ```
 
 ```{r, echo = FALSE}
-plot_markers(pathway_timepoint_FL1018malignantb$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74"))
+library(lme4)
+
+mod <- glm(cbind(cycling_count, total_count-cycling_count) ~ dataset + celltype_full,
+      data = cycling_summary,
+      family = "binomial")
 ```
 
-# FACS validation
-
-Should be run with minimally-filtered dataset (i.e. filtered at 10% mito or higher), as opposed to a 5% filter that could be used for analysis. 
-
-## Data {#bigxtable2}
+## Residuals plot
 
 ```{r, echo = FALSE}
-facs_table_T <- "/datadrive/data/follicular/FACS/FL_paired T pops.csv"
-
-facs_T <- fread(facs_table_T, sep = ",", skip = 1)
-colnames(facs_T)[1] <- "dataset"
-
-facs_T <- subset(facs_T, dataset %in% unique(sce_follicular_normalized_labeled$dataset))
-
-column_mapping <- c(
-  'LIVE/Singlets\\Count\\\\'='Singlets',
-  'LIVE/Singlets/Lym\\Count\\\\'='Lymphocytes',
-  'LIVE/Singlets/Lym/T\\Count\\\\'='T cells',
-  'LIVE/Singlets/Lym/T/CD4\\Count\\\\'='CD4 T cells',
-  'LIVE/Singlets/Lym/T/CD4/CD4+Mem\\Count\\\\'='CD4 T mem',
-  'LIVE/Singlets/Lym/T/CD4/CD4+Naive\\Count\\\\'='CD4 T naive',
-  'LIVE/Singlets/Lym/T/CD4/Tfh\\Count\\\\'='CD4 Tfh',
-  'LIVE/Singlets/Lym/T/CD8\\Count\\\\'='CD8 T cells',
-  'LIVE/Singlets/Lym/T/CD8/CD8+Mem\\Count\\\\'='CD8 T mem',
-  'LIVE/Singlets/Lym/T/CD8/CD8+Naive\\Count\\\\'='CD8 T naive'
-)
-
-facs_T_labeled <- facs_T %>% dplyr::select(c("dataset", names(column_mapping))) %>% plyr::rename(column_mapping)
-
-facs_T_labeled_prop <- facs_T_labeled %>% 
-  dplyr::mutate(
-    `T cells` = `T cells`/Lymphocytes,
-    `CD4 T cells` = `CD4 T cells`/Lymphocytes,
-    `CD4 T mem` = `CD4 T mem`/Lymphocytes,
-    `CD4 T naive` = `CD4 T naive`/Lymphocytes,
-    `CD4 Tfh` = `CD4 Tfh`/Lymphocytes,
-    `CD8 T cells` = `CD8 T cells`/Lymphocytes,
-    `CD8 T mem` = `CD8 T mem`/Lymphocytes,
-    `CD8 T naive` = `CD8 T naive`/Lymphocytes
-  )
+plot(residuals(mod))
 ```
 
+Normality testing is unnecessary as we do not assume it (and it is generally useless to begin with). 
+
+## Model summary
+
 ```{r, echo = FALSE}
-scrna_facs_T <- facs_T_labeled_prop %>% plyr::join(scrna_prop)
-metadata <- subset(colData(sce_follicular), select = c("dataset", "timepoint", "transformed_progressed", "patient")) %>% unique %>% as.data.frame
-scrna_facs_T <- scrna_facs_T %>% plyr::join(metadata)
+summary(mod)
 ```
 
-## T cell proportion
+Coefficients are going the right way. Not exactly surprising that most of the coefficients are nonsignificant -- after all, we don't have many data points at all. 
+
+An observation we may want to note is how the percentage of cycling malignant B cells vs. other celltypes changes from T1 to T2.
+
+## T1
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable((with(colData(sce_normalized_labeled_full %>% scater::filter(timepoint == "T1")), table(celltype_full, Cell_Cycle))/rowSums(with(colData(sce_normalized_labeled_full %>% scater::filter(timepoint == "T1")), table(celltype_full, Cell_Cycle))) * 100) %>% round(2))
+```
+
+## T2
+
+```{r, echo = FALSE, results = 'asis'}
+t2_prop_table <- (with(colData(sce_normalized_labeled_full %>% scater::filter(timepoint == "T2")), table(celltype_full, Cell_Cycle))/rowSums(with(colData(sce_normalized_labeled_full %>% scater::filter(timepoint == "T2")), table(celltype_full, Cell_Cycle))) * 100) %>% round(2)
+
+knitr::kable(t2_prop_table)
+```
+
+So, the only celltype for which we have a decent number of cells (see next slide) and have a substantial increase in cycling cells is in the B cell population. So indeed, the B cell population is becoming more actively cycling in T2 while the other populations aren't. 
+
+## T2 cell counts
+
+```{r, echo = FALSE, results = 'asis'}
+t2_cell_count_table <- with(sce_normalized_labeled_full %>% scater::filter(timepoint == "T2") %>% colData, table(celltype_full) %>%
+                              as.data.frame %>%
+                              dplyr::rename(count=Freq))
+
+knitr::kable(t2_cell_count_table)
+```
+
+## Plot by celltype
 
 ```{r, echo = FALSE}
-ggplot(scrna_facs_T, aes(x=`T cells`, y = `Cytotoxic T cells (scrna)` + `Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`)) + 
-  geom_point(aes(colour=patient)) + 
+min_cell_count <- 15
+
+celltype_compares <- (t2_cell_count_table %>%
+  dplyr::filter(count > min_cell_count))$celltype_full %>%
+  as.character
+
+ggplot(cycling_summary %>% dplyr::filter(celltype_full %in% celltype_compares),
+       aes(x=timepoint, y=cycling_prop, colour=celltype_full)) +
+  geom_point() +
+  geom_line(aes(group=celltype_full)) + 
   theme_bw() + 
   theme_Publication() + 
-  geom_abline(slope = 1) + 
-  xlab("T cell proportion (FACS)") + 
-  ylab("T cell proportion (scrna)")
+  xlab("Timepoint") + 
+  ylab("Proportion of cycling cells")
 ```
 
-## CD4 T cell (out of T cell) proportion
 
-```{r, echo = FALSE}
-ggplot(scrna_facs_T, aes(x=`CD4 T cells`/`T cells`, y = (`Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`)/(`Cytotoxic T cells (scrna)` + `Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`))) + 
-  geom_point(aes(colour=patient)) + 
-  theme_bw() + 
-  theme_Publication() + 
-  geom_abline(slope = 1) + 
-  xlab("CD4 T/T cell proportion (FACS)") + 
-  ylab("CD4 T/T cell proportion (scrna)")
-```
+<!-- # FACS validation -->
 
-## Tfh out of CD4 T cell proportion
+<!-- Should be run with minimally-filtered dataset (i.e. filtered at 10% mito or higher), as opposed to a 5% filter that could be used for analysis.  -->
 
-```{r, echo = FALSE}
-ggplot(scrna_facs_T, aes(x=`CD4 Tfh`/`CD4 T cells`, y = `Tfh (scrna)`/(`Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`))) + 
-  geom_point(aes(colour=patient)) + 
-  theme_bw() + 
-  theme_Publication() + 
-  geom_abline(slope = 1) + 
-  xlab("Tfh/CD4 T cell proportion (FACS)") + 
-  ylab("Tfh/CD4 T cell proportion (scrna)")
-```
+<!-- ## Data {#bigxtable2} -->
 
-Generally fairly consistent. Note that quantifying memory T cells is a problem since we don't have a good marker to distinguish naive from CM. 
+<!-- ```{r, echo = FALSE} -->
+<!-- facs_table_T <- "/datadrive/data/follicular/FACS/FL_paired T pops.csv" -->
+
+<!-- facs_T <- fread(facs_table_T, sep = ",", skip = 1) -->
+<!-- colnames(facs_T)[1] <- "dataset" -->
+
+<!-- facs_T <- subset(facs_T, dataset %in% unique(sce_normalized_labeled_full$dataset)) -->
+
+<!-- column_mapping <- c( -->
+<!--   'LIVE/Singlets\\Count\\\\'='Singlets', -->
+<!--   'LIVE/Singlets/Lym\\Count\\\\'='Lymphocytes', -->
+<!--   'LIVE/Singlets/Lym/T\\Count\\\\'='T cells', -->
+<!--   'LIVE/Singlets/Lym/T/CD4\\Count\\\\'='CD4 T cells', -->
+<!--   'LIVE/Singlets/Lym/T/CD4/CD4+Mem\\Count\\\\'='CD4 T mem', -->
+<!--   'LIVE/Singlets/Lym/T/CD4/CD4+Naive\\Count\\\\'='CD4 T naive', -->
+<!--   'LIVE/Singlets/Lym/T/CD4/Tfh\\Count\\\\'='CD4 Tfh', -->
+<!--   'LIVE/Singlets/Lym/T/CD8\\Count\\\\'='CD8 T cells', -->
+<!--   'LIVE/Singlets/Lym/T/CD8/CD8+Mem\\Count\\\\'='CD8 T mem', -->
+<!--   'LIVE/Singlets/Lym/T/CD8/CD8+Naive\\Count\\\\'='CD8 T naive' -->
+<!-- ) -->
+
+<!-- facs_T_labeled <- facs_T %>% dplyr::select(c("dataset", names(column_mapping))) %>% plyr::rename(column_mapping) -->
+
+<!-- facs_T_labeled_prop <- facs_T_labeled %>%  -->
+<!--   dplyr::mutate( -->
+<!--     `T cells` = `T cells`/Lymphocytes, -->
+<!--     `CD4 T cells` = `CD4 T cells`/Lymphocytes, -->
+<!--     `CD4 T mem` = `CD4 T mem`/Lymphocytes, -->
+<!--     `CD4 T naive` = `CD4 T naive`/Lymphocytes, -->
+<!--     `CD4 Tfh` = `CD4 Tfh`/Lymphocytes, -->
+<!--     `CD8 T cells` = `CD8 T cells`/Lymphocytes, -->
+<!--     `CD8 T mem` = `CD8 T mem`/Lymphocytes, -->
+<!--     `CD8 T naive` = `CD8 T naive`/Lymphocytes -->
+<!--   ) -->
+<!-- ``` -->
+
+<!-- ```{r, echo = FALSE} -->
+<!-- scrna_facs_T <- facs_T_labeled_prop %>% plyr::join(scrna_prop) -->
+<!-- metadata <- subset(colData(sce_normalized_labeled_full), select = c("dataset", "timepoint", "transformed_progressed", "patient")) %>% unique %>% as.data.frame -->
+<!-- scrna_facs_T <- scrna_facs_T %>% plyr::join(metadata) -->
+<!-- ``` -->
+
+<!-- ## T cell proportion -->
+
+<!-- ```{r, echo = FALSE} -->
+<!-- ggplot(scrna_facs_T, aes(x=`T cells`, y = `Cytotoxic T cells (scrna)` + `Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`)) +  -->
+<!--   geom_point(aes(colour=patient)) +  -->
+<!--   theme_bw() +  -->
+<!--   theme_Publication() +  -->
+<!--   geom_abline(slope = 1) +  -->
+<!--   xlab("T cell proportion (FACS)") +  -->
+<!--   ylab("T cell proportion (scrna)") -->
+<!-- ``` -->
+
+<!-- ## CD4 T cell (out of T cell) proportion -->
+
+<!-- ```{r, echo = FALSE} -->
+<!-- ggplot(scrna_facs_T, aes(x=`CD4 T cells`/`T cells`, y = (`Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`)/(`Cytotoxic T cells (scrna)` + `Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`))) +  -->
+<!--   geom_point(aes(colour=patient)) +  -->
+<!--   theme_bw() +  -->
+<!--   theme_Publication() +  -->
+<!--   geom_abline(slope = 1) +  -->
+<!--   xlab("CD4 T/T cell proportion (FACS)") +  -->
+<!--   ylab("CD4 T/T cell proportion (scrna)") -->
+<!-- ``` -->
+
+<!-- ## Tfh out of CD4 T cell proportion -->
+
+<!-- ```{r, echo = FALSE} -->
+<!-- ggplot(scrna_facs_T, aes(x=`CD4 Tfh`/`CD4 T cells`, y = `Tfh (scrna)`/(`Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`))) +  -->
+<!--   geom_point(aes(colour=patient)) +  -->
+<!--   theme_bw() +  -->
+<!--   theme_Publication() +  -->
+<!--   geom_abline(slope = 1) +  -->
+<!--   xlab("Tfh/CD4 T cell proportion (FACS)") +  -->
+<!--   ylab("Tfh/CD4 T cell proportion (scrna)") -->
+<!-- ``` -->
+
+<!-- Generally fairly consistent. Note that quantifying memory T cells is a problem since we don't have a good marker to distinguish naive from CM.  -->
 
 
 
