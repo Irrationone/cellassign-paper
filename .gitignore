@@ -2,6 +2,7 @@
 .snakemake/
 .Rproj
 data/
+results/scratch/
 sessions/
 **/Rmd/*.nb.html
 results/
