@@ -1,5 +1,7 @@
 configfile: "config/v1.yaml"
 
+singularity: "docker://alzhang/scrna-analysis-sim-3.5:v1.9"
+
 rule all:
     input:
         follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(outdir=config['workdir']),
