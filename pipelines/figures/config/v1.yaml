@@ -1,0 +1,39 @@
+# Directories
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/v1'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/v1'
+
+# Random seeds
+cluster_random_seed: 19279
+
+# Paths to filtered gene expression matrices
+follicular_filtered_matrices:
+  FL1018T1: '/datadrive/data/follicular/FL1018T1/filtered_gene_bc_matrices/GRCh38'
+  FL1018T2: '/datadrive/data/follicular/FL1018T2/filtered_gene_bc_matrices/GRCh38'
+
+# Unsupervised clustering settings
+cluster_settings:
+  follicular_t:
+    methods: 
+      - 'seurat_0.8'
+      - 'phenograph'
+    use_method: 'seurat'
+  follicular_b:
+    methods: 
+      - 'seurat_0.8'
+      - 'phenograph'
+    use_method: 'phenograph'
+  follicular_malignant:
+    methods:
+      - 'seurat_0.8'
+      - 'phenograph'
+    use_method: 'phenograph'
+
+# Filtering thresholds
+mito_thres: 10
+ribo_thres: 60
+
+# Marker gene matrices for CellAssign
+follicular_rho_small: '/datadrive/projects/cellassign-paper/resources/marker_gene_matrices/follicular_small.txt'
+follicular_rho_big: '/datadrive/projects/cellassign-paper/resources/marker_gene_matrices/follicular_big.txt'
+
+# Colour palettes

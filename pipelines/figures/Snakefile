@@ -1,0 +1,130 @@
+configfile: "config/v1.yaml"
+
+rule all:
+    input:
+        follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(outdir=config['workdir']),
+
+
+# Create SingleCellExperiment
+rule create_follicular_sce:
+    input:
+        filtered_matrices=lambda wildcards: config['follicular_filtered_matrices'][wildcards.sample],
+    output:
+        '{workdir}/sce_follicular.rds'.format(workdir=config['workdir'])
+    params:
+        name='create-follicular-sce',
+    shell:
+        ''
+
+
+# Filter and normalize SingleCellExperiment
+rule preprocess_follicular_sce:
+    input:
+        follicular_raw='{workdir}/sce_follicular.rds'.format(workdir=config['workdir']),
+    output:
+        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+    params:
+        name='preprocess-follicular-sce',
+        mito_thres=config['mito_thres'],
+        ribo_thres=config['ribo_thres'],
+    shell:
+        ''
+
+# Cell cycle assignments (TODO: Run this in multi-core mode)
+rule cyclone_follicular_sce:
+    input:
+        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+    output:
+        cc_top='{outdir}/cyclone/cc_top_assignments.txt'.format(outdir=config['outdir']),
+        cc_scores='{outdir}/cyclone/cc_scores.tsv'.format(outdir=config['outdir']),
+    params:
+        name='cyclone-follicular-sce',
+    shell:
+        ''
+
+# Assign cells to B or T classes
+rule cellassign_follicular_small:
+    input:
+        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+    output:
+        broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
+    params:
+        name='cellassign-follicular-small',
+    shell:
+        ''
+
+# Assign cells to specific subtypes, including cytotoxic T
+rule cellassign_follicular_big:
+    input:
+        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+    output:
+        specific_assignments='{outdir}/specific_assignments.rds'.format(outdir=config['outdir']),
+    params:
+        name='cellassign-follicular-big',
+    shell:
+        ''
+
+# Unsupervised clustering of T cells
+rule follicular_unsupervised_t:
+    input:
+        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+    output:
+        unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.rds'.format(outdir=config['outdir']),
+    params:
+        name='follicular-unsupervised-t',
+        random_seed=config['cluster_random_seed'],
+        cluster_methods=config['cluster_settings']['follicular_t']['methods'],
+        cluster_use_method=config['cluster_settings']['follicular_t']['use_method'],
+    shell:
+        ''
+
+# Unsupervised clustering of malignant B cells
+rule follicular_unsupervised_malignant:
+    input:
+        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+    output:
+        unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.rds'.format(outdir=config['outdir']),
+    params:
+        name='follicular-unsupervised-malignant',
+        random_seed=config['cluster_random_seed'],
+        cluster_methods=config['cluster_settings']['follicular_malignant']['methods'],
+        cluster_use_method=config['cluster_settings']['follicular_malignant']['use_method'],
+    shell:
+        ''
+
+# Unsupervised clustering of nonmalignant B cells
+rule follicular_unsupervised_b:
+    input:
+        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+    output:
+        unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.rds'.format(outdir=config['outdir']),
+    params:
+        name='follicular-unsupervised-b',
+        random_seed=config['cluster_random_seed'],
+        cluster_methods=config['cluster_settings']['follicular_b']['methods'],
+        cluster_use_method=config['cluster_settings']['follicular_b']['use_method'],
+    shell:
+        ''
+
+# Annotate follicular SCE with assignments
+rule annotate_follicular:
+    input:
+        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+        broad_assignments='{outdir}/broad_assignments.rds'.format(workdir=config['outdir']),
+        specific_assignments='{outdir}/specific_assignments.rds'.format(workdir=config['outdir']),
+        unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.rds'.format(outdir=config['outdir']),
+        unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.rds'.format(outdir=config['outdir']),
+        unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.rds'.format(outdir=config['outdir']),
+    output:
+        follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(outdir=config['workdir']),
+    params:
+        name='annotate-follicular',
+    shell:
+        ''
+
+## FIGURE A
+
+rule follicular_celltype_assignments:
+
+## FIGURE B
+
