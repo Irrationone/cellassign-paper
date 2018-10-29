@@ -452,6 +452,131 @@ colData(sce_b_cells) <- colData(sce_b_cells) %>%
 plotUMAP(sce_b_cells, colour_by = "malignant_status_manual")
 ```
 
+# B cell subclusters (malignant)
+
+## Introduction
+
+We can look for subclusters of B cells, e.g. memory vs. naive, within the malignant population. 
+
+```{r, echo = FALSE, eval = FALSE}
+sce_b_cells_malignant <- sce_b_cells %>%
+  scater::filter(malignant_status_manual == "malignant")
+```
+
+```{r, echo = FALSE}
+plotUMAP(sce_b_cells_malignant, colour_by = "dataset")
+```
+
+## Malignant B cell unsupervised clustering (phenograph, UMAP)
+
+```{r, echo = FALSE, eval = FALSE}
+set.seed(101)
+sce_b_cells_malignant <- cluster_wrapper(sce_b_cells_malignant, gene_subset = NULL, dimreduce_method = "PCA", clustering_method = "seurat", seurat_resolution = 0.8)
+```
+
+```{r, echo = FALSE}
+plotUMAP(sce_b_cells_malignant, ncomponents = 2, colour_by = "cluster")
+```
+
+## IgG-expressing cells
+
+```{r, echo = FALSE}
+plotUMAP(sce_b_cells_malignant, ncomponents = 2, colour_by = get_ensembl_id("IGHG1", rowData(sce_b_cells_malignant)))
+```
+
+Similar results for other IgG chains. No IgM, IgD, or IgA expression. 
+
+## IgE-expressing cells
+
+```{r, echo = FALSE}
+plotUMAP(sce_b_cells_malignant, ncomponents = 2, colour_by = get_ensembl_id("IGHE", rowData(sce_b_cells_malignant)))
+```
+
+For whatever reason, T1 cells express IgE. 
+
+```{r, echo = FALSE, eval = FALSE}
+merged_markers_b_malignant <- get_merged_markers(sce_b_cells_malignant, clusters_col = "cluster", comparisons = "average")
+```
+
+## Cluster 0: Non-IgE cluster
+
+```{r, echo = FALSE}
+plot_markers(merged_markers_b_malignant %>% dplyr::filter(cluster == "0"), top_n = 20, log_q_val_threshold = NULL, nrow = 1, subtitle = "Cluster vs. average", top_direction = "equal", highlight_genes = c("NEAT1", "DUSP1", "IGHG1", "IGHM", "IGHE", "CXCR4"))
+```
+
+## Cluster 1: Non-IgE cluster
+
+```{r, echo = FALSE}
+plot_markers(merged_markers_b_malignant %>% dplyr::filter(cluster == "1"), top_n = 20, log_q_val_threshold = NULL, nrow = 1, subtitle = "Cluster vs. average", top_direction = "equal", highlight_genes = c("NEAT1", "DUSP1", "IGHG1", "IGHM", "IGHE", "CXCR4"))
+```
+
+## Cluster 2: IgE cluster
+
+```{r, echo = FALSE}
+plot_markers(merged_markers_b_malignant %>% dplyr::filter(cluster == "2"), top_n = 20, log_q_val_threshold = NULL, nrow = 1, subtitle = "Cluster vs. average", top_direction = "equal", highlight_genes = c("NEAT1", "DUSP1", "IGHG1", "IGHM", "IGHE", "CXCR4", "FCER2"))
+```
+
+## Cluster 3: Non-IgE cluster
+
+```{r, echo = FALSE}
+plot_markers(merged_markers_b_malignant %>% dplyr::filter(cluster == "3"), top_n = 20, log_q_val_threshold = NULL, nrow = 1, subtitle = "Cluster vs. average", top_direction = "equal", highlight_genes = c("NEAT1", "DUSP1", "IGHG1", "IGHM", "IGHE", "CXCR4", "FCER2"))
+```
+
+## Cluster 4: Proliferating cluster
+
+```{r, echo = FALSE}
+plot_markers(merged_markers_b_malignant %>% dplyr::filter(cluster == "4"), top_n = 20, log_q_val_threshold = NULL, nrow = 1, subtitle = "Cluster vs. average", top_direction = "equal", highlight_genes = c("NEAT1", "DUSP1", "IGHG1", "IGHM", "IGHE", "CXCR4", "MKI67", "TOP2A"))
+```
+
+NOTE: This is predominantly present in T2 as opposed to T1. These cells correspond to the S phase cells observed in T2. 
+
+## Cluster 5: DUSP1-expressing cluster
+
+```{r, echo = FALSE}
+plot_markers(merged_markers_b_malignant %>% dplyr::filter(cluster == "5"), top_n = 20, log_q_val_threshold = NULL, nrow = 1, subtitle = "Cluster vs. average", top_direction = "equal", highlight_genes = c("NEAT1", "DUSP1", "IGHG1", "IGHM", "IGHE", "CXCR4", "MKI67", "TOP2A"))
+```
+
+What's going on in this cluster?
+
+## Cluster 6: Low ribo cluster
+
+```{r, echo = FALSE}
+plot_markers(merged_markers_b_malignant %>% dplyr::filter(cluster == "6"), top_n = 20, log_q_val_threshold = NULL, nrow = 1, subtitle = "Cluster vs. average", top_direction = "equal", highlight_genes = c("NEAT1", "DUSP1", "IGHG1", "IGHM", "IGHE", "CXCR4", "MKI67", "TOP2A", "XIST", "CD22", "MALAT1"))
+```
+
+# B cell subclusters (nonmalignant)
+
+## Introduction
+
+We can look for subclusters of B cells, e.g. memory vs. naive, within the nonmalignant population. 
+
+```{r, echo = FALSE, eval = FALSE}
+sce_b_cells_nonmalignant <- sce_b_cells %>%
+  scater::filter(malignant_status_manual == "nonmalignant",
+                 cellassign_cluster == "B cells")
+
+sce_b_cells_nonmalignant <- runPCA(sce_b_cells_nonmalignant, ntop = 500, ncomponents = 50)
+sce_b_cells_nonmalignant <- runTSNE(sce_b_cells_nonmalignant, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+sce_b_cells_nonmalignant <- runUMAP(sce_b_cells_nonmalignant, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+```
+
+```{r, echo = FALSE}
+plotUMAP(sce_b_cells_nonmalignant, colour_by = "dataset")
+```
+
+## Nonmalignant B cell unsupervised clustering (phenograph, UMAP)
+
+```{r, echo = FALSE, eval = FALSE}
+set.seed(101)
+sce_b_cells_nonmalignant <- cluster_wrapper(sce_b_cells_nonmalignant, gene_subset = NULL, dimreduce_method = "PCA", clustering_method = "phenograph")
+```
+
+```{r, echo = FALSE}
+plotUMAP(sce_b_cells_nonmalignant, ncomponents = 2, colour_by = "cluster")
+```
+
+We don't really have enough cells here to do anything meaningful. 
+
 # Celltype proportion changes between timepoints
 
 ## Introduction
@@ -659,7 +784,7 @@ plot_markers(pathway_timepoint_cytotoxic$pathways %>% plyr::rename(c('pathway'='
 ## CD8 T cells (genes)
 
 ```{r, echo = FALSE}
-plot_markers(pathway_timepoint_cytotoxic$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "IFNG", "CD69", "LAG3", "HAVCR2"))
+plot_markers(pathway_timepoint_cytotoxic$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "IFNG", "CD69", "LAG3", "HAVCR2", "PDCD1"))
 ```
 
 Upregulation of CD8 T effector activity in T2? 
@@ -693,7 +818,7 @@ plot_markers(pathway_timepoint_malignant$pathways %>% plyr::rename(c('pathway'='
 ## Malignant B cells (genes)
 
 ```{r, echo = FALSE}
-plot_markers(pathway_timepoint_malignant$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "IFNG", "CD69", "LAG3", "HAVCR2"))
+plot_markers(pathway_timepoint_malignant$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74", "IFNG", "CD69", "LAG3", "HAVCR2", "CD274"))
 ```
 
 Downregulation in antigen presentation -- perhaps due to corresponding upregulation of T effector response in T2? 
