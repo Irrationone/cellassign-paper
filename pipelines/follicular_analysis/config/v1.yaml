@@ -1,14 +1,32 @@
 # Directories
 workdir: '/datadrive/projects/cellassign-paper/results/scratch/v1'
 outdir: '/datadrive/projects/cellassign-paper/results/outputs/v1'
+logidr: '/datadrive/projects/cellassign-paper/results/logs/v1'
 
 # Random seeds
 cluster_random_seed: 19279
 
+# Sample names (in same order as filtered matrices)
+follicular_sample_names:
+  - FL1018T1
+  - FL1018T2
+
 # Paths to filtered gene expression matrices
-follicular_filtered_matrices:
-  FL1018T1: '/datadrive/data/follicular/FL1018T1/filtered_gene_bc_matrices/GRCh38'
-  FL1018T2: '/datadrive/data/follicular/FL1018T2/filtered_gene_bc_matrices/GRCh38'
+follicular_data:
+  FL1018T1:
+    dataset: FL1018T1
+    patient: FL1018
+    timepoint: T1
+    progression_status: primary
+    patient_progression_status: transformed
+    filtered_matrix_path: '/datadrive/data/follicular/FL1018T1/filtered_gene_bc_matrices/GRCh38'
+  FL1018T2:
+    dataset: FL1018T2
+    patient: FL1018
+    timepoint: T2
+    progression_status: transformed
+    patient_progression_status: transformed
+    filtered_matrix_path: '/datadrive/data/follicular/FL1018T2/filtered_gene_bc_matrices/GRCh38'
 
 # Unsupervised clustering settings
 cluster_settings:
