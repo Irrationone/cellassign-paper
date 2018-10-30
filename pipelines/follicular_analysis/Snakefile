@@ -161,15 +161,23 @@ rule annotate_cellassign:
         '>& {log}'
 
 # Call individual B cells as malignant/nonmalignant
+# NEEDS TO BE EXAMINED EVERY TIME ITS INPUTS CHANGE
 rule determine_malignant_status:
     input:
         follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
     output:
-        malignant_status='{outdir}/malignant_status.txt'.format(outdir=config['outdir']),
+        malignant_status='{outdir}/malignant_status.tsv'.format(outdir=config['outdir']),
     params:
         name='determine-malignant-status',
+    log:
+        '{logdir}/logs/determine_malignant_status.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/determine_malignant_status.txt'.format(logdir=config['logdir'])
     shell:
-        ''
+        'Rscript R/determine_malignant_status.R '
+        '--sce {input.follicular_cellassign_normalized} '
+        '--outfname {output.malignant_status} '
+        '>& {log}'
     
 # Unsupervised clustering of T cells
 rule follicular_unsupervised_t:
