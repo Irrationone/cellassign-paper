@@ -29,7 +29,7 @@ sce_path <- args$sce
 sce <- readRDS(sce_path)
 
 sce_filtered <- filter_cells(sce, nmads = args$nmads, type = "lower", 
-                             log = TRUE, max_mito = mito_thres, max_ribo = ribo_thres)
+                             log = TRUE, max_mito = args$mito_thres, max_ribo = args$ribo_thres)
 
 qclust <- quickCluster(sce_filtered, min.size = 30)
 sce_filtered <- computeSumFactors(sce_filtered, clusters = qclust)
