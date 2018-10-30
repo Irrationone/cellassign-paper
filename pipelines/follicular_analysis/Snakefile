@@ -177,7 +177,7 @@ rule determine_malignant_status:
     shell:
         'Rscript R/determine_malignant_status.R '
         '--sce {input.follicular_cellassign_annotated} '
-        '--outfname {output.malignant_status} '
+        '--outfname {output.follicular_malignant_annotated} '
         '>& {log}'
 
 # Unsupervised clustering of T cells
