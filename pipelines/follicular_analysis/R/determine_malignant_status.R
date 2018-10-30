@@ -46,14 +46,20 @@ B_mapping <- colData(b_cells) %>%
   dplyr::mutate(malignant_status_manual=ifelse(cluster %in% nonmalignant_clusters, "nonmalignant", "malignant")) %>%
   dplyr::select(-c(cluster))
 
+colData(sce) <- colData(sce) %>%
+  data.frame(check.names = FALSE) %>%
+  dplyr::left_join(B_mapping) %>%
+  DataFrame
+
+sce$malignant_status_manual[is.na(sce$malignant_status_manual)] <- "nonmalignant"
+
+sce <- sce %>%
+  scater::mutate(
+    celltype_full=ifelse(malignant_status_manual == "malignant", "B cells (malignant)", as.character(celltype))
+  )
 
 # Save malignant status
-write.table(B_mapping, 
-            file = args$outfname, 
-            sep = "\t",
-            quote = FALSE,
-            row.names = FALSE,
-            col.names = TRUE)
+saveRDS(sce, args$outfname)
 
 cat("Completed.\n")
 
