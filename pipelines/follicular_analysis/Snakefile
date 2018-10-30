@@ -5,7 +5,7 @@ singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.0"
 rule all:
     input:
         '{workdir}/sce_follicular.rds'.format(workdir=config['workdir']),
-        #follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(outdir=config['workdir']),
+        #follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(workdir=config['workdir']),
 
 
 # Create SingleCellExperiment
@@ -67,11 +67,15 @@ rule cyclone_follicular_sce:
         cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
     params:
         name='cyclone-follicular-sce',
-        ncpus=config['cyclone_settings']['ncpus'],
+    log:
+        '{logdir}/logs/cyclone_follicular_sce.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/cyclone_follicular_sce.txt'.format(logdir=config['logdir'])
+    threads: config['cyclone_settings']['ncpus']
     shell:
         'Rscript R/cyclone_sce.R '
         '--sce {input.follicular_normalized} '
-        '--ncpus {params.ncpus} '
+        '--ncpus {threads} '
         '--outfname {output} '
         '>& {log}'
 
@@ -79,29 +83,85 @@ rule cyclone_follicular_sce:
 rule cellassign_follicular_small:
     input:
         follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
-        marker_list_small=config['rho_matrices']['small'],
+        marker_list_small=config['rho_matrices']['small']['path'],
     output:
         broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
     params:
         name='cellassign-follicular-small',
+        include_other=config['rho_matrices']['small']['include_other'],
+        num_runs=config['cellassign_settings']['num_runs'],
+        B=config['cellassign_settings']['B'],
+        extra_opts=config['cellassign_settings']['extra_opts'],
+    threads: config['cellassign_settings']['threads']
+    log:
+        '{logdir}/logs/cellassign_follicular_small.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/cellassign_follicular_small.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/cellassign_sce.R '
         '--sce {input.follicular_normalized} '
         '--marker_list {input.marker_list_small} '
-        '--include_other {}
+        '--include_other {params.include_other} '
+        '--num_runs {params.num_runs} '
+        '--rbf_pieces {params.B} '
+        '{params.extra_opts} '
+        '--outfname {output.broad_assignments} '
+        '>& {log}'
 
 # Assign cells to specific subtypes, including cytotoxic T
 rule cellassign_follicular_big:
     input:
         follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
-        marker_list_big=config['rho_matrices']['big'],
+        marker_list_big=config['rho_matrices']['big']['path'],
     output:
         specific_assignments='{outdir}/specific_assignments.rds'.format(outdir=config['outdir']),
     params:
         name='cellassign-follicular-big',
+        include_other=config['rho_matrices']['big']['include_other'],
+        num_runs=config['cellassign_settings']['num_runs'],
+        B=config['cellassign_settings']['B'],
+        extra_opts=config['cellassign_settings']['extra_opts'],
+    threads: config['cellassign_settings']['threads']
+    log:
+        '{logdir}/logs/cellassign_follicular_big.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/cellassign_follicular_big.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/cellassign_sce.R '
+        '--sce {input.follicular_normalized} '
+        '--marker_list {input.marker_list_small} '
+        '--include_other {params.include_other} '
+        '--num_runs {params.num_runs} '
+        '--rbf_pieces {params.B} '
+        '{params.extra_opts} '
+        '--outfname {output.broad_assignments} '
+        '>& {log}'
+
+
+# Annotate follicular SCE with assignments
+rule annotate_cellassign:
+    input:
+        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+        broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
+        specific_assignments='{outdir}/specific_assignments.rds'.format(outdir=config['outdir']),
+    output:
+        follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
+    params:
+        name='annotate-cellassign',
     shell:
         ''
 
+# Call individual B cells as malignant/nonmalignant
+rule determine_malignant_status:
+    input:
+        follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(outdir=config['workdir']),
+    output:
+        malignant_status='{outdir}/malignant_status.txt'.format(outdir=config['outdir']),
+    params:
+        name='determine-malignant-status',
+    shell:
+        ''
+    
 # Unsupervised clustering of T cells
 rule follicular_unsupervised_t:
     input:
@@ -145,19 +205,17 @@ rule follicular_unsupervised_b:
         ''
 
 # Annotate follicular SCE with assignments
-rule annotate_follicular:
+rule annotate_follicular_final:
     input:
-        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
-        broad_assignments='{outdir}/broad_assignments.rds'.format(workdir=config['outdir']),
-        specific_assignments='{outdir}/specific_assignments.rds'.format(workdir=config['outdir']),
+        follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
         unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.rds'.format(outdir=config['outdir']),
         unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.rds'.format(outdir=config['outdir']),
         unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.rds'.format(outdir=config['outdir']),
         cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
     output:
-        follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(outdir=config['workdir']),
+        follicular_annotated='{workdir}/sce_follicular_annotated_final.rds'.format(workdir=config['workdir']),
     params:
-        name='annotate-follicular',
+        name='annotate-follicular-final',
     shell:
         ''
 

@@ -63,4 +63,11 @@ marker_lists:
     path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_big.txt'
     include_other: TRUE
 
+# CellAssign settings
+cellassign_settings:
+  num_runs: 1
+  B: 20
+  extra_opts: "--delta_prior --variance_prior"
+  threads: 18
+
 # Colour palettes
