@@ -19,8 +19,8 @@ parser$add_argument('--mito_thres', type='double',
                     help="Mitochondrial threshold")
 parser$add_argument('--ribo_thres', type='double',
                     help="Ribosomal threshold")
-parser$add_argument('--nmads', type='double',
-                    help="Number of MADs to filter at.")
+parser$add_argument('--nmads', type='integer',
+                    help="Number of MADs to filter at.", default = 3)
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for preprocessed SCE.")
 args <- parser$parse_args()
