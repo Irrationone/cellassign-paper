@@ -33,7 +33,6 @@ names(filtered_matrix_dirs) <- unlist(args$sample_names)
 
 sce <- DropletUtils::read10xCounts(unname(filtered_matrix_dirs))
 sce <- sce %>% scater::mutate(
-  dataset = str_extract(Sample, "FL[0-9]+[A-Z0-9_]+"),
   sample_barcode = paste(dataset, Barcode, sep = "_")
 )
 
