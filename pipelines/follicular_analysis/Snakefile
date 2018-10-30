@@ -4,7 +4,7 @@ singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.1"
 
 rule all:
     input:
-        cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
+        follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
         #follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(workdir=config['workdir']),
 
 
