@@ -54,10 +54,10 @@ filter_settings:
 # Marker list matrices for CellAssign
 marker_lists:
   small: 
-    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_small.txt'
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_small.yaml'
     include_other: TRUE
   big: 
-    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_big.txt'
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_big.yaml'
     include_other: TRUE
 
 # CellAssign settings
