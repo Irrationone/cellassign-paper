@@ -3,6 +3,7 @@
 .Rproj
 data/
 results/scratch/
+results/logs/
 sessions/
 **/Rmd/*.nb.html
 results/
