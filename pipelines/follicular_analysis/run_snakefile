@@ -1,0 +1,1 @@
+snakemake -p --use-singularity --singularity-args "-B /datadrive:/datadrive"
