@@ -17,8 +17,8 @@ library(argparse)
 parser <- ArgumentParser(description = "Unsupervised clustering on an SCE")
 parser$add_argument('--sce', metavar='FILE', type='character',
                     help="Path to SingleCellExperiment RDS")
-parser$add_argument('--celltype', type = 'character',
-                    help="Name of celltype to subset on", default = NULL)
+parser$add_argument('--celltypes', type = 'character', nargs = '+',
+                    help="Name of celltypes to subset on", default = NULL)
 parser$add_argument('--clustering_methods', type = 'character', nargs ='+',
                     help="Clustering method(s) to run")
 parser$add_argument('--clustering_method_use', type = 'character', nargs ='+',
@@ -40,9 +40,9 @@ Sys.setenv(PYTHONPATH='')
 reticulate::use_condaenv(args$conda_env, conda = "/home/rstudio/miniconda/bin/conda")
 
 # Subset on celltype
-if (!is.null(args$celltype)) {
+if (!is.null(args$celltypes)) {
   sce <- sce %>%
-    scater::filter(celltype_full == args$celltype)
+    scater::filter(celltype_full %in% args$celltypes)
 }
 
 for (method in unlist(args$clustering_methods)) {
