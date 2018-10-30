@@ -60,7 +60,11 @@ if (is.null(args$marker_gene_matrix)) {
 rho <- as.matrix(rho)
 s <- sizeFactors(sce)
 
-cellassign_res <- cellassign_em(exprs_obj = sce, 
+sce_markers <- sce[get_ensembl_id(rownames(rho), sce),]
+rownames(sce_markers) <- rownames(rho)
+counts(sce_markers) <- as.matrix(counts(sce_markers))
+
+cellassign_res <- cellassign_em(exprs_obj = sce_markers, 
                                 s = s, 
                                 rho = rho, 
                                 X = NULL, # no batch effect design matrix
