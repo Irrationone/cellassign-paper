@@ -37,24 +37,24 @@ cluster_settings:
     use_method: 'seurat'
     celltypes:
       - CD4\ \(activated\)
-      - 'Cytotoxic T cells (activated)'
-      - 'Tfh'
-      - 'Naive/resting CD4'
-      - 'Cytotoxic T cells'
+      - Cytotoxic\ T\ cells\ \(activated\)
+      - Tfh
+      - Naive/resting\ CD4
+      - Cytotoxic\ T\ cells
   follicular_b:
     methods: 
       - 'seurat_0.8'
       - 'phenograph'
     use_method: 'phenograph'
     celltypes:
-      - 'B cells'
+      - B\ cells
   follicular_malignant:
     methods:
       - 'seurat_0.8'
       - 'phenograph'
     use_method: 'phenograph'
     celltypes:
-      - 'B cells (malignant)'
+      - B\ cells\ \(malignant\)
 
 # Filtering thresholds
 filter_settings:
