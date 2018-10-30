@@ -154,7 +154,7 @@ rule annotate_cellassign:
 # Call individual B cells as malignant/nonmalignant
 rule determine_malignant_status:
     input:
-        follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(outdir=config['workdir']),
+        follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
     output:
         malignant_status='{outdir}/malignant_status.txt'.format(outdir=config['outdir']),
     params:
