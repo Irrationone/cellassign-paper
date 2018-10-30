@@ -14,6 +14,7 @@ library(scrna.utils)
 library(scrna.sceutils)
 library(cellassign)
 library(cellassign.utils)
+library(Seurat)
 library(argparse)
 
 parser <- ArgumentParser(description = "Determine malignant status of B cells in FL data")

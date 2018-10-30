@@ -12,6 +12,7 @@ library(yaml)
 library(scrna.utils)
 library(scrna.sceutils)
 library(cellassign.utils)
+library(Seurat)
 library(argparse)
 
 parser <- ArgumentParser(description = "Unsupervised clustering on an SCE")
