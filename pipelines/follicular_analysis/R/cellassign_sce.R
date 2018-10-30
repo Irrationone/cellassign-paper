@@ -34,12 +34,16 @@ parser$add_argument('--delta_prior', action = 'store_true',
                     help="Use delta shrinkage prior")
 parser$add_argument('--variance_prior', action = 'store_true',
                     help="Use delta variance prior")
+parser$add_argument('--conda_env', type = 'character',
+                    help="Name of conda environment with tensorflow", default = "r-tensorflow")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for cell cycle assignments.")
 args <- parser$parse_args()
 
 sce_path <- args$sce
 sce <- readRDS(sce_path)
+
+reticulate::use_condaenv(args$conda_env, conda = "/home/rstudio/miniconda/bin/conda")
 
 # Process marker gene matrix
 if (is.null(args$marker_gene_matrix)) {
