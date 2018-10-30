@@ -11,16 +11,16 @@ rule all:
 # Create SingleCellExperiment
 rule create_follicular_sce:
     input:
-        filtered_matrices=[x['filtered_matrix_path'] for x in config['follicular_data']],
+        filtered_matrices=[config['follicular_data'][x]['filtered_matrix_path'] for x in config['follicular_data']],
     output:
         '{workdir}/sce_follicular.rds'.format(workdir=config['workdir'])
     params:
         name='create-follicular-sce',
-        sample_names=[x['dataset'] for x in config['follicular_data']],
-        timepoints=[x['timepoint'] for x in config['follicular_data']],
-        progression_statuses=[x['progression_status'] for x in config['follicular_data']],
-        patient_progression_statuses=[x['patient_progression_status'] for x in config['follicular_data']],
-        patients=[x['patient'] for x in config['follicular_data']],
+        sample_names=[config['follicular_data'][x]['dataset'] for x in config['follicular_data']],
+        timepoints=[config['follicular_data'][x]['timepoint'] for x in config['follicular_data']],
+        progression_statuses=[config['follicular_data'][x]['progression_status'] for x in config['follicular_data']],
+        patient_progression_statuses=[config['follicular_data'][x]['patient_progression_status'] for x in config['follicular_data']],
+        patients=[config['follicular_data'][x]['patient'] for x in config['follicular_data']],
     log:
         '{logdir}/logs/create_follicular_sce.log'.format(logdir=config['logdir'])
     benchmark:
