@@ -51,9 +51,6 @@ filter_settings:
   mito_thres: 10
   ribo_thres: 60
 
-cyclone_settings:
-  ncpus: 15
-
 # Marker list matrices for CellAssign
 marker_lists:
   small: 

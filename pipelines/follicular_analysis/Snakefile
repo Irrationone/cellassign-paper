@@ -71,7 +71,7 @@ rule cyclone_follicular_sce:
         '{logdir}/logs/cyclone_follicular_sce.log'.format(logdir=config['logdir'])
     benchmark:
         '{logdir}/benchmarks/cyclone_follicular_sce.txt'.format(logdir=config['logdir'])
-    threads: config['cyclone_settings']['ncpus']
+    threads: 15
     shell:
         'Rscript R/cyclone_sce.R '
         '--sce {input.follicular_normalized} '
@@ -92,7 +92,7 @@ rule cellassign_follicular_small:
         num_runs=config['cellassign_settings']['num_runs'],
         B=config['cellassign_settings']['B'],
         extra_opts=config['cellassign_settings']['extra_opts'],
-    threads: config['cellassign_settings']['threads']
+    threads: 15
     log:
         '{logdir}/logs/cellassign_follicular_small.log'.format(logdir=config['logdir'])
     benchmark:
@@ -121,7 +121,7 @@ rule cellassign_follicular_big:
         num_runs=config['cellassign_settings']['num_runs'],
         B=config['cellassign_settings']['B'],
         extra_opts=config['cellassign_settings']['extra_opts'],
-    threads: config['cellassign_settings']['threads']
+    threads: 15
     log:
         '{logdir}/logs/cellassign_follicular_big.log'.format(logdir=config['logdir'])
     benchmark:
