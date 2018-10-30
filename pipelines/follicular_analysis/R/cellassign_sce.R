@@ -43,6 +43,9 @@ args <- parser$parse_args()
 sce_path <- args$sce
 sce <- readRDS(sce_path)
 
+# Attempt to snakemake's default
+Sys.setenv(PYTHONPATH='')
+
 reticulate::use_condaenv(args$conda_env, conda = "/home/rstudio/miniconda/bin/conda")
 
 # Process marker gene matrix

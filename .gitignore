@@ -23,6 +23,7 @@ intermediates/
 *.weights
 *.tree
 *.log
+.keras/
 
 ## Allow
 !sce_t4k_params.rds
