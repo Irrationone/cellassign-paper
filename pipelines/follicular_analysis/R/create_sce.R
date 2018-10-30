@@ -32,9 +32,6 @@ filtered_matrix_dirs <- unlist(args$filtered_matrices)
 names(filtered_matrix_dirs) <- unlist(args$sample_names)
 
 sce <- DropletUtils::read10xCounts(unname(filtered_matrix_dirs))
-sce <- sce %>% scater::mutate(
-  sample_barcode = paste(dataset, Barcode, sep = "_")
-)
 
 metadata_table <- data.frame(
   Sample=unname(filtered_matrix_dirs),
@@ -51,6 +48,10 @@ colData(sce) <- colData(sce) %>%
   as.data.frame %>%
   dplyr::left_join(metadata_table, by = 'Sample') %>%
   DataFrame()
+
+sce <- sce %>% scater::mutate(
+  sample_barcode = paste(dataset, Barcode, sep = "_")
+)
 
 # Get ensembl gene IDs of mitochondrial and ribosomal genes
 mito_genes <- as.character(rowData(sce)$Symbol[str_detect(rowData(sce)$Symbol, "^MT\\-")]) %>% 
