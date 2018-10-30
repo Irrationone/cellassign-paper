@@ -47,8 +47,12 @@ cluster_settings:
     use_method: 'phenograph'
 
 # Filtering thresholds
-mito_thres: 10
-ribo_thres: 60
+filter_settings:
+  mito_thres: 10
+  ribo_thres: 60
+
+cyclone_settings:
+  ncpus: 15
 
 # Marker gene matrices for CellAssign
 follicular_rho_small: '/datadrive/projects/cellassign-paper/resources/marker_gene_matrices/follicular_small.txt'

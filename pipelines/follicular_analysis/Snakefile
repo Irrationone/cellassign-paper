@@ -1,6 +1,6 @@
 configfile: "config/v1.yaml"
 
-singularity: "docker://alzhang/scrna-analysis-sim-3.5:v1.9"
+singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.0"
 
 rule all:
     input:
@@ -26,9 +26,15 @@ rule create_follicular_sce:
     benchmark:
         '{logdir}/benchmarks/create_follicular_sce.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/create_sce.R --sample_names {params.sample_names} --filtered_matrices {input.filtered_matrices} '
-        '--timepoints {params.timepoints} --progression {params.progression} --patient_progression {params.patient_progression}'
-        '--patients {params.patients} --outfname {output} &> {log}'
+        'Rscript R/create_sce.R '
+        '--sample_names {params.sample_names} '
+        '--filtered_matrices {input.filtered_matrices} '
+        '--timepoints {params.timepoints} '
+        '--progression {params.progression} '
+        '--patient_progression {params.patient_progression} '
+        '--patients {params.patients} '
+        '--outfname {output} '
+        '>& {log}'
 
 
 # Filter and normalize SingleCellExperiment
@@ -39,22 +45,35 @@ rule preprocess_follicular_sce:
         follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
     params:
         name='preprocess-follicular-sce',
-        mito_thres=config['mito_thres'],
-        ribo_thres=config['ribo_thres'],
+        mito_thres=config['filter_settings']['mito_thres'],
+        ribo_thres=config['filter_settings']['ribo_thres'],
+    log:
+        '{logdir}/logs/preprocess_follicular_sce.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/preprocess_follicular_sce.txt'.format(logdir=config['logdir'])
     shell:
-        ''
+        'Rscript R/preprocess_sce.R '
+        '--sce {input.follicular_raw} '
+        '--mito_thres {params.mito_thres} '
+        '--ribo_thres {params.ribo_thres} '
+        '--outfname {output} '
+        '>& {log}'
 
 # Cell cycle assignments (TODO: Run this in multi-core mode)
 rule cyclone_follicular_sce:
     input:
         follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
     output:
-        cc_top='{outdir}/cyclone/cc_top_assignments.txt'.format(outdir=config['outdir']),
-        cc_scores='{outdir}/cyclone/cc_scores.tsv'.format(outdir=config['outdir']),
+        cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
     params:
         name='cyclone-follicular-sce',
+        ncpus=config['cyclone_settings']['ncpus'],
     shell:
-        ''
+        'Rscript R/cyclone_sce.R '
+        '--sce {input.follicular_normalized} '
+        '--ncpus {params.ncpus} '
+        '--outfname {output} '
+        '>& {log}'
 
 # Assign cells to B or T classes
 rule cellassign_follicular_small:
@@ -129,6 +148,7 @@ rule annotate_follicular:
         unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.rds'.format(outdir=config['outdir']),
         unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.rds'.format(outdir=config['outdir']),
         unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.rds'.format(outdir=config['outdir']),
+        cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
     output:
         follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(outdir=config['workdir']),
     params:
