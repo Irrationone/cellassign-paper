@@ -4,7 +4,8 @@ singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.1"
 
 rule all:
     input:
-        follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
+        follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
+        unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.rds'.format(outdir=config['outdir']),
         #follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(workdir=config['workdir']),
 
 
@@ -166,7 +167,7 @@ rule determine_malignant_status:
     input:
         follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
     output:
-        malignant_status='{outdir}/malignant_status.tsv'.format(outdir=config['outdir']),
+        follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
     params:
         name='determine-malignant-status',
     log:
@@ -178,7 +179,7 @@ rule determine_malignant_status:
         '--sce {input.follicular_cellassign_normalized} '
         '--outfname {output.malignant_status} '
         '>& {log}'
-    
+
 # Unsupervised clustering of T cells
 rule follicular_unsupervised_t:
     input:
@@ -190,8 +191,20 @@ rule follicular_unsupervised_t:
         random_seed=config['cluster_random_seed'],
         cluster_methods=config['cluster_settings']['follicular_t']['methods'],
         cluster_use_method=config['cluster_settings']['follicular_t']['use_method'],
+        celltypes=config['cluster_settings']['follicular_t']['celltypes'],
+    log:
+        '{logdir}/logs/follicular_unsupervised_t.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/follicular_unsupervised_t.txt'.format(logdir=config['logdir'])
     shell:
-        ''
+        'Rscript R/unsupervised_cluster_sce.R '
+        '--sce {input.follicular_normalized} '
+        '--celltypes {params.celltypes} '
+        '--clustering_methods {params.cluster_methods} '
+        '--clustering_method_use {params.cluster_use_method} '
+        '--random_seed {params.random_seed} '
+        '--outfname {output.unsupervised_t_assignments} '
+        '>& {log}'
 
 # Unsupervised clustering of malignant B cells
 rule follicular_unsupervised_malignant:
