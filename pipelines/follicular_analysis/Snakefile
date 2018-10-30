@@ -176,14 +176,14 @@ rule determine_malignant_status:
         '{logdir}/benchmarks/determine_malignant_status.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/determine_malignant_status.R '
-        '--sce {input.follicular_cellassign_normalized} '
+        '--sce {input.follicular_cellassign_annotated} '
         '--outfname {output.malignant_status} '
         '>& {log}'
 
 # Unsupervised clustering of T cells
 rule follicular_unsupervised_t:
     input:
-        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+        follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
     output:
         unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.rds'.format(outdir=config['outdir']),
     params:
@@ -209,7 +209,7 @@ rule follicular_unsupervised_t:
 # Unsupervised clustering of malignant B cells
 rule follicular_unsupervised_malignant:
     input:
-        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+        follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
     output:
         unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.rds'.format(outdir=config['outdir']),
     params:
@@ -223,7 +223,7 @@ rule follicular_unsupervised_malignant:
 # Unsupervised clustering of nonmalignant B cells
 rule follicular_unsupervised_b:
     input:
-        follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+        follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
     output:
         unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.rds'.format(outdir=config['outdir']),
     params:
@@ -237,7 +237,7 @@ rule follicular_unsupervised_b:
 # Annotate follicular SCE with assignments
 rule annotate_follicular_final:
     input:
-        follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
+        follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
         unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.rds'.format(outdir=config['outdir']),
         unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.rds'.format(outdir=config['outdir']),
         unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.rds'.format(outdir=config['outdir']),
