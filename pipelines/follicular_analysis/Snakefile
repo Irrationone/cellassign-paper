@@ -185,7 +185,7 @@ rule follicular_unsupervised_t:
     input:
         follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
     output:
-        unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.rds'.format(outdir=config['outdir']),
+        unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.tsv'.format(outdir=config['outdir']),
     params:
         name='follicular-unsupervised-t',
         random_seed=config['cluster_random_seed'],
