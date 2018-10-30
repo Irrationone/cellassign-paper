@@ -36,7 +36,7 @@ cluster_settings:
       - 'phenograph'
     use_method: 'seurat'
     celltypes:
-      - 'CD4 (activated)'
+      - "CD4 (activated)"
       - 'Cytotoxic T cells (activated)'
       - 'Tfh'
       - 'Naive/resting CD4'
