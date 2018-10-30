@@ -34,6 +34,7 @@ rule create_follicular_sce:
         '--patient_progression {params.patient_progression_statuses} '
         '--patients {params.patients} '
         '--outfname {output} '
+        '>& {log}'
 
 
 # Filter and normalize SingleCellExperiment
