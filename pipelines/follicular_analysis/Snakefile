@@ -79,17 +79,22 @@ rule cyclone_follicular_sce:
 rule cellassign_follicular_small:
     input:
         follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+        marker_list_small=config['rho_matrices']['small'],
     output:
         broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
     params:
         name='cellassign-follicular-small',
     shell:
-        ''
+        'Rscript R/cellassign_sce.R '
+        '--sce {input.follicular_normalized} '
+        '--marker_list {input.marker_list_small} '
+        '--include_other {}
 
 # Assign cells to specific subtypes, including cytotoxic T
 rule cellassign_follicular_big:
     input:
         follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
+        marker_list_big=config['rho_matrices']['big'],
     output:
         specific_assignments='{outdir}/specific_assignments.rds'.format(outdir=config['outdir']),
     params:

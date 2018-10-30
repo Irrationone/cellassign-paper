@@ -54,8 +54,13 @@ filter_settings:
 cyclone_settings:
   ncpus: 15
 
-# Marker gene matrices for CellAssign
-follicular_rho_small: '/datadrive/projects/cellassign-paper/resources/marker_gene_matrices/follicular_small.txt'
-follicular_rho_big: '/datadrive/projects/cellassign-paper/resources/marker_gene_matrices/follicular_big.txt'
+# Marker list matrices for CellAssign
+marker_lists:
+  small: 
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_small.txt'
+    include_other: TRUE
+  big: 
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_big.txt'
+    include_other: TRUE
 
 # Colour palettes
