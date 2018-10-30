@@ -198,7 +198,7 @@ rule follicular_unsupervised_t:
         '{logdir}/benchmarks/follicular_unsupervised_t.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/unsupervised_cluster_sce.R '
-        '--sce {input.follicular_normalized} '
+        '--sce {input.follicular_malignant_annotated} '
         '--celltypes {params.celltypes} '
         '--clustering_methods {params.cluster_methods} '
         '--clustering_method_use {params.cluster_use_method} '
