@@ -83,12 +83,12 @@ rule cyclone_follicular_sce:
 rule cellassign_follicular_small:
     input:
         follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
-        marker_list_small=config['rho_matrices']['small']['path'],
+        marker_list_small=config['marker_lists']['small']['path'],
     output:
         broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
     params:
         name='cellassign-follicular-small',
-        include_other=config['rho_matrices']['small']['include_other'],
+        include_other=config['marker_lists']['small']['include_other'],
         num_runs=config['cellassign_settings']['num_runs'],
         B=config['cellassign_settings']['B'],
         extra_opts=config['cellassign_settings']['extra_opts'],
@@ -112,12 +112,12 @@ rule cellassign_follicular_small:
 rule cellassign_follicular_big:
     input:
         follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
-        marker_list_big=config['rho_matrices']['big']['path'],
+        marker_list_big=config['marker_lists']['big']['path'],
     output:
         specific_assignments='{outdir}/specific_assignments.rds'.format(outdir=config['outdir']),
     params:
         name='cellassign-follicular-big',
-        include_other=config['rho_matrices']['big']['include_other'],
+        include_other=config['marker_lists']['big']['include_other'],
         num_runs=config['cellassign_settings']['num_runs'],
         B=config['cellassign_settings']['B'],
         extra_opts=config['cellassign_settings']['extra_opts'],
