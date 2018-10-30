@@ -153,7 +153,7 @@ rule annotate_cellassign:
     benchmark:
         '{logdir}/benchmarks/annotate_cellassign.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/annotate_sce.R '
+        'Rscript R/annotate_cellassign.R '
         '--sce {input.follicular_normalized} '
         '--broad {input.broad_assignments} '
         '--specific {input.specific_assignments} '
