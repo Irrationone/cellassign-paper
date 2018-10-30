@@ -129,12 +129,12 @@ rule cellassign_follicular_big:
     shell:
         'Rscript R/cellassign_sce.R '
         '--sce {input.follicular_normalized} '
-        '--marker_list {input.marker_list_small} '
+        '--marker_list {input.marker_list_big} '
         '--include_other {params.include_other} '
         '--num_runs {params.num_runs} '
         '--rbf_pieces {params.B} '
         '{params.extra_opts} '
-        '--outfname {output.broad_assignments} '
+        '--outfname {output.specific_assignments} '
         '>& {log}'
 
 
