@@ -48,6 +48,8 @@ sce <- sce %>%
 # Rename cluster names
 rename_cols <- function(df, prefix = '') {
   df <- df %>%
+    dplyr::mutate_at(vars(contains('cluster')),
+                     funs(factor(.))) %>%
     dplyr::rename_at(vars(contains('cluster')), 
                      funs(paste0(prefix, .)))
   return(df)
