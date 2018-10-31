@@ -210,7 +210,7 @@ rule follicular_unsupervised_malignant:
     input:
         follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
     output:
-        unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.rds'.format(outdir=config['outdir']),
+        unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.tsv'.format(outdir=config['outdir']),
     params:
         name='follicular-unsupervised-malignant',
         random_seed=config['cluster_random_seed'],
@@ -236,7 +236,7 @@ rule follicular_unsupervised_b:
     input:
         follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
     output:
-        unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.rds'.format(outdir=config['outdir']),
+        unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.tsv'.format(outdir=config['outdir']),
     params:
         name='follicular-unsupervised-b',
         random_seed=config['cluster_random_seed'],
