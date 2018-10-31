@@ -4,7 +4,7 @@ singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.1"
 
 rule all:
     input:
-        follicular_annotated='{workdir}/sce_follicular_annotated_final.rds'.format(workdir=config['workdir']),
+        expand('{outdir}/differential_expression/celltype/{{{celltype_group}}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_celltype_groups']),
         #follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(workdir=config['workdir']),
 
 
@@ -283,3 +283,24 @@ rule annotate_follicular_final:
         '--outfname {output.follicular_annotated} '
         '>& {log}'
 
+rule differential_expression_timepoint_by_celltype:
+    input:
+        follicular_annotated='{workdir}/sce_follicular_annotated_final.rds'.format(workdir=config['workdir']),
+        gene_set=config['gene_set'],
+    output:
+        de_tables='{outdir}/differential_expression/celltype/{{{celltype_group}}}.rds'.format(outdir=config['outdir']),
+    params:
+        name='differential-expression-timepoint-{celltype_group}',
+        celltype_group=lambda wildcards: config['differential_expression_celltype_groups'][wildcards.celltype_group],
+    log:
+        '{logdir}/logs/differential_expression_timepoint/{{{celltype_group}}}.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/differential_expression_timepoint/{{{celltype_group}}}.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/de_timepoint.R '
+        '--sce {input.follicular_annotated} '
+        '--comparison timepoint '
+        '--celltypes {params.celltype_group} '
+        '--gene_set_file {input.gene_set} '
+        '--outfname {output.de_tables} '
+        '>& {log}'

@@ -77,4 +77,22 @@ cellassign_settings:
   extra_opts: "--delta_prior"
   threads: 18
 
+# Differential expression settings
+differential_expression_celltype_groups:
+  cytotoxic:
+    - Cytotoxic\ T\ cells
+    - Cytotoxic\ T\ cells\ \(activated\)
+  follicular_helper:
+    - Tfh
+  malignant:
+    - B\ cells\ \(malignant\)
+  b:
+    - B\ cells
+  helper:
+    - CD4\ \(activated\)
+    - Naive/resting\ CD4
+
+gene_set: '/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt'
+
+
 # Colour palettes
