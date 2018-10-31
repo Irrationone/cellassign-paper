@@ -275,6 +275,7 @@ rule annotate_follicular_final:
         '{logdir}/benchmarks/annotate_follicular_final.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/annotate_follicular_final.R '
+        '--sce {input.follicular_malignant_annotated} '
         '--unsupervised_t {input.unsupervised_t_assignments} '
         '--unsupervised_malignant {input.unsupervised_malignant_assignments} '
         '--unsupervised_b {input.unsupervised_b_assignments} '
