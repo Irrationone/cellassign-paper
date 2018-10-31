@@ -285,7 +285,7 @@ rule annotate_follicular_final:
 
 rule differential_expression_timepoint_by_celltype:
     input:
-        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(workdir=config['outdir']),
+        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
         gene_set=config['gene_set'],
     output:
         de_tables='{outdir}/differential_expression/celltype/{{celltype_group}}.rds'.format(outdir=config['outdir']),
