@@ -4,8 +4,7 @@ singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.1"
 
 rule all:
     input:
-        follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
-        unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.tsv'.format(outdir=config['outdir']),
+        follicular_annotated='{workdir}/sce_follicular_annotated_final.rds'.format(workdir=config['workdir']),
         #follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(workdir=config['workdir']),
 
 
@@ -217,8 +216,20 @@ rule follicular_unsupervised_malignant:
         random_seed=config['cluster_random_seed'],
         cluster_methods=config['cluster_settings']['follicular_malignant']['methods'],
         cluster_use_method=config['cluster_settings']['follicular_malignant']['use_method'],
+        celltypes=config['cluster_settings']['follicular_malignant']['celltypes'],
+    log:
+        '{logdir}/logs/follicular_unsupervised_malignant.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/follicular_unsupervised_malignant.txt'.format(logdir=config['logdir'])
     shell:
-        ''
+        'Rscript R/unsupervised_cluster_sce.R '
+        '--sce {input.follicular_malignant_annotated} '
+        '--celltypes {params.celltypes} '
+        '--clustering_methods {params.cluster_methods} '
+        '--clustering_method_use {params.cluster_use_method} '
+        '--random_seed {params.random_seed} '
+        '--outfname {output.unsupervised_malignant_assignments} '
+        '>& {log}'
 
 # Unsupervised clustering of nonmalignant B cells
 rule follicular_unsupervised_b:
@@ -231,21 +242,43 @@ rule follicular_unsupervised_b:
         random_seed=config['cluster_random_seed'],
         cluster_methods=config['cluster_settings']['follicular_b']['methods'],
         cluster_use_method=config['cluster_settings']['follicular_b']['use_method'],
+        celltypes=config['cluster_settings']['follicular_b']['celltypes'],
+    log:
+        '{logdir}/logs/follicular_unsupervised_b.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/follicular_unsupervised_b.txt'.format(logdir=config['logdir'])
     shell:
-        ''
+        'Rscript R/unsupervised_cluster_sce.R '
+        '--sce {input.follicular_malignant_annotated} '
+        '--celltypes {params.celltypes} '
+        '--clustering_methods {params.cluster_methods} '
+        '--clustering_method_use {params.cluster_use_method} '
+        '--random_seed {params.random_seed} '
+        '--outfname {output.unsupervised_b_assignments} '
+        '>& {log}'
 
 # Annotate follicular SCE with assignments
 rule annotate_follicular_final:
     input:
         follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
-        unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.rds'.format(outdir=config['outdir']),
-        unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.rds'.format(outdir=config['outdir']),
-        unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.rds'.format(outdir=config['outdir']),
+        unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.tsv'.format(outdir=config['outdir']),
+        unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.tsv'.format(outdir=config['outdir']),
+        unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.tsv'.format(outdir=config['outdir']),
         cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
     output:
         follicular_annotated='{workdir}/sce_follicular_annotated_final.rds'.format(workdir=config['workdir']),
     params:
         name='annotate-follicular-final',
+    log:
+        '{logdir}/logs/annotate_follicular_final.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/annotate_follicular_final.txt'.format(logdir=config['logdir'])
     shell:
-        ''
+        'Rscript R/annotate_follicular_final.R '
+        '--unsupervised_t {input.unsupervised_t_assignments} '
+        '--unsupervised_malignant {input.unsupervised_malignant_assignments} '
+        '--unsupervised_b {input.unsupervised_b_assignments} '
+        '--cyclone {input.cc_result} '
+        '--outfname {output.follicular_annotated} '
+        '>& {log}'
 
