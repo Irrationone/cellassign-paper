@@ -32,8 +32,8 @@ sce <- readRDS(sce_path)
 
 de_tables <- gage_analysis(sce = sce %>% scater::filter(celltype_full %in% unlist(args$celltypes)), 
                            comparison_type = "timepoint",
-                           filter_ribo = filter_ribo,
-                           filter_mito = filter_mito,
+                           filter_ribo = TRUE,
+                           filter_mito = TRUE,
                            gene_set_path = args$gene_set_file, 
                            rowdat = rowData(sce))
 
