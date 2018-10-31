@@ -1,6 +1,6 @@
 configfile: "config/v1.yaml"
 
-singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.1"
+singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.2"
 
 rule all:
     input:
