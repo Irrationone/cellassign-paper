@@ -266,7 +266,7 @@ rule annotate_follicular_final:
         unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.tsv'.format(outdir=config['outdir']),
         cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
     output:
-        follicular_annotated='{workdir}/sce_follicular_annotated_final.rds'.format(workdir=config['workdir']),
+        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
     params:
         name='annotate-follicular-final',
     log:
@@ -285,7 +285,7 @@ rule annotate_follicular_final:
 
 rule differential_expression_timepoint_by_celltype:
     input:
-        follicular_annotated='{workdir}/sce_follicular_annotated_final.rds'.format(workdir=config['workdir']),
+        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(workdir=config['outdir']),
         gene_set=config['gene_set'],
     output:
         de_tables='{outdir}/differential_expression/celltype/{{celltype_group}}.rds'.format(outdir=config['outdir']),
