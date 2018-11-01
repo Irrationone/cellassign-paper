@@ -316,9 +316,9 @@ rule filter_tcells:
         name='filter-tcells',
         t_cell_probability=config['celltype_filters']['broad_t_cell_probability'],
     log: 
-        '{logdir}/logs/filter_tcells.log'.format(logdir=config['logdir'])
+        '{logdir}/logs/filter_subset/filter_tcells.log'.format(logdir=config['logdir'])
     benchmark:
-        '{logdir}/benchmarks/filter_tcells.txt'.format(logdir=config['logdir'])
+        '{logdir}/benchmarks/filter_subset/filter_tcells.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/filter_cells.R '
         '--sce {input.follicular_annotated} '
@@ -338,9 +338,9 @@ rule filter_bcells:
         name='filter-bcells',
         b_cell_probability=config['celltype_filters']['broad_b_cell_probability'],
     log: 
-        '{logdir}/logs/filter_bcells.log'.format(logdir=config['logdir'])
+        '{logdir}/logs/filter_subset/filter_bcells.log'.format(logdir=config['logdir'])
     benchmark:
-        '{logdir}/benchmarks/filter_bcells.txt'.format(logdir=config['logdir'])
+        '{logdir}/benchmarks/filter_subset/filter_bcells.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/filter_cells.R '
         '--sce {input.follicular_annotated} '

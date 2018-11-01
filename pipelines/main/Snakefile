@@ -1,3 +1,60 @@
 
 configfile: 'config/v1.yaml'
 
+rule all:
+    input:
+        fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir']),
+        fl_timepoint_figure='{outdir}/figures/fl_timepoint_figure.pdf'.format(outdir=config['outdir']),
+
+
+
+rule fl_overview_figure:
+    input:
+        sce=config['follicular_analysis_results']['sce_annotated'],
+    output:
+        fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir'])
+    params:
+        name-'fl-overview-figure',
+        dimreduce_type=config['plot_dimreduce_type'],
+    log:
+        '{logdir}/logs/fl_overview_figure.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/fl_overview_figure.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/fl_overview_figure.R '
+        '--sce {input.sce} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.fl_overview_figure} '
+        '>& {log}'
+
+
+rule fl_timepoint_figure:
+    input:
+        sce=config['follicular_analysis_results']['sce_annotated'],
+        sce_tcell=config['follicular_analysis_results']['sce_tcell_annotated'],
+        sce_bcell=config['follicular_analysis_results']['sce_bcell_annotated'],
+        de_malignant=config['follicular_analysis_results']['differential_expression']['malignant'],
+        azizi_signatures=config['external']['azizi_s4'],
+    output:
+        fl_timepoint_figure='{outdir}/figures/fl_timepoint_figure.pdf'.format(outdir=config['outdir'])
+    params:
+        name='fl-timepoint-figure',
+        dimreduce_type=config['dimreduce_type'],
+        tcell_labels=config['follicular_celltype_labels']['tcell'],
+        bcell_labels=config['follicular_celltype_labels']['bcell'],
+    log:
+        '{logdir}/logs/fl_overview_figure.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/fl_overview_figure.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/fl_timepoint_figure.R '
+        '--sce {input.sce} '
+        '--sce_tcell {input.sce_tcell} '
+        '--sce_bcell {input.sce_bcell} '
+        '--tcell_labels {params.tcell_labels} '
+        '--bcell_labels {params.bcell_labels} '
+        '--azizi_signatures {params.azizi_signatures} '
+        '--de_malignant {input.de_malignant} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.fl_timepoint_figure} '
+        '>& {log}'
