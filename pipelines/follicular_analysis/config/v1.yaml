@@ -97,3 +97,4 @@ gene_set: '/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2
 # Probabilities to filter celltypes at (for post-annotation filtering jobs)
 celltype_filters:
   broad_t_cell_probability: 0.9
+  broad_b_cell_probability: 0.9
