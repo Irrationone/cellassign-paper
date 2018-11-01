@@ -1,6 +1,8 @@
 
 configfile: 'config/v1.yaml'
 
+singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.0"
+
 rule all:
     input:
         fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir']),
