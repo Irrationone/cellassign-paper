@@ -1,0 +1,17 @@
+
+
+# Follicular analysis results
+follicular_analysis_results:
+  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/v1/sce_follicular_annotated_final.rds
+  differential_expression: 
+    cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/v1/differential_expression/celltype/cytotoxic.rds
+    malignant: /datadrive/projects/cellassign-paper/results/outputs/v1/differential_expression/celltype/malignant.rds
+
+
+
+
+# Colour palettes
+palettes:
+  timepoints:
+    T1: "#000000"
+    T2: "#FFFFFF"

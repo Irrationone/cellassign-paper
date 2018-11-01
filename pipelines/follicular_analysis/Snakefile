@@ -1,9 +1,10 @@
 configfile: "config/v1.yaml"
 
-singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.2"
+singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.3"
 
 rule all:
     input:
+        tcells_annotated='{outdir}/sce_follicular_tcells_annotated_final.rds'.format(outdir=config['outdir']),
         expand('{outdir}/differential_expression/celltype/{{celltype_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_celltype_groups']),
         #follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(workdir=config['workdir']),
 
@@ -303,4 +304,23 @@ rule differential_expression_timepoint_by_celltype:
         '--celltypes {params.celltype_group} '
         '--gene_set_file {input.gene_set} '
         '--outfname {output.de_tables} '
+        '>& {log}'
+
+rule filter_tcells:
+    input:
+        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
+    output:
+        tcells_annotated='{outdir}/sce_follicular_tcells_annotated_final.rds'.format(outdir=config['outdir']),
+    params:
+        name='filter-tcells',
+        t_cell_probability=config['celltype_filters']['broad_t_cell_probability'],
+    log:
+    '{logdir}/logs/filter_tcells.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/filter_tcells.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/filter_tcells.R '
+        '--sce {input.follicular_annotated} '
+        '--tcell_probability {params.t_cell_probability} '
+        '--outfname {output.tcells_annotated} '
         '>& {log}'
