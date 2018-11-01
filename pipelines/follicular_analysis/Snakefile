@@ -5,6 +5,7 @@ singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.3"
 rule all:
     input:
         tcells_annotated='{outdir}/sce_follicular_tcells_annotated_final.rds'.format(outdir=config['outdir']),
+        bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_bcells.rds'.format(outdir=config['outdir']),
         expand('{outdir}/differential_expression/celltype/{{celltype_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_celltype_groups']),
         #follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(workdir=config['workdir']),
 
@@ -310,17 +311,41 @@ rule filter_tcells:
     input:
         follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
     output:
-        tcells_annotated='{outdir}/sce_follicular_tcells_annotated_final.rds'.format(outdir=config['outdir']),
+        tcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_tcells.rds'.format(outdir=config['outdir']),
     params:
         name='filter-tcells',
         t_cell_probability=config['celltype_filters']['broad_t_cell_probability'],
-    log:
-    '{logdir}/logs/filter_tcells.log'.format(logdir=config['logdir'])
+    log: 
+        '{logdir}/logs/filter_tcells.log'.format(logdir=config['logdir'])
     benchmark:
         '{logdir}/benchmarks/filter_tcells.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/filter_tcells.R '
+        'Rscript R/filter_cells.R '
         '--sce {input.follicular_annotated} '
-        '--tcell_probability {params.t_cell_probability} '
+        '--celltype T\ cell '
+        '--malignancy_filter nonmalignant '
+        '--celltype_probability {params.t_cell_probability} '
         '--outfname {output.tcells_annotated} '
+        '>& {log}'
+
+
+rule filter_bcells:
+    input:
+        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
+    output:
+        bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_bcells.rds'.format(outdir=config['outdir']),
+    params:
+        name='filter-bcells',
+        b_cell_probability=config['celltype_filters']['broad_b_cell_probability'],
+    log: 
+        '{logdir}/logs/filter_bcells.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/filter_bcells.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/filter_cells.R '
+        '--sce {input.follicular_annotated} '
+        '--celltype B\ cell '
+        '--malignancy_filter all '
+        '--celltype_probability {params.b_cell_probability} '
+        '--outfname {output.bcells_annotated} '
         '>& {log}'
