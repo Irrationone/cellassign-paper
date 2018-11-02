@@ -4,6 +4,7 @@
 test/
 .Rproj
 data/
+Rplots.pdf
 results/scratch/
 results/logs/
 sessions/

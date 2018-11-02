@@ -122,7 +122,7 @@ final_plot <- cowplot::plot_grid(timepoint_plot, dr_plots, marker_gene_plots,
 
 # Plot to output file
 pdf(args$outfname, width = 10, height = 10)
-final_plot
+plot(final_plot)
 dev.off()
 
 cat("Completed.\n")

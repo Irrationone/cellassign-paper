@@ -10,6 +10,7 @@ library(methods)
 library(scran)
 library(cowplot)
 library(pheatmap)
+library(Matrix)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -40,9 +41,11 @@ args <- parser$parse_args()
 sce_path <- args$sce
 sce <- readRDS(sce_path)
 sce_tcell <- readRDS(args$sce_tcell)
+sce_bcell <- readRDS(args$sce_bcell)
 de_malignant <- readRDS(args$de_malignant)
 
 tcell_labels <- unlist(args$tcell_labels)
+bcell_labels <- unlist(args$bcell_labels)
 
 categorical_palettes <- cat_palettes()
 heatmap_heat_colours <- heat_colour_gradient()
@@ -216,6 +219,7 @@ cd8_activation_scores_melted <- cd8_activation_scores %>%
   dplyr::rename(Timepoint=Var1,
                 Symbol=Var2,
                 mean_logcounts=value)
+
 
 cd8_activation_scores_cells <- rbind(data.frame(timepoint='T1', mean_logcounts_genes=colMeans(logcounts(sce_t1_cytotoxic))),
                                      data.frame(timepoint='T2', mean_logcounts_genes=colMeans(logcounts(sce_t2_cytotoxic))))
@@ -391,8 +395,8 @@ final_plot <- cowplot::plot_grid(top_row_annotated, middle_row, bottom_row,
                                  rel_heights = c(0.45, 0.25, 0.3))
 
 # Plot final plot
-pdf(final_plot, width = 10, height = 10)
-final_plot
+pdf(args$outfname, width = 10, height = 10)
+plot(final_plot)
 dev.off()
 
 cat("Completed.\n")
