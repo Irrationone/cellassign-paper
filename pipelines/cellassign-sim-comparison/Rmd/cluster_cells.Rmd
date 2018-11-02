@@ -1,10 +1,9 @@
 ---
 title: "Cluster SingleCellExperiment object"
 output: 
-  html_notebook:
+  html_document:
     toc: true
     toc_depth: 5
-    toc_float: true
 params:
   sce: ""
   dimreduce_method: "PCA"
@@ -245,9 +244,9 @@ sce@metadata$param_df <- data.frame(sce@metadata$param_df,
                                     wrong_marker_proportion=wrong_marker_proportion,
                                     stringsAsFactors = FALSE)
 
-output_rds_file <- "cluster_cells.rds"
+#output_rds_file <- "cluster_cells.rds"
 
-saveRDS(sce, output_rds_file)
+#saveRDS(sce, output_rds_file)
 ```
 
 ```{r}

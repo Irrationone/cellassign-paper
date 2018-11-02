@@ -135,7 +135,7 @@ outputs:
         outputBinding:
             glob: "*.rds"
         secondaryFiles:
-            - "^.nb.html"
+            - "^.html"
     
     stderr_file:
         type: stderr

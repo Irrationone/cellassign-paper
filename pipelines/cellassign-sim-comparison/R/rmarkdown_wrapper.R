@@ -39,7 +39,7 @@ other_param_string <- paste(lapply(names(other_params), function(x) {
 ## Test existence of rmarkdown file
 stopifnot(file.exists(input_rmd_file))
 
-cmd <- sprintf('cp %s %s/; Rscript -e \'rmarkdown::render("%s", "html_notebook", params = list(%s))\'', input_rmd_file, getwd(), paste0(getwd(), "/", basename(input_rmd_file)), other_param_string)
+cmd <- sprintf('cp %s %s/; Rscript -e \'rmarkdown::render("%s", "html_document", params = list(%s))\'', input_rmd_file, getwd(), paste0(getwd(), "/", basename(input_rmd_file)), other_param_string)
 print(cmd)
 
 system(cmd)

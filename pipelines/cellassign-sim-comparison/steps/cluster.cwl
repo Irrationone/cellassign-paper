@@ -92,9 +92,8 @@ outputs:
     sce_cluster:
         type: File
         outputBinding:
-            glob: "*.rds"
+            glob: "*.html"
         secondaryFiles:
-            - "^.nb.html"
             - "^_eval_measures.tsv"
             - "^_params.tsv"
             - "^_delta_compare.tsv"
