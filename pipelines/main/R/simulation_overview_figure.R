@@ -26,6 +26,8 @@ parser$add_argument('--wrongmarker_result_dir', metavar = 'DIR', type = 'charact
                     help="Path to simulation result directory for wrong marker")
 parser$add_argument('--delta_deprobs', type='double', nargs ='+',
                     help="DE probs to show delta plots for.")
+parser$add_argument('--deprob_methods', type='character', nargs ='+',
+                    help="Clustering methods to use for DE prob analysis.")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for PDF plot")
 args <- parser$parse_args()
@@ -33,13 +35,20 @@ args <- parser$parse_args()
 deprob_result_dir <- args$deprob_result_dir
 wrongmarker_result_dir <- args$wrongmarker_result_dir
 delta_deprobs <- unlist(args$delta_deprobs)
+deprob_methods <- unlist(args$deprob_methods)
 
 categorical_palettes <- cat_palettes()
 factor_orderings <- factor_orders()
 
+clust_methods_palette <- categorical_palettes$clustering_methods[deprob_methods]
+
 # DE prob figure
 de_eval_measures <- load_annotation_files(deprob_result_dir, pattern = "*_eval_measures.tsv")
 de_deltas <- load_annotation_files(deprob_result_dir, pattern = "*_delta_compare.tsv")
+
+## Only use methods that were selected
+de_eval_measures <- de_eval_measures %>%
+  dplyr::filter(clustering_method %in% deprob_methods)
 
 ## TODO: When reruns have been done with ARI and NMI, add those too
 de_plots <- plot_simulation_performance(de_eval_measures %>%
@@ -51,20 +60,20 @@ de_plots <- plot_simulation_performance(de_eval_measures %>%
                                                                   "Accuracy"),
                                         x_var = "de_prob")
 
-## TODO: Check SC3 and gaussian -- code may not be working properly for it
 de_plot_markers <- de_plots$markers + 
   guides(fill = FALSE) + 
   xlab("% DE per group") + 
-  scale_fill_manual(values = categorical_palettes$clustering_methods)
+  scale_fill_manual(values = clust_methods_palette)
   
 de_plot_full <- de_plots$full + 
   guides(fill = FALSE) + 
   xlab("% DE per group") + 
-  scale_fill_manual(values = categorical_palettes$clustering_methods)
+  scale_fill_manual(values = clust_methods_palette)
 
 
-de_plot_legend <- cellassign.utils::ggsimplelegend(names(categorical_palettes$clustering_methods),
-                                                   colour_mapping = unname(categorical_palettes$clustering_methods),
+
+de_plot_legend <- cellassign.utils::ggsimplelegend(names(clust_methods_palette),
+                                                   colour_mapping = unname(clust_methods_palette),
                                                    legend_title = "Method", legend_rows = 2, fontsize = 7)
 de_plot_legend <- cellassign.utils::extract_legend(de_plot_legend)
 
@@ -97,7 +106,7 @@ delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) +
   ylab("Inferred logFC") + 
   guides(colour = FALSE) + 
   facet_wrap(~ de_prob, ncol = length(delta_deprobs)) + 
-  scale_colour_manual(values = categorical_palettes$clustering_methods) + 
+  scale_colour_manual(values = clust_methods_palette) + 
   geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1, vjust = 1, parse = TRUE,
             size = 0.35*8)
   

@@ -69,6 +69,7 @@ library(Seurat)
 coldat <- as.data.frame(colData(sce_total))
 sets <- splitstackshape::stratified(coldat, group = "Group", size = (1-test_proportion), bothSets = TRUE)
 
+rowData(sce_total)$symbol <- rowData(sce_total)$Gene
 rowData(sce_total)$feature_symbol <- rowData(sce_total)$Gene
 rowData(sce_total)$Symbol <- rowData(sce_total)$Gene
 
@@ -104,7 +105,7 @@ cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clusterin
     sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
                                    object2 = object2, object2_cluster_label = object2_cluster_label)
   } else {
-    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method)
+    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, ncores = 1)
   }
   return(sce_clustered)
 }
