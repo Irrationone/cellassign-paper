@@ -29,7 +29,7 @@ parser$add_argument('--tcell_labels', type='character', nargs='+',
                     help="Cell type labels of T cells")
 parser$add_argument('--bcell_labels', type='character', nargs='+',
                     help="Cell type labels of B cells")
-parser$add_argument('--azizi_s4', metavar = 'FILE', type='character',
+parser$add_argument('--azizi_signatures', metavar = 'FILE', type='character',
                     help="XLS file of Azizi et al. Table S4")
 parser$add_argument('--de_malignant', type='character',
                     help="DE results for malignant B cells")
@@ -188,7 +188,7 @@ bcell_proportion_plot <- plot_proportions(bcell_proportions,
 
 
 # CD8 T cell activation plot
-azizi_signatures <- process_azizi_signatures(args$azizi_s4)
+azizi_signatures <- process_azizi_signatures(args$azizi_signatures)
 cd8_activation_genes <- azizi_signatures$`CD8 T Cell Activation`
 cd8_activation_genes <- cd8_activation_genes[!is.na(get_ensembl_id(cd8_activation_genes, sce_tcell))]
 cd8_ensembl_ids <- get_ensembl_id(cd8_activation_genes, sce_tcell)
