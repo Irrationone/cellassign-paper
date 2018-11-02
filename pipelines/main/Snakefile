@@ -45,9 +45,9 @@ rule fl_timepoint_figure:
         tcell_labels=config['follicular_celltype_labels']['tcell'],
         bcell_labels=config['follicular_celltype_labels']['bcell'],
     log:
-        '{logdir}/logs/fl_overview_figure.log'.format(logdir=config['logdir'])
+        '{logdir}/logs/fl_timepoint_figure.log'.format(logdir=config['logdir'])
     benchmark:
-        '{logdir}/benchmarks/fl_overview_figure.txt'.format(logdir=config['logdir'])
+        '{logdir}/benchmarks/fl_timepoint_figure.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/fl_timepoint_figure.R '
         '--sce {input.sce} '
