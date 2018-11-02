@@ -41,7 +41,7 @@ rule fl_timepoint_figure:
         fl_timepoint_figure='{outdir}/figures/fl_timepoint_figure.pdf'.format(outdir=config['outdir'])
     params:
         name='fl-timepoint-figure',
-        dimreduce_type=config['dimreduce_type'],
+        dimreduce_type=config['plot_dimreduce_type'],
         tcell_labels=config['follicular_celltype_labels']['tcell'],
         bcell_labels=config['follicular_celltype_labels']['bcell'],
     log:
