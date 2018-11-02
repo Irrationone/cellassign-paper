@@ -16,7 +16,7 @@ rule fl_overview_figure:
     output:
         fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir'])
     params:
-        name-'fl-overview-figure',
+        name='fl-overview-figure',
         dimreduce_type=config['plot_dimreduce_type'],
     log:
         '{logdir}/logs/fl_overview_figure.log'.format(logdir=config['logdir'])
