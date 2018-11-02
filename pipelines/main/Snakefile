@@ -19,6 +19,7 @@ rule simulation_performance_figure:
         sim_performance_figure='{outdir}/figures/sim_performance_figure.pdf'.format(outdir=config['outdir'])
     params:
         name='simulation-performance-figure',
+        delta_deprobs=config['delta_deprobs'],
     log:
         '{logdir}/logs/simulation_performance_figure.log'.format(logdir=config['logdir'])
     benchmark:
@@ -27,6 +28,7 @@ rule simulation_performance_figure:
         'Rscript R/simulation_overview_figure.R '
         '--deprob_result_dir {input.deprob_result_dir} '
         '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
+        '--delta_deprobs {params.delta_deprobs} '
         '--outfname {output.sim_performance_figure} '
         '>& {log}'
 
