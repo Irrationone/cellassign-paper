@@ -24,12 +24,15 @@ parser$add_argument('--deprob_result_dir', metavar='DIR', type='character',
                     help="Path to simulation result directory for DE prob")
 parser$add_argument('--wrongmarker_result_dir', metavar = 'DIR', type = 'character',
                     help="Path to simulation result directory for wrong marker")
+parser$add_argument('--delta_deprobs', type='double', nargs ='+',
+                    help="DE probs to show delta plots for.")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for PDF plot")
 args <- parser$parse_args()
 
 deprob_result_dir <- args$deprob_result_dir
 wrongmarker_result_dir <- args$wrongmarker_result_dir
+delta_deprobs <- unlist(args$delta_deprobs)
 
 categorical_palettes <- cat_palettes()
 factor_orderings <- factor_orders()
@@ -65,6 +68,40 @@ de_plot_legend <- cellassign.utils::ggsimplelegend(names(categorical_palettes$cl
                                                    legend_title = "Method", legend_rows = 2, fontsize = 7)
 de_plot_legend <- cellassign.utils::extract_legend(de_plot_legend)
 
+# Delta plots
+
+delta_table <- de_deltas %>% 
+  dplyr::filter(de_prob %in% delta_deprobs) %>%
+  dplyr::mutate(de_prob = paste0("DE prob = ", de_prob))
+
+rvals <- compute_pvals_subsets(delta_table,
+                               facet_vars = c("de_prob", "clustering_method"),
+                               formula = ~ true_delta + inferred_delta,
+                               corfun = cor.test,
+                               output = "estimate")
+
+rval_labels <- rvals %>%
+  dplyr::group_by(de_prob) %>%
+  dplyr::summarise(r_label=as.character(as.expression(substitute(list(italic(R) == est1, italic(R[s]) == est2), list(est1 = format(estimate[clustering_method == "cellassign"], digits = 3),
+                                                                                                                     est2 = format(estimate[clustering_method == "cellassign_shrinkage"], digits = 3))))))
+
+delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) + 
+  geom_point(aes(colour=clustering_method), alpha = 0.5) + 
+  theme_Publication() + 
+  theme_nature() + 
+  stripped_theme() +
+  geom_abline(slope = 1, intercept = 0) + 
+  scale_x_continuous(expand = c(0,0.05)) + 
+  scale_y_continuous(expand = c(0,0.05)) + 
+  xlab("True logFC") + 
+  ylab("Inferred logFC") + 
+  guides(colour = FALSE) + 
+  facet_wrap(~ de_prob, ncol = length(delta_deprobs)) + 
+  scale_colour_manual(values = categorical_palettes$clustering_methods) + 
+  geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1, vjust = 1, parse = TRUE,
+            size = 0.35*8)
+  
+
 # Wrong marker figure
 wm_eval_measures <- load_annotation_files(wrongmarker_result_dir, pattern = "*_eval_measures.tsv")
 wm_delta_vals <- load_annotation_files(wrongmarker_result_dir, pattern = "*_delta_compare.tsv")
@@ -88,8 +125,14 @@ de_plots_labeled <- cowplot::plot_grid(de_plot_markers, de_plot_full, de_plot_le
                                        nrow = 3,
                                        rel_heights = c(1, 1, 0.2))
 
-final_plot <- cowplot::plot_grid(de_plots_labeled, wm_plot_cellassign, 
-                                 labels = c('', 'c'), 
+bottom_row <- cowplot::plot_grid(delta_plots, wm_plot_cellassign,
+                                 labels = c('c', 'd'),
+                                 ncol = 2,
+                                 nrow = 1,
+                                 rel_widths = c(0.5, 0.5))
+
+final_plot <- cowplot::plot_grid(de_plots_labeled, bottom_row, 
+                                 labels = c('', ''), 
                                  ncol = 1, 
                                  nrow = 2,
                                  rel_heights = c(0.67, 0.33))
