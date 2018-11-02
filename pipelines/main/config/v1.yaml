@@ -5,12 +5,12 @@ logdir: '/datadrive/projects/cellassign-paper/results/logs/main/v1'
 
 # Follicular analysis results
 follicular_analysis_results:
-  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/v1/sce_follicular_annotated_final.rds
-  sce_tcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/v1/sce_annotated_subset/sce_follicular_tcells.rds
-  sce_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/v1/sce_annotated_subset/sce_follicular_bcells.rds
+  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v1/sce_follicular_annotated_final.rds
+  sce_tcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v1/sce_annotated_subset/sce_follicular_tcells.rds
+  sce_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v1/sce_annotated_subset/sce_follicular_bcells.rds
   differential_expression: 
-    cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/v1/differential_expression/celltype/cytotoxic.rds
-    malignant: /datadrive/projects/cellassign-paper/results/outputs/v1/differential_expression/celltype/malignant.rds
+    cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v1/differential_expression/celltype/cytotoxic.rds
+    malignant: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v1/differential_expression/celltype/malignant.rds
 
 # Dimensionality reduction type to plot
 plot_dimreduce_type: 'UMAP'
