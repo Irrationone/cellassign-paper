@@ -108,6 +108,8 @@ marker_plots <- lapply(marker_genes, function(mgene) {
   return(p)
 })
 
+## TODO: Put a legend here for expression values
+
 # Assemble plot
 
 ## DR plots
