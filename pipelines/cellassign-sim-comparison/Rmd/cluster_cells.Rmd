@@ -142,7 +142,7 @@ map_and_evaluate_clusters <- function(sce_sim, min_count = 0) {
 ## Cluster cells
 
 ```{r}
-markers_to_use <- select_markers(sce_total, percentile_fc = fc_percentile, percentile_meanexpr = expr_percentile, frac_genes = frac_genes, max_genes_per_class = floor(max_genes * (1+wrong_marker_proportion)))
+markers_to_use <- select_markers(sce_total, percentile_fc = fc_percentile, percentile_meanexpr = expr_percentile, frac_genes = frac_genes, max_genes_per_class = max_genes)
 
 rho <- create_rho_matrix(sce_total, markers_to_use, wrong_proportion = wrong_marker_proportion)
 
