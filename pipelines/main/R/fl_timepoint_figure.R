@@ -25,9 +25,9 @@ parser$add_argument('--sce_bcell', metavar='FILE', type='character',
                     help="Path to B cell-filtered SCE")
 parser$add_argument('--dimreduce_type', type='character',
                     help="Type of dimensionality reduction to plot", default = "UMAP")
-parser$add_argument('--tcell_labels', type='character',
+parser$add_argument('--tcell_labels', type='character', nargs='+',
                     help="Cell type labels of T cells")
-parser$add_argument('--bcell_labels', type='character',
+parser$add_argument('--bcell_labels', type='character', nargs='+',
                     help="Cell type labels of B cells")
 parser$add_argument('--azizi_s4', metavar = 'FILE', type='character',
                     help="XLS file of Azizi et al. Table S4")
