@@ -12,6 +12,20 @@ delta_deprobs:
   - 0.15
   - 0.45
 
+deprob_methods:
+  - cellassign
+  - cellassign_shrinkage
+  - densitycut
+  - dynamicTreeCut
+  - kmeans
+  - phenograph
+  - SC3
+  - scmap
+  - seurat_0.4
+  - seurat_0.8
+  - seurat_1.2
+  - Zheng_cor
+
 
 # Follicular analysis results
 follicular_analysis_results:
