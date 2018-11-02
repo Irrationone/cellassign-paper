@@ -3,6 +3,12 @@ workdir: '/datadrive/projects/cellassign-paper/results/scratch/main/v1'
 outdir: '/datadrive/projects/cellassign-paper/results/outputs/main/v1'
 logdir: '/datadrive/projects/cellassign-paper/results/logs/main/v1'
 
+# Simulation results
+simulation_analysis_results:
+  deprob_result_dir: /datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob3
+  wrongmarker_result_dir: /datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers2
+  
+
 # Follicular analysis results
 follicular_analysis_results:
   sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v1/sce_follicular_annotated_final.rds

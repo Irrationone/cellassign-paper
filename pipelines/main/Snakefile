@@ -1,14 +1,34 @@
 
 configfile: 'config/v1.yaml'
 
-singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.0"
+singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.1"
 
 rule all:
     input:
         fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir']),
         fl_timepoint_figure='{outdir}/figures/fl_timepoint_figure.pdf'.format(outdir=config['outdir']),
+        sim_performance_figure='{outdir}/figures/sim_performance_figure.pdf'.format(outdir=config['outdir']),
 
 
+
+rule simulation_performance_figure:
+    input:
+        deprob_result_dir=config['simulation_analysis_results']['deprob_result_dir'],
+        wrongmarker_result_dir=config['simulation_analysis_results']['wrongmarker_result_dir'],
+    output:
+        sim_performance_figure='{outdir}/figures/sim_performance_figure.pdf'.format(outdir=config['outdir'])
+    params:
+        name='simulation-performance-figure',
+    log:
+        '{logdir}/logs/simulation_performance_figure.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/simulation_performance_figure.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/simulation_overview_figure.R '
+        '--deprob_result_dir {input.deprob_result_dir} '
+        '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
+        '--outfname {output.sim_performance_figure} '
+        '>& {log}'
 
 rule fl_overview_figure:
     input:
