@@ -132,11 +132,9 @@ map_and_evaluate_clusters <- function(sce_sim, min_count = 0) {
   de_evaluation_measures <- compute_evaluation_measures(sce_de, 
                                                          truth_labels = sce_de$Group,
                                                          inferred_labels = sce_de$inferred_group)
-  print(de_evaluation_measures)
   corr_evaluation_measures <- compute_evaluation_measures(sce_correlation, 
                                                            truth_labels = sce_correlation$Group,
                                                            inferred_labels = sce_correlation$inferred_group)
-  print(corr_evaluation_measures)
   
   evaluation_measures <- rbind(data.frame(mapping_type = "de", de_evaluation_measures, stringsAsFactors = FALSE), data.frame(mapping_type = "correlation", corr_evaluation_measures, stringsAsFactors = FALSE))
   
