@@ -83,6 +83,7 @@ sce <- sce_total[,which(as.character(colData(sce_total)$Cell) %in% as.character(
 ```{r}
 cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clustering_method, conda_env = "r-tensorflow", conda_binary = "/home/rstudio/miniconda/bin/conda", seurat_resolution = 0.6,
                             object2 = NULL, object2_cluster_label = "Group") {
+  sce_original <- sce
   if (!is.null(gene_subset)) {
     sce <- sce[gene_subset,]
     sce <- runPCA(sce, ntop = 500, ncomponents = 50, exprs_values = "logcounts")
@@ -93,21 +94,23 @@ cluster_wrapper <- function(sce, gene_subset = NULL, dimreduce_method, clusterin
   }
   
   if (clustering_method == "phenograph") {
-    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, conda_env = conda_env, 
+    sce <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, conda_env = conda_env, 
       conda_binary = conda_binary,
       phenograph_module = "scrnatools.methods.clustering.phenograph_analysis")
   } else if (clustering_method == "dbscan") {
-    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, dbscan_epsilon = 0.5, dbscan_minPoints = 5)
+    sce <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, dbscan_epsilon = 0.5, dbscan_minPoints = 5)
   } else if (str_detect(clustering_method, "^seurat")) {
-    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
+    sce <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
                                    seurat_resolution = seurat_resolution)
   } else if (clustering_method %in% c("Zheng_cor", "scmap")) {
-    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
+    sce <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method,
                                    object2 = object2, object2_cluster_label = object2_cluster_label)
   } else {
-    sce_clustered <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, ncores = 1)
+    sce <- cluster_cells(sce, method = clustering_method, dimreduce_type = dimreduce_method, ncores = 1)
   }
-  return(sce_clustered)
+  
+  sce_original$cluster <- sce$cluster
+  return(sce_original)
 }
 
 map_and_evaluate_clusters <- function(sce_sim, min_count = 0) {
@@ -116,7 +119,7 @@ map_and_evaluate_clusters <- function(sce_sim, min_count = 0) {
   
   nclusts <- length(unique(sce_sim$cluster))
   
-  if (nclusts > 1) {
+  if (nclusts > 1 & !all(is.na(sce_sim$cluster))) {
     sce_de <- map_clusters(sce_sim, method = "de2", FDR_cutoff = 0.05)
     sce_correlation <- map_clusters(sce_sim, method = "correlation", min_correlation = 0)
   } else {
@@ -129,9 +132,11 @@ map_and_evaluate_clusters <- function(sce_sim, min_count = 0) {
   de_evaluation_measures <- compute_evaluation_measures(sce_de, 
                                                          truth_labels = sce_de$Group,
                                                          inferred_labels = sce_de$inferred_group)
+  print(de_evaluation_measures)
   corr_evaluation_measures <- compute_evaluation_measures(sce_correlation, 
                                                            truth_labels = sce_correlation$Group,
                                                            inferred_labels = sce_correlation$inferred_group)
+  print(corr_evaluation_measures)
   
   evaluation_measures <- rbind(data.frame(mapping_type = "de", de_evaluation_measures, stringsAsFactors = FALSE), data.frame(mapping_type = "correlation", corr_evaluation_measures, stringsAsFactors = FALSE))
   
