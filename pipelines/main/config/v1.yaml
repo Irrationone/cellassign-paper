@@ -6,7 +6,7 @@ logdir: '/datadrive/projects/cellassign-paper/results/logs/main/v1'
 # Simulation results
 simulation_analysis_results:
   deprob_result_dir: /datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob3
-  wrongmarker_result_dir: /datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers2
+  wrongmarker_result_dir: /datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers3
 
 delta_deprobs:
   - 0.15
