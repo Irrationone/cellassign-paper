@@ -113,71 +113,6 @@
     <filter
        inkscape:collect="always"
        style="color-interpolation-filters:sRGB"
-       id="filter4795"
-       x="-0.035999998"
-       width="1.072"
-       y="-0.035999998"
-       height="1.072">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.058932928"
-         id="feGaussianBlur4797" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       style="color-interpolation-filters:sRGB"
-       id="filter4803"
-       x="-0.024"
-       width="1.048"
-       y="-0.024"
-       height="1.048">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.039288619"
-         id="feGaussianBlur4805" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       style="color-interpolation-filters:sRGB"
-       id="filter4811"
-       x="-0.020197432"
-       width="1.0403949"
-       y="-0.029566474"
-       height="1.0591331">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.062937139"
-         id="feGaussianBlur4813" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       style="color-interpolation-filters:sRGB"
-       id="filter5111"
-       x="-0.047190774"
-       width="1.0943815"
-       y="-0.047190774"
-       height="1.0943815">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.077252515"
-         id="feGaussianBlur5113" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       style="color-interpolation-filters:sRGB"
-       id="filter5179"
-       x="-0.058800001"
-       width="1.1176"
-       y="-0.058800001"
-       height="1.1176">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.096257115"
-         id="feGaussianBlur5181" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       style="color-interpolation-filters:sRGB"
        id="filter5191"
        x="-0.041815732"
        width="1.0836315"
@@ -187,19 +122,6 @@
          inkscape:collect="always"
          stdDeviation="0.10248767"
          id="feGaussianBlur5193" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       style="color-interpolation-filters:sRGB"
-       id="filter5203"
-       x="-0.041815732"
-       width="1.0836315"
-       y="-0.056330979"
-       height="1.112662">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.10248767"
-         id="feGaussianBlur5205" />
     </filter>
     <clipPath
        id="clipPath6439"
@@ -241,8 +163,8 @@
      showgrid="false"
      inkscape:window-width="1700"
      inkscape:window-height="1023"
-     inkscape:window-x="-60"
-     inkscape:window-y="8"
+     inkscape:window-x="-71"
+     inkscape:window-y="0"
      inkscape:window-maximized="0"
      inkscape:snap-global="false"
      fit-margin-top="0"
@@ -285,7 +207,7 @@
     <g
        id="g4614"
        transform="translate(39.885288,29.903691)"
-       style="filter:url(#filter4795)">
+       style="">
       <circle
          r="1.9644309"
          cy="16.086363"
@@ -302,7 +224,7 @@
     <g
        id="g4626"
        transform="translate(30.48,30.444722)"
-       style="filter:url(#filter4803)">
+       style="">
       <circle
          style="fill:#e9afaf;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
          id="circle4616"
@@ -318,7 +240,7 @@
     </g>
     <g
        id="g4675"
-       style="opacity:1;stroke:#000000;stroke-opacity:1;filter:url(#filter4811)"
+       style="opacity:1;stroke:#000000;stroke-opacity:1;"
        transform="translate(43.285833,29.421667)">
       <path
          inkscape:connector-curvature="0"
@@ -335,7 +257,7 @@
     <g
        id="g4712"
        transform="translate(57.573333,32.7025)"
-       style="filter:url(#filter5203)">
+       style="">
       <path
          inkscape:connector-curvature="0"
          id="path4679"
@@ -348,8 +270,7 @@
          style="fill:#442178;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     </g>
     <g
-       style="filter:url(#filter4795)"
-       transform="translate(33.711677,30.856191)"
+       transform="translate(34.240844,31.120774)"
        id="g4918">
       <circle
          style="fill:#aaccff;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
@@ -367,7 +288,7 @@
     <g
        id="g4924"
        transform="translate(47.611121,29.656747)"
-       style="filter:url(#filter4795)">
+       style="">
       <circle
          r="1.9644309"
          cy="16.086363"
@@ -382,7 +303,7 @@
          style="fill:#0055d4;fill-opacity:1;stroke:#000000;stroke-width:0.19504283" />
     </g>
     <g
-       style="filter:url(#filter4795)"
+       style=""
        transform="translate(39.426677,35.653969)"
        id="g4930">
       <circle
@@ -399,7 +320,7 @@
          r="0.68958056" />
     </g>
     <g
-       style="filter:url(#filter4803)"
+       style=""
        transform="translate(27.587223,39.158334)"
        id="g4936">
       <circle
@@ -418,7 +339,7 @@
     <g
        id="g5035"
        transform="translate(81.494567,-0.54103067)"
-       style="opacity:1;filter:url(#filter5179)">
+       style="opacity:1;">
       <circle
          r="1.9644309"
          cy="16.086363"
@@ -444,7 +365,7 @@
          y="16.894442"
          style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';stroke-width:0.26458332">T cell: CD2, CD3, CD45</tspan></text>
     <g
-       style="opacity:1;filter:url(#filter5111)"
+       style="opacity:1;"
        transform="translate(67.837094,5.0447223)"
        id="g5045">
       <circle
@@ -469,9 +390,9 @@
        inkscape:connector-curvature="0"
        id="path5151"
        d="m 112.43707,36.298746 c -0.001,0.347964 -0.25001,0.625861 -0.48182,0.857892 -0.19522,0.195367 -0.41155,0.370541 -0.59395,0.577521 -0.11303,0.114364 -0.27714,-0.0088 -0.39789,0.0565 -0.0778,0.116097 0.0542,0.272518 -0.0753,0.363828 -0.13046,0.193638 -0.26897,0.403725 -0.28578,0.642944 -0.0127,0.164553 0.18527,0.19189 0.30347,0.145447 0.326,-0.09579 0.6245,-0.272028 0.89473,-0.475348 0.42991,-0.329849 0.7866,-0.806961 0.83706,-1.360628 0.015,-0.149914 0.0164,-0.311424 -0.0724,-0.441089 -0.0656,-0.11207 -0.14687,-0.230023 -0.12819,-0.367067 z"
-       style="fill:#442178;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;filter:url(#filter5191)" />
+       style="fill:#442178;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;" />
     <g
-       style="filter:url(#filter5191)"
+       style=""
        id="g6413"
        inkscape:label="dr_plot"
        transform="matrix(0.21100319,0,0,-0.21100319,40.002308,187.67686)">
@@ -3144,7 +3065,7 @@
          id="g7547" />
     </g>
     <g
-       style="filter:url(#filter5191)"
+       style=""
        id="g8144"
        inkscape:label="marker_plot"
        transform="matrix(0.18938517,0,0,-0.18938517,99.18968,88.405114)">
@@ -3587,7 +3508,7 @@
          id="g8396" />
     </g>
     <g
-       style="filter:url(#filter5191)"
+       style=""
        id="g8552"
        inkscape:label="probs"
        transform="matrix(0.14599177,0,0,-0.14599177,134.38394,187.07847)">
@@ -4009,7 +3930,7 @@
        id="text8815"
        y="35.327084"
        x="71.333565"
-       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;filter:url(#filter5191)"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;"
        xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:Helvetica;-inkscape-font-specification:'Helvetica Bold';text-align:center;text-anchor:middle;stroke-width:0.26458332"
          y="35.327084"
@@ -4023,7 +3944,7 @@
          sodipodi:role="line">heterogeneous data</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;filter:url(#filter5191)"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;"
        x="140.12523"
        y="4.900002"
        id="text8845"><tspan
@@ -4041,7 +3962,7 @@
        id="text8855"
        y="47.762501"
        x="154.41273"
-       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;filter:url(#filter5191)"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;"
        xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:Helvetica;-inkscape-font-specification:'Helvetica Bold';text-align:center;text-anchor:middle;stroke-width:0.26458332"
          y="47.762501"
@@ -4050,7 +3971,7 @@
          id="tspan8853">Binarization</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;filter:url(#filter5191)"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;"
        x="98.585648"
        y="104.38334"
        id="text8861"><tspan
@@ -4077,12 +3998,12 @@
        height="26.222097"
        width="58.113842"
        id="rect8871"
-       style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.23623511;stroke-opacity:1;filter:url(#filter5191)" />
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.23623511;stroke-opacity:1;" />
     <text
        id="text8879"
        y="190.37291"
        x="63.925232"
-       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;filter:url(#filter5191)"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;"
        xml:space="preserve"><tspan
          id="tspan8886"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:Helvetica;-inkscape-font-specification:'Helvetica Bold';text-align:center;text-anchor:middle;stroke-width:0.26458332"
@@ -4091,7 +4012,7 @@
          sodipodi:role="line">Cell type assignments</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;filter:url(#filter5191)"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;"
        x="150.1794"
        y="191.69583"
        id="text8892"><tspan
@@ -4134,7 +4055,7 @@
          id="tspan5163"
          sodipodi:role="line">Fibroblast: COL1A1, ACTA2, THY90</tspan></text>
     <g
-       style="filter:url(#filter4795)"
+       style=""
        transform="translate(80.948621,56.379663)"
        id="g8898">
       <circle
@@ -4153,7 +4074,7 @@
     <g
        id="g8904"
        transform="translate(67.247182,49.230139)"
-       style="opacity:1;filter:url(#filter5111)">
+       style="opacity:1;">
       <circle
          style="fill:#e9afaf;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
          id="circle8900"
@@ -4168,7 +4089,7 @@
          r="0.68958056" />
     </g>
     <g
-       style="filter:url(#filter5203)"
+       style=""
        transform="translate(101.71552,37.332709)"
        id="g8940">
       <path
@@ -4185,7 +4106,7 @@
     <g
        id="g8970"
        transform="translate(108.99445,115.18825)"
-       style="filter:url(#filter4795)">
+       style="">
       <circle
          r="1.9644309"
          cy="16.086363"
@@ -4200,7 +4121,7 @@
          style="fill:#0055d4;fill-opacity:1;stroke:#000000;stroke-width:0.19504283" />
     </g>
     <g
-       style="opacity:1;filter:url(#filter5111)"
+       style="opacity:1;"
        transform="translate(102.43677,113.69154)"
        id="g8982">
       <circle
@@ -4219,7 +4140,7 @@
     <g
        id="g8988"
        transform="translate(153.04469,112.78784)"
-       style="filter:url(#filter5203)">
+       style="">
       <path
          inkscape:connector-curvature="0"
          id="path8984"
@@ -4232,7 +4153,7 @@
          style="fill:#442178;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     </g>
     <g
-       style="filter:url(#filter4795)"
+       style=""
        transform="translate(41.5257,137.67784)"
        id="g10745">
       <circle
@@ -4249,7 +4170,7 @@
          r="0.68958056" />
     </g>
     <g
-       style="filter:url(#filter5203)"
+       style=""
        transform="translate(55.942607,158.82534)"
        id="g10757">
       <path
@@ -4266,7 +4187,7 @@
     <g
        id="g10763"
        transform="translate(37.613853,152.58529)"
-       style="opacity:1;filter:url(#filter5111)">
+       style="opacity:1;">
       <circle
          style="fill:#e9afaf;fill-opacity:1;stroke:#000000;stroke-width:0.26458332"
          id="circle10759"
