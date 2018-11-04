@@ -3,19 +3,21 @@ configfile: 'config/v1.yaml'
 
 rule all:
     input:
-        koh_annotated='{outdir}/koh/sce_annotated.rds'.format(outdir=config['outdir']),
+        koh_annotated='{outdir}/koh/sce_cellassign.rds'.format(outdir=config['outdir']),
 
 rule koh_preprocess:
     output:
         '{workdir}/koh/sce_preprocess.rds'.format(workdir=config['workdir'])
     params:
         name='koh-preprocess',
+        celltypes=config['koh_analysis']['celltypes'],
     log:
         '{logdir}/logs/koh/sce_preprocess.log'.format(logdir=config['logdir'])
     benchmark:
         '{logdir}/benchmarks/sce_preprocess.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/koh_preprocess.R '
+        '--koh_celltypes {params.celltypes} '
         '--outfname {output} '
         '>& {log}'
 
@@ -24,7 +26,7 @@ rule koh_cellassign:
         koh_preprocessed='{workdir}/koh/sce_preprocess.rds'.format(workdir=config['workdir']),
         bulkrna_de=config['koh_data']['bulkrna_de'],
     output:
-        koh_annotated='{outdir}/koh/sce_annotated.rds'.format(outdir=config['outdir']),
+        koh_cellassign='{outdir}/koh/sce_cellassign.rds'.format(outdir=config['outdir']),
     params:
         name='koh-cellassign',
     log:
@@ -35,6 +37,24 @@ rule koh_cellassign:
         'Rscript R/koh_cellassign.R '
         '--sce {input.koh_preprocessed} '
         '--bulkrna_de {input.bulkrna_de} '
+        '--outfname {output.koh_cellassign} '
+        '>& {log}'
+
+# Run external clustering methods on Koh data
+rule koh_cluster:
+    input:
+        koh_cellassign='{outdir}/koh/sce_cellassign.rds'.format(outdir=config['outdir']),
+    params:
+        name='koh-cellassign',
+        koh_cluster_methods=config['koh_cluster_methods'],
+    log:
+        '{logdir}/logs/koh/sce_cellassign.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/sce_cellassign.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/koh_cellassign.R '
+        '--sce {input.koh_cellassign} '
+        '--clustering_methods {params.koh_cluster_methods} '
         '--outfname {output.koh_annotated} '
         '>& {log}'
 

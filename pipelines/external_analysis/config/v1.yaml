@@ -4,3 +4,14 @@ logdir: /datadrive/projects/cellassign-paper/results/logs/external/v1
 
 koh_data:
   bulkrna_de: /datadrive/data/external/scrna/koh/SD_bulkRNA_DE_annotated.csv
+
+koh_analysis:
+  celltypes:
+    - hESC
+    - APS
+    - MPS
+    - DLL1pPXM
+    - ESMT
+    - Sclrtm
+    - D5CntrlDrmmtm
+    - D2LtM
