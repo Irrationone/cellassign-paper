@@ -44,6 +44,7 @@ rule koh_cellassign:
         '--koh_bulkrna {input.bulkrna_de} '
         '--koh_celltypes {params.celltypes} '
         '--quantile_cutoff {params.marker_quantile} '
+        '--conda_env r-tensorflow '
         '--outfname {output.koh_cellassign} '
         '--outrho {output.cellassign_rho} '
         '>& {log}'
@@ -67,6 +68,7 @@ rule koh_cluster:
         '--sce {input.koh_cellassign} '
         '--rho {input.cellassign_rho} '
         '--clustering_methods {params.koh_cluster_methods} '
+        '--conda_env r-tensorflow '
         '--outfname {output.koh_annotated} '
         '>& {log}'
 
