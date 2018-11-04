@@ -1,6 +1,8 @@
 
 configfile: 'config/v1.yaml'
 
+singularity: "docker://alzhang/scrna-analysis-external-3.5:v1.0"
+
 rule all:
     input:
         koh_annotated='{outdir}/koh/sce_cellassign.rds'.format(outdir=config['outdir']),
