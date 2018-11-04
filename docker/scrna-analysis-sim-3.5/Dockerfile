@@ -2,10 +2,10 @@
 
 FROM rocker/rstudio:3.5.0 as intermediate
 
-# docker build --no-cache -t scrna-analysis-sim-3.5:latest -t scrna-analysis-sim-3.5:v1.12 .
-# docker tag scrna-analysis-sim-3.5:v1.12 alzhang/scrna-analysis-sim-3.5:v1.12
+# docker build --no-cache -t scrna-analysis-sim-3.5:latest -t scrna-analysis-sim-3.5:v1.13 .
+# docker tag scrna-analysis-sim-3.5:v1.13 alzhang/scrna-analysis-sim-3.5:v1.13
 # docker tag scrna-analysis-sim-3.5:latest alzhang/scrna-analysis-sim-3.5:latest
-# docker push alzhang/scrna-analysis-sim-3.5:v1.12
+# docker push alzhang/scrna-analysis-sim-3.5:v1.13
 # docker push alzhang/scrna-analysis-sim-3.5:latest
 
 # Install git
