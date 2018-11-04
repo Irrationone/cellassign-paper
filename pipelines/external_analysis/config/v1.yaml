@@ -15,3 +15,10 @@ koh_analysis:
     - Sclrtm
     - D5CntrlDrmmtm
     - D2LtM
+  clustering_methods:
+    - seurat_0.4
+    - seurat_0.8
+    - seurat_1.2
+    - SC3
+    - phenograph
+  marker_quantile: 0.8

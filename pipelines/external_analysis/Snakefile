@@ -5,7 +5,7 @@ singularity: "docker://alzhang/scrna-analysis-external-3.5:v1.0"
 
 rule all:
     input:
-        koh_annotated='{outdir}/koh/sce_cellassign.rds'.format(outdir=config['outdir']),
+        koh_annotated='{outdir}/koh/sce_annotated.rds'.format(outdir=config['outdir']),
 
 rule koh_preprocess:
     output:
@@ -28,9 +28,11 @@ rule koh_cellassign:
         koh_preprocessed='{workdir}/koh/sce_preprocess.rds'.format(workdir=config['workdir']),
         bulkrna_de=config['koh_data']['bulkrna_de'],
     output:
-        koh_cellassign='{outdir}/koh/sce_cellassign.rds'.format(outdir=config['outdir']),
+        koh_cellassign='{workdir}/koh/sce_cellassign.rds'.format(workdir=config['workdir']),
+        cellassign_rho='{workdir}/koh/cellassign_rho.tsv'.format(workdir=config['workdir']),
     params:
         name='koh-cellassign',
+        marker_quantile=config['koh_analysis']['marker_quantile'],
     log:
         '{logdir}/logs/koh/sce_cellassign.log'.format(logdir=config['logdir'])
     benchmark:
@@ -39,23 +41,29 @@ rule koh_cellassign:
         'Rscript R/koh_cellassign.R '
         '--sce {input.koh_preprocessed} '
         '--bulkrna_de {input.bulkrna_de} '
+        '--quantile_cutoff {params.marker_quantile} '
         '--outfname {output.koh_cellassign} '
+        '--outrho {output.cellassign_rho} '
         '>& {log}'
 
 # Run external clustering methods on Koh data
 rule koh_cluster:
     input:
-        koh_cellassign='{outdir}/koh/sce_cellassign.rds'.format(outdir=config['outdir']),
+        koh_cellassign='{workdir}/koh/sce_cellassign.rds'.format(workdir=config['workdir']),
+        cellassign_rho='{workdir}/koh/cellassign_rho.tsv'.format(workdir=config['workdir']),
+    output:
+        koh_annotated='{outdir}/koh/sce_annotated.rds'.format(outdir=config['outdir']),
     params:
-        name='koh-cellassign',
-        koh_cluster_methods=config['koh_cluster_methods'],
+        name='koh-cluster',
+        koh_cluster_methods=config['koh_analysis']['clustering_methods'],
     log:
-        '{logdir}/logs/koh/sce_cellassign.log'.format(logdir=config['logdir'])
+        '{logdir}/logs/koh/sce_cluster.log'.format(logdir=config['logdir'])
     benchmark:
-        '{logdir}/benchmarks/sce_cellassign.txt'.format(logdir=config['logdir'])
+        '{logdir}/benchmarks/sce_cluster.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/koh_cellassign.R '
+        'Rscript R/koh_cluster.R '
         '--sce {input.koh_cellassign} '
+        '--rho {input.cellassign_rho} '
         '--clustering_methods {params.koh_cluster_methods} '
         '--outfname {output.koh_annotated} '
         '>& {log}'
