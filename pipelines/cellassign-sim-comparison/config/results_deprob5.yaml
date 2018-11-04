@@ -31,11 +31,11 @@ group_probss:
 batch_probss:
   - '1'
 de_faclocs:
-  - 0.03
+  - 0.028
 de_facscales:
   - 0.015
 de_nus:
-  - 1.5
+  - 1.35
 de_min: 1
 de_max: 1000
 batch_faclocs:
