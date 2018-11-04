@@ -163,7 +163,7 @@
      showgrid="false"
      inkscape:window-width="1700"
      inkscape:window-height="1023"
-     inkscape:window-x="-71"
+     inkscape:window-x="10"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
      inkscape:snap-global="false"
@@ -3930,18 +3930,18 @@
        id="text8815"
        y="35.327084"
        x="71.333565"
-       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:Helvetica;-inkscape-font-specification:'Helvetica Bold';text-align:center;text-anchor:middle;stroke-width:0.26458332"
          y="35.327084"
          x="71.333565"
          id="tspan8813"
-         sodipodi:role="line">Count matrix for</tspan><tspan
+         sodipodi:role="line">Expression count matrix for</tspan><tspan
          id="tspan8817"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:Helvetica;-inkscape-font-specification:'Helvetica Bold';text-align:center;text-anchor:middle;stroke-width:0.26458332"
          y="40.080009"
          x="71.333565"
-         sodipodi:role="line">heterogeneous data</tspan></text>
+         sodipodi:role="line">heterogeneous population</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;"
