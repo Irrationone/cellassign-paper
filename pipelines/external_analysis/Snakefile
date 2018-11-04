@@ -33,6 +33,7 @@ rule koh_cellassign:
     params:
         name='koh-cellassign',
         marker_quantile=config['koh_analysis']['marker_quantile'],
+        celltypes=config['koh_analysis']['celltypes'],
     log:
         '{logdir}/logs/koh/sce_cellassign.log'.format(logdir=config['logdir'])
     benchmark:
@@ -40,7 +41,8 @@ rule koh_cellassign:
     shell:
         'Rscript R/koh_cellassign.R '
         '--sce {input.koh_preprocessed} '
-        '--bulkrna_de {input.bulkrna_de} '
+        '--koh_bulkrna {input.bulkrna_de} '
+        '--koh_celltypes {params.celltypes} '
         '--quantile_cutoff {params.marker_quantile} '
         '--outfname {output.koh_cellassign} '
         '--outrho {output.cellassign_rho} '
