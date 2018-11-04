@@ -1,0 +1,40 @@
+
+configfile: 'config/v1.yaml'
+
+rule all:
+    input:
+        koh_annotated='{outdir}/koh/sce_annotated.rds'.format(outdir=config['outdir']),
+
+rule koh_preprocess:
+    output:
+        '{workdir}/koh/sce_preprocess.rds'.format(workdir=config['workdir'])
+    params:
+        name='koh-preprocess',
+    log:
+        '{logdir}/logs/koh/sce_preprocess.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/sce_preprocess.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/koh_preprocess.R '
+        '--outfname {output} '
+        '>& {log}'
+
+rule koh_cellassign:
+    input:
+        koh_preprocessed='{workdir}/koh/sce_preprocess.rds'.format(workdir=config['workdir']),
+        bulkrna_de=config['koh_data']['bulkrna_de'],
+    output:
+        koh_annotated='{outdir}/koh/sce_annotated.rds'.format(outdir=config['outdir']),
+    params:
+        name='koh-cellassign',
+    log:
+        '{logdir}/logs/koh/sce_cellassign.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/sce_cellassign.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/koh_cellassign.R '
+        '--sce {input.koh_preprocessed} '
+        '--bulkrna_de {input.bulkrna_de} '
+        '--outfname {output.koh_annotated} '
+        '>& {log}'
+

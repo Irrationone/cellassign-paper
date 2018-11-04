@@ -1,0 +1,6 @@
+workdir: /datadrive/projects/cellassign-paper/results/scratch/external/v1
+outdir: /datadrive/projects/cellassign-paper/results/outputs/external/v1
+logdir: /datadrive/projects/cellassign-paper/results/logs/external/v1
+
+koh_data:
+  bulkrna_de: /datadrive/data/external/scrna/koh/SD_bulkRNA_DE_annotated.csv
