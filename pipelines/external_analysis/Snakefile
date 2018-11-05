@@ -38,6 +38,7 @@ rule koh_cellassign:
         '{logdir}/logs/koh/sce_cellassign.log'.format(logdir=config['logdir'])
     benchmark:
         '{logdir}/benchmarks/sce_cellassign.txt'.format(logdir=config['logdir'])
+    threads: 20
     shell:
         'Rscript R/koh_cellassign.R '
         '--sce {input.koh_preprocessed} '
@@ -63,6 +64,7 @@ rule koh_cluster:
         '{logdir}/logs/koh/sce_cluster.log'.format(logdir=config['logdir'])
     benchmark:
         '{logdir}/benchmarks/sce_cluster.txt'.format(logdir=config['logdir'])
+    threads: 20
     shell:
         'Rscript R/koh_cluster.R '
         '--sce {input.koh_cellassign} '
