@@ -8,6 +8,7 @@ library(data.table)
 library(methods)
 library(scran)
 library(Matrix)
+library(infotheo)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -24,10 +25,18 @@ parser$add_argument('--koh_celltypes', type = 'character', nargs='+',
                     help="Celltypes to use in Koh analysis (i.e. intersection of bulk and scRNAseq data)")
 parser$add_argument('--quantile_cutoff', type = 'double',
                     help="Quantile cutoff for marker genes (by maxdiff)", default = 0.8)
+parser$add_argument('--conda_env', type = 'character',
+                    help="Conda environment", default = 'r-tensorflow')
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for Koh SCE")
 parser$add_argument('--outrho', type = 'character', metavar = 'FILE',
                     help="Output path for CellAssign rho")
+args <- parser$parse_args()
+
+# Attempt to reset snakemake's default
+Sys.setenv(PYTHONPATH='')
+
+reticulate::use_condaenv(args$conda_env, conda = "/home/rstudio/miniconda/bin/conda")
 
 sce_path <- args$sce
 sce_koh_normalized <- readRDS(sce_path)
@@ -107,13 +116,13 @@ rho <- expr_mat_thres[maxdiffs >= quantile(maxdiffs, quantile_cutoff),] %>%
 
 rho <- rho[intersect(rownames(rho), rownames(sce_koh_normalized)),]
 B <- 20
-s <- sizeFactors(koh_normalized)
+s <- sizeFactors(sce_koh_normalized)
 
 res <- cellassign_em(exprs_obj = sce_koh_normalized[rownames(rho),], 
                      s = s, rho = rho, X = NULL, B = B, 
                      use_priors = TRUE, prior_type = "shrinkage", 
                      delta_variance_prior = FALSE, verbose = FALSE, 
-                     em_convergence_thres = 1e-5, num_runs = 3, 
+                     em_convergence_thres = 1e-5, num_runs = 5, 
                      min_delta = quantile(maxdiffs, quantile_cutoff))
 
 

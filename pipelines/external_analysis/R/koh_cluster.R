@@ -24,8 +24,14 @@ parser$add_argument('--rho', type = 'character', metavar='FILE',
                     help="Rho from CellAssign")
 parser$add_argument('--clustering_methods', type = 'character', nargs ='+',
                     help="Clustering methods to run")
+parser$add_argument('--conda_env', type = 'character',
+                    help="Conda environment", default = 'r-tensorflow')
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for annotated SCE")
+args <- parser$parse_args()
+
+# Attempt to reset snakemake's default
+Sys.setenv(PYTHONPATH='')
 
 reticulate::use_condaenv(args$conda_env, conda = "/home/rstudio/miniconda/bin/conda")
 

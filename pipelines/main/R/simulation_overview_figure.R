@@ -128,7 +128,7 @@ wm_plot_cellassign <- wm_plots$cellassign +
 
 
 # Final plot
-de_plots_labeled <- cowplot::plot_grid(de_plot_markers, de_plot_full, de_plot_legend,
+de_plots_labeled <- cowplot::plot_grid(de_plot_full, de_plot_markers, de_plot_legend,
                                        labels = c('a', 'b', ''),
                                        ncol = 1,
                                        nrow = 3,

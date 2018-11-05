@@ -20,6 +20,7 @@ parser$add_argument('--koh_celltypes', type = 'character', nargs='+',
                     help="Celltypes to use in Koh analysis (i.e. intersection of bulk and scRNAseq data)")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for Koh SCE")
+args <- parser$parse_args()
 
 koh_celltypes <- unlist(args$koh_celltypes)
 

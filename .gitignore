@@ -27,6 +27,7 @@ intermediates/
 *.tree
 *.log
 .keras/
+.ExperimentHub/
 
 ## Allow
 !sce_t4k_params.rds
