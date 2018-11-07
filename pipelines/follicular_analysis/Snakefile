@@ -8,6 +8,7 @@ rule all:
         bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_bcells.rds'.format(outdir=config['outdir']),
         de_results=expand('{outdir}/differential_expression/timepoint/{{celltype_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_celltype_groups']),
         de_res='{outdir}/differential_expression/malignant_timepoint/b_cells.rds'.format(outdir=config['outdir']),
+        RLN_normalized='{workdir}/sce_RLN_normalized.rds'.format(workdir=config['workdir']),
         #follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(workdir=config['workdir']),
 
 
@@ -369,4 +370,57 @@ rule filter_bcells:
         '--malignancy_filter all '
         '--celltype_probability {params.b_cell_probability} '
         '--outfname {output.bcells_annotated} '
+        '>& {log}'
+
+### RLN processing
+
+# Create SingleCellExperiment
+rule create_rln_sce:
+    input:
+        filtered_matrices=[config['RLN_data'][x]['filtered_matrix_path'] for x in config['RLN_data']],
+    output:
+        '{workdir}/sce_RLN.rds'.format(workdir=config['workdir'])
+    params:
+        name='create-rln-sce',
+        sample_names=[config['RLN_data'][x]['dataset'] for x in config['RLN_data']],
+        timepoints=[config['RLN_data'][x]['timepoint'] for x in config['RLN_data']],
+        progression_statuses=[config['RLN_data'][x]['progression_status'] for x in config['RLN_data']],
+        patient_progression_statuses=[config['RLN_data'][x]['patient_progression_status'] for x in config['RLN_data']],
+        patients=[config['RLN_data'][x]['patient'] for x in config['RLN_data']],
+    log:
+        '{logdir}/logs/create_rln_sce.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/create_rln_sce.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/create_sce.R '
+        '--sample_names {params.sample_names} '
+        '--filtered_matrices {input.filtered_matrices} '
+        '--timepoints {params.timepoints} '
+        '--progression {params.progression_statuses} '
+        '--patient_progression {params.patient_progression_statuses} '
+        '--patients {params.patients} '
+        '--outfname {output} '
+        '>& {log}'
+
+
+# Filter and normalize SingleCellExperiment
+rule preprocess_rln_sce:
+    input:
+        RLN_raw='{workdir}/sce_RLN.rds'.format(workdir=config['workdir']),
+    output:
+        RLN_normalized='{workdir}/sce_RLN_normalized.rds'.format(workdir=config['workdir']),
+    params:
+        name='preprocess-rln-sce',
+        mito_thres=config['filter_settings']['mito_thres'],
+        ribo_thres=config['filter_settings']['ribo_thres'],
+    log:
+        '{logdir}/logs/preprocess_rln_sce.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/preprocess_rln_sce.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/preprocess_sce.R '
+        '--sce {input.RLN_raw} '
+        '--mito_thres {params.mito_thres} '
+        '--ribo_thres {params.ribo_thres} '
+        '--outfname {output.RLN_normalized} '
         '>& {log}'

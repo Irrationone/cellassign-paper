@@ -28,6 +28,37 @@ follicular_data:
     patient_progression_status: transformed
     filtered_matrix_path: '/datadrive/data/follicular/FL1018T2/filtered_gene_bc_matrices/GRCh38'
 
+# Paths to RLN filtered gene expression matrices
+RLN_data:
+  RLN-2:
+    dataset: RLN-2
+    patient: RLN-2
+    timepoint: T1
+    progression_status: none
+    patient_progression_status: healthy
+    filtered_matrix_path: '/datadrive/data/RLN/RLN-2/filtered_gene_bc_matrices/GRCh38'
+  RLN-3:
+    dataset: RLN-3
+    patient: RLN-3
+    timepoint: T1
+    progression_status: none
+    patient_progression_status: healthy
+    filtered_matrix_path: '/datadrive/data/RLN/RLN-3/filtered_gene_bc_matrices/GRCh38'
+  RLN-4:
+    dataset: RLN-4
+    patient: RLN-4
+    timepoint: T1
+    progression_status: none
+    patient_progression_status: healthy
+    filtered_matrix_path: '/datadrive/data/RLN/RLN-4/filtered_gene_bc_matrices/GRCh38'
+  RLN-5:
+    dataset: RLN-5
+    patient: RLN-5
+    timepoint: T1
+    progression_status: none
+    patient_progression_status: healthy
+    filtered_matrix_path: '/datadrive/data/RLN/RLN-5/filtered_gene_bc_matrices/GRCh38'
+
 # Unsupervised clustering settings
 cluster_settings:
   follicular_t:
