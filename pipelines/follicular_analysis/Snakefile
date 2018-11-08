@@ -12,7 +12,7 @@ rule all:
         #de_results=expand('{outdir}/differential_expression/timepoint/{{celltype_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_celltype_groups']),
         #de_res='{outdir}/differential_expression/malignant_timepoint/b_cells.rds'.format(outdir=config['outdir']),
         RLN_normalized='{workdir}/sce_RLN_normalized.rds'.format(workdir=config['workdir']),
-        #follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(workdir=config['workdir']),
+        follicular_annotated='{workdir}/sce_follicular_annotated.rds'.format(workdir=config['workdir']),
 
 
 # Create SingleCellExperiment
