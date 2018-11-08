@@ -1,7 +1,7 @@
 # Directories
-workdir: '/datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v1'
-outdir: '/datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v1'
-logdir: '/datadrive/projects/cellassign-paper/results/logs/follicular_analysis/v1'
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v2'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v2'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/follicular_analysis/v2'
 
 # Random seeds
 cluster_random_seed: 19279
@@ -10,6 +10,8 @@ cluster_random_seed: 19279
 follicular_sample_names:
   - FL1018T1
   - FL1018T2
+  - FL2001T1
+  - FL2001T2
 
 # Paths to filtered gene expression matrices
 follicular_data:
@@ -27,6 +29,21 @@ follicular_data:
     progression_status: transformed
     patient_progression_status: transformed
     filtered_matrix_path: '/datadrive/data/follicular/FL1018T2/filtered_gene_bc_matrices/GRCh38'
+  FL2001T1:
+    dataset: FL2001T1
+    patient: FL2001
+    timepoint: T1
+    progression_status: primary
+    patient_progression_status: progressed
+    filtered_matrix_path: '/datadrive/data/follicular/FL2001T1/filtered_gene_bc_matrices/GRCh38'
+  FL2001T2:
+    dataset: FL2001T2
+    patient: FL2001
+    timepoint: T1
+    progression_status: progressed
+    patient_progression_status: progressed
+    filtered_matrix_path: '/datadrive/data/follicular/FL2001T2/filtered_gene_bc_matrices/GRCh38'
+
 
 # Paths to RLN filtered gene expression matrices
 RLN_data:
@@ -132,3 +149,6 @@ gene_set: '/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2
 celltype_filters:
   broad_t_cell_probability: 0.9
   broad_b_cell_probability: 0.9
+
+scvis:
+  default_config: '/datadrive/projects/cellassign-paper/resources/scvis/config/default_config.yaml'
