@@ -39,7 +39,7 @@ follicular_data:
   FL2001T2:
     dataset: FL2001T2
     patient: FL2001
-    timepoint: T1
+    timepoint: T2
     progression_status: progressed
     patient_progression_status: progressed
     filtered_matrix_path: '/datadrive/data/follicular/FL2001T2/filtered_gene_bc_matrices/GRCh38'
