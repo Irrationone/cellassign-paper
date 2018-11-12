@@ -2,10 +2,10 @@
 
 FROM rocker/rstudio:3.5.0 as intermediate
 
-# docker build --no-cache -t scrna-analysis-follicular-3.5:latest -t scrna-analysis-follicular-3.5:v1.4 .
-# docker tag scrna-analysis-follicular-3.5:v1.4 alzhang/scrna-analysis-follicular-3.5:v1.4
+# docker build --no-cache -t scrna-analysis-follicular-3.5:latest -t scrna-analysis-follicular-3.5:v1.5 .
+# docker tag scrna-analysis-follicular-3.5:v1.5 alzhang/scrna-analysis-follicular-3.5:v1.5
 # docker tag scrna-analysis-follicular-3.5:latest alzhang/scrna-analysis-follicular-3.5:latest
-# docker push alzhang/scrna-analysis-follicular-3.5:v1.4
+# docker push alzhang/scrna-analysis-follicular-3.5:v1.5
 # docker push alzhang/scrna-analysis-follicular-3.5:latest
 
 # Install git
@@ -77,3 +77,9 @@ RUN Rscript -e "install.packages('lmerTest',dependencies=TRUE)" && \
 
 RUN echo 'BiocManager::install(c("org.Hs.eg.db", "ReactomePA"))' >> /opt/packages.r && \
     Rscript /opt/packages.r
+
+USER rstudio
+
+RUN /bin/bash -c "PATH=$HOME/miniconda/bin:$PATH && source activate r-tensorflow && git clone https://github.com/brianhie/scanorama.git && cd scanorama/ && python setup.py install --user && cd .. && rm -rf scanorama"
+
+USER root

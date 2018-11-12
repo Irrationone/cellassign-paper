@@ -293,43 +293,49 @@ rule annotate_follicular_final:
 rule differential_expression_timepoint_by_celltype:
     input:
         follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
-        gene_set=config['gene_set'],
     output:
-        de_tables='{outdir}/differential_expression/timepoint/{{celltype_group}}.rds'.format(outdir=config['outdir']),
+        de_tables='{outdir}/differential_expression/timepoint/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']),
     params:
         celltype_group=lambda wildcards: config['differential_expression_celltype_groups'][wildcards.celltype_group],
-        name='differential-expression-timepoint-{celltype_group}',
+        patient_group=lambda wildcards: config['differential_expression_patient_groups'][wildcards.patient_group],
+        de_method=config['differential_expression_settings']['gene_method'],
+        num_genes=config['differential_expression_settings']['num_genes'],
+        min_gene_counts=config['differential_expression_settings']['min_gene_counts'],
+        name='differential-expression-timepoint-{celltype_group}-{patient_group}',
     log:
-        '{logdir}/logs/differential_expression_timepoint/{{celltype_group}}.log'.format(logdir=config['logdir'])
+        '{logdir}/logs/differential_expression_timepoint/{{celltype_group}}/{{patient_group}}.log'.format(logdir=config['logdir'])
     benchmark:
-        '{logdir}/benchmarks/differential_expression_timepoint/{{celltype_group}}.txt'.format(logdir=config['logdir'])
+        '{logdir}/benchmarks/differential_expression_timepoint/{{celltype_group}}/{{patient_group}}.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/de_timepoint.R '
         '--sce {input.follicular_annotated} '
-        '--comparison timepoint '
         '--celltypes {params.celltype_group} '
-        '--gene_set_file {input.gene_set} '
+        '--patients {params.patient_group} '
+        '--method_gene {params.de_method} '
+        '--ngene {params.num_genes} '
         '--outfname {output.de_tables} '
         '>& {log}'
 
 rule differential_expression_bcell_malignant_timepoint:
     input:
         bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_bcells.rds'.format(outdir=config['outdir']),
-        gene_set=config['gene_set'],
     output:
-        de_res='{outdir}/differential_expression/malignant_timepoint/b_cells.rds'.format(outdir=config['outdir']),
+        de_res='{outdir}/differential_expression/malignant_timepoint/b_cells/{{patient_group}}.rds'.format(outdir=config['outdir']),
     params:
-        name='differential-expression-bcell-malignant-timepoint',
-        min_gene_counts=config['de_settings']['min_gene_counts'],
+        min_gene_counts=config['differential_expression_settings']['min_gene_counts'],
+        patient_group=lambda wildcards: config['differential_expression_patient_groups'][wildcards.patient_group],
+        num_genes=config['differential_expression_settings']['num_genes'],
+        name='differential-expression-bcell-malignant-timepoint-{patient_group}',
     log:
-        '{logdir}/logs/differential_expression_bcell_malignant_timepoint.log'.format(logdir=config['logdir'])
+        '{logdir}/logs/differential_expression_bcell_malignant_timepoint/{{patient_group}}.log'.format(logdir=config['logdir'])
     benchmark:
-        '{logdir}/benchmarks/differential_expression_bcell_malignant_timepoint.txt'.format(logdir=config['logdir'])
+        '{logdir}/benchmarks/differential_expression_bcell_malignant_timepoint/{{patient_group}}.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/de_b_cells_malignant_timepoint.R '
         '--sce {input.bcells_annotated} '
         '--min_gene_counts {params.min_gene_counts} '
-        '--gene_set_file {input.gene_set} '
+        '--patients {params.patient_group} '
+        '--ngene {params.num_genes} '
         '--outfname {output.de_res} '
         '>& {log}'
 
@@ -427,3 +433,22 @@ rule preprocess_rln_sce:
         '--ribo_thres {params.ribo_thres} '
         '--outfname {output.RLN_normalized} '
         '>& {log}'
+
+rule batch_correct:
+
+rule scvis_follicular_train:
+    input:
+    output:
+    params:
+    log:
+    benchmark:
+    shell:
+
+rule scvis_map_rln:
+    input:
+    output:
+    params:
+    log:
+        '{logdir}/logs/preprocess_rln_sce.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/preprocess_rln_sce.txt'.format(logdir=config['logdir'])

@@ -140,8 +140,20 @@ differential_expression_celltype_groups:
     - CD4\ \(activated\)
     - Naive/resting\ CD4
   
-de_settings:
+differential_expression_settings:
+  # Minimum number of UMIs to test a gene for DE
   min_gene_counts: 500
+  # Method of performing DE
+  gene_method: voom
+  # Number of top genes to use for pathway enrichment analysis
+  num_genes: 50
+
+
+differential_expression_patient_groups:
+  FL1018:
+    - FL1018
+  FL2001:
+    - FL2001
 
 gene_set: '/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt'
 
