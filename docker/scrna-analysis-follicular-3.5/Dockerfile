@@ -78,10 +78,8 @@ RUN Rscript -e "install.packages('lmerTest',dependencies=TRUE)" && \
 RUN echo 'BiocManager::install(c("org.Hs.eg.db", "ReactomePA"))' >> /opt/packages.r && \
     Rscript /opt/packages.r
 
-RUN /bin/bash -c "PATH=$HOME/miniconda/bin:$PATH && source activate r-tensorflow && cd $HOME && git clone https://github.com/brianhie/scanorama.git && cd scanorama/ && $HOME/miniconda/bin/python setup.py install"
+RUN /bin/bash -c "PATH=$HOME/miniconda/bin:$PATH && source activate r-tensorflow && cd / && git clone https://github.com/brianhie/scanorama.git && pip install /scanorama"
 
 USER rstudio
 
-RUN /bin/bash -c "PATH=$HOME/miniconda/bin:$PATH && source activate r-tensorflow && cd $HOME && git clone https://github.com/brianhie/scanorama.git && cd scanorama/ && $HOME/miniconda/bin/python setup.py install"
-
-USER root
+RUN /bin/bash -c "PATH=$HOME/miniconda/bin:$PATH && source activate r-tensorflow && pip install /scanorama"
