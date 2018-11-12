@@ -75,7 +75,7 @@ RUN rm -rf "/scrnaseq" && \
 RUN Rscript -e "install.packages('lmerTest',dependencies=TRUE)" && \
     Rscript -e "install.packages('argparse',dependencies=TRUE)"
 
-RUN echo 'BiocManager::install(c("org.Hs.eg.db", "ReactomePA"), update = FALSE)' >> /opt/packages.r && \
+RUN echo 'BiocManager::install(c("ReactomePA"), update = FALSE)' >> /opt/packages.r && \
     Rscript /opt/packages.r
 
 RUN /bin/bash -c "PATH=$HOME/miniconda/bin:$PATH && source activate r-tensorflow && cd / && git clone https://github.com/brianhie/scanorama.git && pip install /scanorama"
