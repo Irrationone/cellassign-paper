@@ -1,18 +1,19 @@
 configfile: "config/v1.yaml"
 
-singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.3"
+singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.5"
 
 rule all:
     input:
         #cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
         #follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
-        follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
+        #follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
         #tcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_tcells.rds'.format(outdir=config['outdir']),
         #bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_bcells.rds'.format(outdir=config['outdir']),
         #de_results=expand('{outdir}/differential_expression/timepoint/{{celltype_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_celltype_groups']),
         #de_res='{outdir}/differential_expression/malignant_timepoint/b_cells.rds'.format(outdir=config['outdir']),
-        RLN_normalized='{workdir}/sce_RLN_normalized.rds'.format(workdir=config['workdir']),
-        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
+        #RLN_normalized='{workdir}/sce_RLN_normalized.rds'.format(workdir=config['workdir']),
+        #follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
+        follicular_scvis_train='{workdir}/sce_follicular_annotated_final_scvis_train.rds'.format(workdir=config['workdir']),
 
 
 # Create SingleCellExperiment
@@ -435,20 +436,48 @@ rule preprocess_rln_sce:
         '>& {log}'
 
 rule batch_correct:
+    input:
+        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
+    output:
+        follicular_bc='{workdir}/sce_follicular_annotated_final_bc.rds'.format(workdir=config['workdir']),
+    params:
+        name='batch-correct',
+        batch_col=config['batch_correction_settings']['batch_variable'],
+        method=config['batch_correction_settings']['method'],
+        conda_env='r-tensorflow',
+    log:
+        '{logdir}/logs/batch_correct.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/batch_correct.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/batch_correct.R '
+        '--sce {input.follicular_annotated} '
+        '--conda_env {params.conda_env} '
+        '--method {params.method} '
+        '--batch_column {params.batch_col} '
+        '--outfname {output.follicular_bc} '
+        '>& {log}'
 
 rule scvis_follicular_train:
     input:
+        follicular_bc='{workdir}/sce_follicular_annotated_final_bc.rds'.format(workdir=config['workdir']),
     output:
+        follicular_scvis_train='{workdir}/sce_follicular_annotated_final_scvis_train.rds'.format(workdir=config['workdir']),
+        scvis_output_dir='{workdir}/scvis/train_follicular'.format(workdir=config['workdir']),
     params:
+        name='scvis-follicular-train',
+        config_path=config['scvis']['default_config'],
+        dimname=config['scvis']['dimname'],
     log:
+        '{logdir}/logs/scvis_follicular_train.log'.format(logdir=config['logdir'])
     benchmark:
+        '{logdir}/benchmarks/scvis_follicular_train.txt'.format(logdir=config['logdir'])
+    threads: 15
     shell:
-
-rule scvis_map_rln:
-    input:
-    output:
-    params:
-    log:
-        '{logdir}/logs/preprocess_rln_sce.log'.format(logdir=config['logdir'])
-    benchmark:
-        '{logdir}/benchmarks/preprocess_rln_sce.txt'.format(logdir=config['logdir'])
+        'Rscript R/scvis_train.R '
+        '--sce {input.follicular_bc} '
+        '--scvis_config_path {params.config_path} '
+        '--scvis_dimname {params.dimname} '
+        '--scvis_output_dir {output.scvis_output_dir} '
+        '--outfname {output.follicular_scvis_train} '
+        '>& {log}'

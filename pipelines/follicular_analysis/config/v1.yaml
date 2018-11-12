@@ -162,5 +162,11 @@ celltype_filters:
   broad_t_cell_probability: 0.9
   broad_b_cell_probability: 0.9
 
+# Settings for batch correction
+batch_correction_settings:
+  method: scanorama
+  batch_variable: patient
+
 scvis:
   default_config: '/datadrive/projects/cellassign-paper/resources/scvis/config/default_config.yaml'
+  dimname: scanorama_PCA
