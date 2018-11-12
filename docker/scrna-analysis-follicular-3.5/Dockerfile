@@ -80,6 +80,6 @@ RUN echo 'BiocManager::install(c("org.Hs.eg.db", "ReactomePA"))' >> /opt/package
 
 USER rstudio
 
-RUN /bin/bash -c "PATH=$HOME/miniconda/bin:$PATH && source activate r-tensorflow && git clone https://github.com/brianhie/scanorama.git && cd scanorama/ && python setup.py install --user && cd .. && rm -rf scanorama"
+RUN /bin/bash -c "PATH=$HOME/miniconda/bin:$PATH && source activate r-tensorflow && cd $HOME && git clone https://github.com/brianhie/scanorama.git && cd scanorama/ && python setup.py install --user && cd .. && rm -rf scanorama"
 
 USER root
