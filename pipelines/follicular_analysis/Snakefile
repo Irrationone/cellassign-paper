@@ -463,7 +463,7 @@ rule scvis_follicular_train:
         follicular_bc='{workdir}/sce_follicular_annotated_final_bc.rds'.format(workdir=config['workdir']),
     output:
         follicular_scvis_train='{workdir}/sce_follicular_annotated_final_scvis_train.rds'.format(workdir=config['workdir']),
-        scvis_output_dir='{workdir}/scvis/train_follicular'.format(workdir=config['workdir']),
+        scvis_output_dir=directory('{workdir}/scvis/train_follicular'.format(workdir=config['workdir'])),
     params:
         name='scvis-follicular-train',
         config_path=config['scvis']['default_config'],
