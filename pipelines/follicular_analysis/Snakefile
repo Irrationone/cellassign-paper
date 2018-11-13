@@ -10,10 +10,12 @@ rule all:
         #tcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_tcells.rds'.format(outdir=config['outdir']),
         #bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_bcells.rds'.format(outdir=config['outdir']),
         #de_results=expand('{outdir}/differential_expression/timepoint/{{celltype_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_celltype_groups']),
-        #de_res='{outdir}/differential_expression/malignant_timepoint/b_cells.rds'.format(outdir=config['outdir']),
+        de_tables=expand('{outdir}/differential_expression/timepoint/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_celltype_groups'], patient_group=config['differential_expression_patient_groups']),
+        de_res=expand('{outdir}/differential_expression/malignant_timepoint/b_cells/{{patient_group}}.rds'.format(outdir=config['outdir']), patient_group=config['differential_expression_patient_groups']),
         #RLN_normalized='{workdir}/sce_RLN_normalized.rds'.format(workdir=config['workdir']),
         #follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
         follicular_scvis_train='{workdir}/sce_follicular_annotated_final_scvis_train.rds'.format(workdir=config['workdir']),
+        follicular_RLN_merged='{workdir}/sce_follicular_RLN_merged.rds'.format(workdir=config['workdir']),
 
 
 # Create SingleCellExperiment
@@ -482,4 +484,32 @@ rule scvis_follicular_train:
         '--scvis_dimname {params.dimname} '
         '--scvis_output_dir {output.scvis_output_dir} '
         '--outfname {output.follicular_scvis_train} '
+        '>& {log}'
+
+rule scvis_RLN_map:
+    input:
+        follicular_scvis_train='{workdir}/sce_follicular_annotated_final_scvis_train.rds'.format(workdir=config['workdir']),
+        RLN_normalized='{workdir}/sce_RLN_normalized.rds'.format(workdir=config['workdir']),
+        scvis_output_dir=directory('{workdir}/scvis/train_follicular'.format(workdir=config['workdir'])),
+    output:
+        RLN_mapped='{workdir}/sce_RLN_mapped.rds'.format(workdir=config['workdir']),
+        follicular_RLN_merged='{workdir}/sce_follicular_RLN_merged.rds'.format(workdir=config['workdir']),
+    params:
+        name='scvis-RLN-map',
+        config_path=config['scvis']['default_config'],
+        conda_env='r-tensorflow',
+    log:
+        '{logdir}/logs/scvis_RLN_map.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/scvis_RLN_map.txt'.format(logdir=config['logdir'])
+    threads: 15
+    shell:
+        'Rscript R/scvis_map.R '
+        '--sce {input.follicular_scvis_train} '
+        '--sce_rln {input.RLN_normalized} '
+        '--conda_env {params.conda_env} '
+        '--scvis_config_path {params.config_path} '
+        '--scvis_output_dir {output.scvis_output_dir} '
+        '--out_rln {output.RLN_mapped} '
+        '--out_merged {output.follicular_RLN_merged} '
         '>& {log}'
