@@ -509,7 +509,7 @@ rule scvis_RLN_map:
         '--sce_rln {input.RLN_normalized} '
         '--conda_env {params.conda_env} '
         '--scvis_config_path {params.config_path} '
-        '--scvis_output_dir {output.scvis_output_dir} '
+        '--scvis_output_dir {input.scvis_output_dir} '
         '--out_rln {output.RLN_mapped} '
         '--out_merged {output.follicular_RLN_merged} '
         '>& {log}'
