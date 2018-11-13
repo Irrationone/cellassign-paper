@@ -169,4 +169,4 @@ batch_correction_settings:
 
 scvis:
   default_config: '/datadrive/projects/cellassign-paper/resources/scvis/config/default_config.yaml'
-  dimname: scanorama_PCA
+  dimname: PCA # no need to use scanorama PCA

@@ -468,6 +468,7 @@ rule scvis_follicular_train:
         name='scvis-follicular-train',
         config_path=config['scvis']['default_config'],
         dimname=config['scvis']['dimname'],
+        conda_env='r-tensorflow',
     log:
         '{logdir}/logs/scvis_follicular_train.log'.format(logdir=config['logdir'])
     benchmark:
@@ -476,6 +477,7 @@ rule scvis_follicular_train:
     shell:
         'Rscript R/scvis_train.R '
         '--sce {input.follicular_bc} '
+        '--conda_env {params.conda_env} '
         '--scvis_config_path {params.config_path} '
         '--scvis_dimname {params.dimname} '
         '--scvis_output_dir {output.scvis_output_dir} '
