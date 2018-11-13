@@ -152,8 +152,8 @@ rule cellassign_follicular_big:
 rule annotate_cellassign:
     input:
         follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
-        broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
-        specific_assignments='{outdir}/specific_assignments.rds'.format(outdir=config['outdir']),
+        broad_assignments=ancient('{outdir}/broad_assignments.rds'.format(outdir=config['outdir'])),
+        specific_assignments=ancient('{outdir}/specific_assignments.rds'.format(outdir=config['outdir'])),
     output:
         follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
     params:
