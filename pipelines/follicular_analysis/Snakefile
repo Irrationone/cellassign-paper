@@ -385,10 +385,32 @@ rule filter_bcells:
         '--outfname {output.bcells_annotated} '
         '>& {log}'
 
+
+rule filter_nonmalignant_bcells:
+    input:
+        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
+    output:
+        nonmalignant_bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds'.format(outdir=config['outdir']),
+    params:
+        name='filter-bcells',
+        b_cell_probability=config['celltype_filters']['broad_b_cell_probability'],
+    log: 
+        '{logdir}/logs/filter_subset/filter_nonmalignant_bcells.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/filter_subset/filter_nonmalignant_bcells.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/filter_cells.R '
+        '--sce {input.follicular_annotated} '
+        '--celltype B\ cell '
+        '--malignancy_filter nonmalignant '
+        '--celltype_probability {params.b_cell_probability} '
+        '--outfname {output.nonmalignant_bcells_annotated} '
+        '>& {log}'
+
 # Assign nonmalignant B/T cells to lambda/kappa
 rule lambda_kappa_classification:
     input:
-        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
+        nonmalignant_bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds'.format(outdir=config['outdir']),
         marker_list_lk=config['marker_lists']['lambdakappa']['path'],
     output:
         lk_assignments='{outdir}/lambda_kappa_assignments.rds'.format(outdir=config['outdir']),
@@ -405,7 +427,7 @@ rule lambda_kappa_classification:
         '{logdir}/benchmarks/lambda_kappa_classification.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/cellassign_sce.R '
-        '--sce {input.follicular_annotated} '
+        '--sce {input.nonmalignant_bcells_annotated} '
         '--marker_list {input.marker_list_lk} '
         '--include_other {params.include_other} '
         '--num_runs {params.num_runs} '
