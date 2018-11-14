@@ -1,0 +1,8 @@
+event patient timepoint   years observed
+FL1018T0    FL1018  T0  0   0
+FL1018T1    FL1018  T1  3   1
+FL1018T2    FL1018  T2  5   1
+FL1018L FL1018  L   11  0
+FL2001T1    FL2001  T1  0   1
+FL2001T2    FL2001  T2  4   1
+FL2001D FL2001  D   5   1
