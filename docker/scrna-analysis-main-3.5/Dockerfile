@@ -2,10 +2,10 @@
 
 FROM rocker/rstudio:3.5.0 as intermediate
 
-# docker build --no-cache -t scrna-analysis-main-3.5:latest -t scrna-analysis-main-3.5:v1.1 .
-# docker tag scrna-analysis-main-3.5:v1.1 alzhang/scrna-analysis-main-3.5:v1.1
+# docker build --no-cache -t scrna-analysis-main-3.5:latest -t scrna-analysis-main-3.5:v1.2 .
+# docker tag scrna-analysis-main-3.5:v1.2 alzhang/scrna-analysis-main-3.5:v1.2
 # docker tag scrna-analysis-main-3.5:latest alzhang/scrna-analysis-main-3.5:latest
-# docker push alzhang/scrna-analysis-main-3.5:v1.1
+# docker push alzhang/scrna-analysis-main-3.5:v1.2
 # docker push alzhang/scrna-analysis-main-3.5:latest
 
 # Install git
@@ -76,3 +76,6 @@ RUN Rscript -e "install.packages('lmerTest',dependencies=TRUE)" && \
     Rscript -e "install.packages('argparse',dependencies=TRUE)" && \
     Rscript -e "install.packages('dunn.test',dependencies=TRUE)" && \
     Rscript -e "install.packages('nestedRanksTest',dependencies=TRUE)"
+
+RUN echo 'BiocManager::install(c("ReactomePA"), update = FALSE)' >> /opt/packages.r && \
+    Rscript /opt/packages.r
