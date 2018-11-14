@@ -7,8 +7,8 @@ rule all:
         #cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
         #follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
         #follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
-        #tcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_tcells.rds'.format(outdir=config['outdir']),
-        #bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_bcells.rds'.format(outdir=config['outdir']),
+        tcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_tcells.rds'.format(outdir=config['outdir']),
+        bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_bcells.rds'.format(outdir=config['outdir']),
         #de_results=expand('{outdir}/differential_expression/timepoint/{{celltype_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_celltype_groups']),
         de_tables=expand('{outdir}/differential_expression/timepoint/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_celltype_groups'], patient_group=config['differential_expression_patient_groups']),
         de_res=expand('{outdir}/differential_expression/malignant_timepoint/b_cells/{{patient_group}}.rds'.format(outdir=config['outdir']), patient_group=config['differential_expression_patient_groups']),
@@ -16,6 +16,7 @@ rule all:
         #follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
         follicular_scvis_train='{workdir}/sce_follicular_annotated_final_scvis_train.rds'.format(workdir=config['workdir']),
         follicular_RLN_merged='{workdir}/sce_follicular_RLN_merged.rds'.format(workdir=config['workdir']),
+        lk_assignments='{outdir}/lambda_kappa_assignments.rds'.format(outdir=config['outdir']),
 
 
 # Create SingleCellExperiment
@@ -152,8 +153,8 @@ rule cellassign_follicular_big:
 rule annotate_cellassign:
     input:
         follicular_normalized='{workdir}/sce_follicular_normalized.rds'.format(workdir=config['workdir']),
-        broad_assignments=ancient('{outdir}/broad_assignments.rds'.format(outdir=config['outdir'])),
-        specific_assignments=ancient('{outdir}/specific_assignments.rds'.format(outdir=config['outdir'])),
+        broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
+        specific_assignments='{outdir}/specific_assignments.rds'.format(outdir=config['outdir']),
     output:
         follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
     params:
@@ -382,6 +383,35 @@ rule filter_bcells:
         '--malignancy_filter all '
         '--celltype_probability {params.b_cell_probability} '
         '--outfname {output.bcells_annotated} '
+        '>& {log}'
+
+# Assign nonmalignant B/T cells to lambda/kappa
+rule lambda_kappa_classification:
+    input:
+        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
+        marker_list_lk=config['marker_lists']['lambdakappa']['path'],
+    output:
+        lk_assignments='{outdir}/lambda_kappa_assignments.rds'.format(outdir=config['outdir']),
+    params:
+        name='lambda-kappa-classification',
+        include_other=config['marker_lists']['lambdakappa']['include_other'],
+        num_runs=config['cellassign_settings']['num_runs'],
+        B=config['cellassign_settings']['B'],
+        extra_opts=config['cellassign_settings']['extra_opts'],
+    threads: 15
+    log:
+        '{logdir}/logs/lambda_kappa_classification.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/lambda_kappa_classification.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/cellassign_sce.R '
+        '--sce {input.follicular_annotated} '
+        '--marker_list {input.marker_list_lk} '
+        '--include_other {params.include_other} '
+        '--num_runs {params.num_runs} '
+        '--rbf_pieces {params.B} '
+        '{params.extra_opts} '
+        '--outfname {output.lk_assignments} '
         '>& {log}'
 
 ### RLN processing

@@ -117,6 +117,9 @@ marker_lists:
   big: 
     path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_big.yaml'
     include_other: TRUE
+  lambdakappa:
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_lambda_kappa.yaml'
+    include_other: TRUE
 
 # CellAssign settings
 cellassign_settings:
