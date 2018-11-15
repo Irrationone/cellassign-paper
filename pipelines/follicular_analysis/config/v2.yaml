@@ -161,6 +161,10 @@ celltype_filters:
   broad_t_cell_probability: 0.9
   broad_b_cell_probability: 0.9
 
+celltype_full_groups:
+  nonmalignant_b:
+    - B\ cells
+
 # Settings for batch correction
 batch_correction_settings:
   method: scanorama

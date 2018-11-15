@@ -389,6 +389,7 @@ rule filter_nonmalignant_bcells:
     params:
         name='filter-bcells',
         b_cell_probability=config['celltype_filters']['broad_b_cell_probability'],
+        nonmalignant_b_cell_categories=config['celltype_full_groups']['nonmalignant_b'],
     log: 
         '{logdir}/logs/filter_subset/filter_nonmalignant_bcells.log'.format(logdir=config['logdir'])
     benchmark:
@@ -397,6 +398,7 @@ rule filter_nonmalignant_bcells:
         'Rscript R/filter_cells.R '
         '--sce {input.follicular_annotated} '
         '--celltype B\ cell '
+        '--celltype_full {params.nonmalignant_b_cell_categories} '
         '--malignancy_filter nonmalignant '
         '--celltype_probability {params.b_cell_probability} '
         '--outfname {output.nonmalignant_bcells_annotated} '
