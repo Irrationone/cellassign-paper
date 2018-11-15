@@ -122,7 +122,7 @@ res <- cellassign_em(exprs_obj = sce_koh_normalized[rownames(rho),],
                      s = s, rho = rho, X = NULL, B = B, 
                      use_priors = TRUE, prior_type = "shrinkage", 
                      delta_variance_prior = FALSE, verbose = FALSE, 
-                     em_convergence_thres = 1e-5, num_runs = 5, 
+                     em_convergence_thres = 1e-5, num_runs = 3, 
                      min_delta = quantile(maxdiffs, quantile_cutoff))
 
 

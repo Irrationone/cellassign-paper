@@ -115,7 +115,10 @@ delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) +
 wm_eval_measures <- load_annotation_files(wrongmarker_result_dir, pattern = "*_eval_measures.tsv")
 wm_delta_vals <- load_annotation_files(wrongmarker_result_dir, pattern = "*_delta_compare.tsv")
 
-wm_plots <- plot_simulation_performance(wm_eval_measures, 
+wm_plots <- plot_simulation_performance(wm_eval_measures %>%
+                                          dplyr::filter(de_nu == 1,
+                                                        de_facscale == 0.06,
+                                                        max_genes == 5), 
                                         measures = c("v_measure",
                                                      "accuracy"),
                                         display_measure_names = c("V-measure",

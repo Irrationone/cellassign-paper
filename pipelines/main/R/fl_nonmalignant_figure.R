@@ -1,5 +1,4 @@
-# Figure comparing T1 to T2 in FL samples
-# Components: cell cycle, differential expression, cell composition
+# Figure looking in-depth at nonmalignant cells in FL
 
 library(tidyverse)
 library(tensorflow)
@@ -17,13 +16,15 @@ library(scrna.sceutils)
 library(cellassign.utils)
 library(argparse)
 
-parser <- ArgumentParser(description = "Create overview figure for FL")
+parser <- ArgumentParser(description = "Create nonmalignant figure for FL")
 parser$add_argument('--sce', metavar='FILE', type='character',
                     help="Path to SingleCellExperiment RDS")
 parser$add_argument('--sce_tcell', metavar='FILE', type='character',
                     help="Path to T cell-filtered SCE")
 parser$add_argument('--sce_bcell', metavar='FILE', type='character',
                     help="Path to B cell-filtered SCE")
+parser$add_argument('--sce_scvis_merged', metavar='FILE', type='character',
+                    help="Path to scvis-merged SCE")
 parser$add_argument('--dimreduce_type', type='character',
                     help="Type of dimensionality reduction to plot", default = "UMAP")
 parser$add_argument('--tcell_labels', type='character', nargs='+',
@@ -44,6 +45,7 @@ sce_path <- args$sce
 sce <- readRDS(sce_path)
 sce_tcell <- readRDS(args$sce_tcell)
 sce_bcell <- readRDS(args$sce_bcell)
+sce_scvis_merged <- readRDS(args$sce_scvis_merged)
 de_malignant <- readRDS(args$de_malignant)
 de_nonmalignant <- readRDS(args$de_nonmalignant)
 
@@ -52,21 +54,77 @@ bcell_labels <- unlist(args$bcell_labels)
 
 categorical_palettes <- cat_palettes()
 heatmap_heat_colours <- heat_colour_gradient()
+gradient_colours <- scrna_expression_gradient()
 
-# Process T and B cell subset SCEs
+# Process SCEs
 sce_tcell <- sce_tcell %>%
   scater::filter(celltype_full %in% c(tcell_labels, "other")) %>%
   scater::mutate(celltype_full=factor(plyr::mapvalues(celltype_full,
                                                       "other",
                                                       "Unassigned")))
-  
+
 
 sce_bcell <- sce_bcell %>%
   scater::filter(celltype_full %in% c(bcell_labels, "other")) %>%
   scater::mutate(celltype_full=factor(plyr::mapvalues(celltype_full,
                                                       "other",
                                                       "Unassigned")))
+
+
+# B cell dr figure
+dr_bcell <- plotReducedDim(sce_bcell, 
+                           use_dimred = "UMAP", 
+                           colour_by = "celltype_full",
+                           shape_by = "patient",
+                           point_alpha = 0.2, 
+                           add_ticks = FALSE,
+                           point_size = 2)
+dr_bcell <- dr_bcell + 
+  guides(colour = guide_legend(title = "Celltype"),
+         shape = FALSE) + 
+  xlab("UMAP-1") + 
+  ylab("UMAP-2") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  scale_fill_manual(values = categorical_palettes$celltype)
+
+# B cell marker figures
+
+kappa_lambda_markers <- c("IGKC", "IGLC2", "IGLC3")
+exprs <- logcounts(sce_bcell)[cellassign.utils::get_ensembl_id(kappa_lambda_markers, sce_bcell),]
+expr_limits <- c(min(exprs), max(exprs))
+
+kappa_lambda_plots <- lapply(kappa_lambda_markers, function(mgene) {
+  p <- plotReducedDim(sce_bcell,
+                      use_dimred = "UMAP",
+                      colour_by = cellassign.utils::get_ensembl_id(mgene, sce),
+                      point_alpha = 0.5,
+                      point_size = 1.5,
+                      add_ticks = FALSE)
+  p$layers[[1]]$aes_params$colour <- "grey60"
   
+  p <- p + 
+    guides(fill = FALSE) + 
+    xlab("UMAP-1") + 
+    ylab("UMAP-2") + 
+    theme_bw() + 
+    theme_Publication() + 
+    theme_nature() +
+    scale_fill_gradientn(colours = gradient_colours, 
+                         limits = expr_limits) + 
+    ggtitle(mgene)
+  return(p)
+})
+
+# scvis figure
+scvis_plot <- plotReducedDim(sce_scvis_merged, 
+                             use_dimred = "UMAP", 
+                             colour_by = "celltype_full",
+                             shape_by = "patient",
+                             point_alpha = 0.2, 
+                             add_ticks = FALSE,
+                             point_size = 2)
 
 # T cell dr figure
 dr_tcell <- plotReducedDim(sce_tcell, 
@@ -360,10 +418,10 @@ cycling_summary <- cycling_stats %>%
 min_cell_count <- 15
 
 removed_cell_types <- (cycling_summary %>%
-  dplyr::filter(total_count < min_cell_count))$celltype_full
+                         dplyr::filter(total_count < min_cell_count))$celltype_full
 
 cycling_plot <- ggplot(cycling_summary %>% dplyr::filter(!celltype_full %in% removed_cell_types),
-       aes(x=timepoint, y=cycling_prop, colour=celltype_full)) +
+                       aes(x=timepoint, y=cycling_prop, colour=celltype_full)) +
   geom_point(aes(size=total_prop)) +
   geom_line(aes(group=celltype_full)) + 
   theme_bw() + 
@@ -379,7 +437,7 @@ cycling_plot <- ggplot(cycling_summary %>% dplyr::filter(!celltype_full %in% rem
 
 # Create a celltype-timepoint legend
 tmp <- plotReducedDim(sce %>% scater::filter(celltype_full != "other"), use_dimred = args$dimreduce_type, colour_by = "celltype_full",
-               shape_by = "timepoint", point_alpha = 1) + 
+                      shape_by = "timepoint", point_alpha = 1) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 

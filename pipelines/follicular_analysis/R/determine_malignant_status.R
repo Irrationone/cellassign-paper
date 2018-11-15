@@ -36,10 +36,9 @@ set.seed(19279)
 b_cells <- cluster_wrapper(b_cells, 
                            gene_subset = NULL, 
                            dimreduce_method = "PCA", 
-                           clustering_method = "seurat",
-                           seurat_resolution = 0.8)
+                           clustering_method = "seurat_0.8")
 
-nonmalignant_clusters <- c("6")
+nonmalignant_clusters <- c("2")
 
 B_mapping <- colData(b_cells) %>%
   data.frame(check.names = FALSE) %>%

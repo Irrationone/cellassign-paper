@@ -8,6 +8,7 @@ library(data.table)
 library(methods)
 library(scran)
 library(cowplot)
+library(ggrepel)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -17,6 +18,8 @@ library(argparse)
 parser <- ArgumentParser(description = "Create overview figure for FL")
 parser$add_argument('--sce', metavar='FILE', type='character',
                     help="Path to SingleCellExperiment RDS")
+parser$add_argument('--patient_progression', metavar='FILE', type='character',
+                    help="Patient events")
 parser$add_argument('--dimreduce_type', type='character',
                     help="Type of dimensionality reduction to plot", default = "UMAP")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
@@ -28,47 +31,71 @@ sce <- readRDS(sce_path)
 
 categorical_palettes <- cat_palettes()
 
-# Plot of progression
-df <- data.frame(
-  patient=c('FL1018', 'FL1018', 'FL1018', 'FL1018'),
-  timepoint=c('P', 'T1', 'T2', 'D'),
-  time=c(0, 3, 4.5, 9)
-)
+patient_progression <- fread(args$patient_progression, sep = "\t")
+patient_progression <- patient_progression %>%
+  dplyr::mutate(patient = factor(patient),
+                label = ifelse(timepoint %in% c("L", "D"), "", plot_label)) %>%
+  dplyr::mutate(patient = factor(patient, levels = rev(levels(patient)))) 
 
-timepoint_plot <- ggplot(df, aes(x=time, y=patient)) + 
-  geom_line(arrow = arrow(length=unit(0.30,"cm"), ends="last", type = "closed")) + 
-  geom_point(aes(colour=timepoint), size = 5) + 
+dead_patients <- (patient_progression %>% 
+                    dplyr::filter(timepoint == "D"))$patient
+live_patients <- (patient_progression %>% 
+                    dplyr::filter(timepoint == "L"))$patient
+death_boxes <- patient_progression %>%
+  dplyr::filter(timepoint == "D") %>%
+  dplyr::mutate(ycenter=as.numeric(patient),
+                ymin=ycenter-0.05,
+                ymax=ycenter+0.05)
+
+ggplot(patient_progression, aes(x=years, y=patient)) + 
+  geom_text_repel(data = patient_progression %>% dplyr::filter(observed == 1),
+                  aes(label=label), size = 3, nudge_y = 0.1) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
-  xlab("Time since diagnosis (years)") + 
+  xlab("Time since first biopsy (years)") + 
   ylab("") + 
-  scale_colour_manual(values = categorical_palettes$timepoint, limits = c('P', 'T1', 'T2')) + 
-  guides(colour = guide_legend(title = "Timepoint")) + 
+  scale_fill_manual(values = categorical_palettes$dataset) +
+  scale_colour_manual(values = categorical_palettes$dataset, limits = c('FL1018T0', 
+                                                                        'FL1018T1', 
+                                                                        'FL1018T2', 
+                                                                        'FL2001T1',
+                                                                        'FL2001T2',
+                                                                        'FL2001D')) + 
+  guides(colour = FALSE) + 
+  guides(fill = FALSE) +
   theme(axis.line.y = element_blank(),
         axis.ticks.y = element_blank(),
-        axis.text.y = element_text(face = 'bold'))
+        axis.text.y = element_text(face = 'bold')) + 
+  geom_line(data = patient_progression %>% dplyr::filter(patient %in% dead_patients),
+            arrow = arrow(length=unit(0,"cm"), ends="last", type = "closed")) +
+  geom_line(data = patient_progression %>% dplyr::filter(patient %in% live_patients),
+            arrow = arrow(length=unit(0.30,"cm"), ends="last", type = "closed")) +
+  geom_rect(data = death_boxes,
+            aes(xmin=years-0.1,xmax=years+0.1,ymin=ymin,ymax=ymax, fill=event)) + 
+  geom_point(data = patient_progression %>% dplyr::filter(observed == 1 & timepoint != "D"), 
+             aes(colour=event), size = 5) 
 
 # Plot of timepoint
-dr_timepoint <- plotReducedDim(sce, use_dimred = "UMAP", colour_by = "timepoint", point_alpha = 0.5, add_ticks = FALSE)
+dr_timepoint <- plotReducedDim(sce, use_dimred = "UMAP", colour_by = "dataset", point_alpha = 0.5, add_ticks = FALSE)
 dr_timepoint <- dr_timepoint + 
   geom_rug(alpha = 0.1, colour = "gray20") +
-  guides(fill = guide_legend(title = "Timepoint")) + 
+  guides(fill = guide_legend(title = "Sample")) + 
   xlab("UMAP-1") + 
   ylab("UMAP-2") + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
-  scale_fill_manual(values = categorical_palettes$timepoint)
+  scale_fill_manual(values = categorical_palettes$dataset)
 
 # Plot of celltype assignments
-nonother_types <- sort(setdiff(unique(sce$celltype_full), "other"))
+nonother_types <- sort(setdiff(unique(sce$celltype), "other"))
 dr_celltype <- plotReducedDim(sce %>%
-                                scater::mutate(celltype_full=factor(plyr::mapvalues(celltype_full, from = c("other"),
+                                scater::mutate(celltype=factor(plyr::mapvalues(celltype, from = c("other"),
                                                                                     to = c("Unassigned")),
                                                                     levels = c(nonother_types, "Unassigned"))), 
                               use_dimred = "UMAP",
-                              colour_by = "celltype_full",
+                              colour_by = "celltype",
                               point_alpha = 0.5, 
                               add_ticks = FALSE)
 dr_celltype <- dr_celltype + 
@@ -82,7 +109,7 @@ dr_celltype <- dr_celltype +
   scale_fill_manual(values = categorical_palettes$celltype)
 
 # Plots of marker gene expression
-marker_genes <- c("CD79A", "CD3D", "IGKC", "IGLC2")
+marker_genes <- c("CD79A", "CD3D", "GZMA", "IL7R")
 exprs <- logcounts(sce)[cellassign.utils::get_ensembl_id(marker_genes, sce),]
 expr_limits <- c(min(exprs), max(exprs))
 
@@ -93,8 +120,10 @@ marker_plots <- lapply(marker_genes, function(mgene) {
                  use_dimred = "UMAP",
                  colour_by = cellassign.utils::get_ensembl_id(mgene, sce),
                  point_alpha = 0.5,
-                 point_size = 0.5,
+                 point_size = 1.5,
                  add_ticks = FALSE)
+  p$layers[[1]]$aes_params$colour <- "grey60"
+  
   p <- p + 
     guides(fill = FALSE) + 
     xlab("UMAP-1") + 

@@ -294,9 +294,9 @@ if (selection_method == "maxdiff") {
 
 rho <- rho[intersect(rownames(rho), rownames(koh_normalized)),]
 B <- 20
-s <- sizeFactors(koh_normalized)
+s <- sizeFactors(koh_normalized)/mean(sizeFactors(koh_normalized))
   
-res <- cellassign_em(exprs_obj = koh_normalized[rownames(rho),], s = s, rho = rho, X = NULL, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, num_runs = 3, min_delta = 2.04)
+res <- cellassign_em(exprs_obj = koh_normalized[rownames(rho),], s = s, rho = rho, X = NULL, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, num_runs = 1, min_delta = 2.04)
 
 koh_normalized$cluster <- res$cell_type
 

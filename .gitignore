@@ -2,6 +2,7 @@
 .snakemake/
 .singularity/
 test/
+.cache/
 .Rproj
 data/
 Rplots.pdf

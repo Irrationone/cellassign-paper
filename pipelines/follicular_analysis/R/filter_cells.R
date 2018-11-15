@@ -13,7 +13,7 @@ library(scrna.sceutils)
 library(cellassign.utils)
 library(argparse)
 
-parser <- ArgumentParser(description = "Extract T cells from follicular SCE")
+parser <- ArgumentParser(description = "Extract cells from follicular SCE")
 parser$add_argument('--sce', metavar='FILE', type='character',
                     help="Path to SingleCellExperiment RDS")
 parser$add_argument('--celltype', type = 'character',
