@@ -121,7 +121,7 @@ marker_lists:
 
 # CellAssign settings
 cellassign_settings:
-  num_runs: 1
+  num_runs: 3
   B: 20
   extra_opts: "--delta_prior"
   threads: 18
