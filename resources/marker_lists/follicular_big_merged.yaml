@@ -1,0 +1,44 @@
+B cells:
+  - CD19
+  - MS4A1
+  - CD79A
+  - CD79B
+  - IGKC
+  - IGLC2
+  - IGLC3
+  - CD74
+  - CXCR5
+Cytotoxic T cells:
+  - CD2
+  - CD3D
+  - CD3E
+  - CD3G
+  - TRAC
+  - CD8A
+  - CD8B
+  - GZMA
+  - NKG7
+  - CCL5
+  - EOMES
+CD4 T cells:
+  - CD2
+  - CD3D
+  - CD3E
+  - CD3G
+  - TRAC
+  - CD4
+  - IL7R
+Tfh:
+  - CD2
+  - CD3D
+  - CD3E
+  - CD3G
+  - TRAC
+  - CD4
+  - CXCR5
+  - PDCD1
+  - TNFRSF4
+  - ST8SIA1
+  - ICA1
+  - ICOS
+  
