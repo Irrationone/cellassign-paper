@@ -100,7 +100,7 @@ scvis_combined <- merge_sces_scvis(sce,
                                    name1 = "follicular",
                                    name2 = "RLN",
                                    n_dims = 2,
-                                   keep_cols = "malignant_status_manual")
+                                   keep_cols = c("malignant_status_manual", "celltype_full"))
 
 
 
