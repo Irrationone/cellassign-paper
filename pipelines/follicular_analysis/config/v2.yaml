@@ -139,6 +139,10 @@ differential_expression_celltype_groups:
   helper:
     - CD4\ T\ cells
   
+b_cell_labels:
+  - B\ cells
+  - B\ cells\ \(malignant\)
+
 differential_expression_settings:
   # Minimum number of UMIs to test a gene for DE
   min_gene_counts: 500

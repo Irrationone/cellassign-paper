@@ -325,6 +325,7 @@ rule differential_expression_bcell_malignant_timepoint:
         patient_group=lambda wildcards: config['differential_expression_patient_groups'][wildcards.patient_group],
         num_genes=config['differential_expression_settings']['num_genes'],
         name='differential-expression-bcell-malignant-timepoint-{patient_group}',
+        bcell_labels=config['b_cell_labels'],
     log:
         '{logdir}/logs/differential_expression_bcell_malignant_timepoint/{{patient_group}}.log'.format(logdir=config['logdir'])
     benchmark:
@@ -334,6 +335,7 @@ rule differential_expression_bcell_malignant_timepoint:
         '--sce {input.bcells_annotated} '
         '--min_gene_counts {params.min_gene_counts} '
         '--patients {params.patient_group} '
+        '--bcell_labels {params.bcell_labels} '
         '--ngene {params.num_genes} '
         '--outfname {output.de_res} '
         '>& {log}'
