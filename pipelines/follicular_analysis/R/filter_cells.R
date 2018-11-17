@@ -19,6 +19,8 @@ parser$add_argument('--sce', metavar='FILE', type='character',
 parser$add_argument('--celltype', type = 'character',
                     help="Celltype to filter", 
                     choices = c("all", "T cell", "B cell"))
+parser$add_argument('--celltype_full', type = 'character', nargs ="+",
+                    help="Full celltypes to consider", default = NULL)
 parser$add_argument('--celltype_probability', type='double',
                     help="Broad probability threshold to consider a cell a T cell", default = 0.9)
 parser$add_argument('--malignancy_filter', type='character',
@@ -38,6 +40,12 @@ categorical_palettes <- cat_palettes()
 # Filter for celltype
 if (args$celltype != "all") {
   sce <- follicular_filter(sce, filter = args$celltype, probability = args$celltype_probability)
+}
+
+# Filter for full celltype 
+if (!is.null(args$celltype_full)) {
+  sce <- sce %>%
+    scater::filter(celltype_full %in% unlist(args$celltype_full))
 }
 
 # Filter for malignant status
