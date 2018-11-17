@@ -35,6 +35,8 @@ follicular_analysis_results:
   scvis_merged: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v3/sce_follicular_RLN_merged.rds
   differential_expression: 
     cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/timepoint/cytotoxic
+    timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/timepoint
+    malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/malignant_timepoint
 
 # Dimensionality reduction type to plot
 plot_dimreduce_type: 'UMAP'
