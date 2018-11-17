@@ -24,6 +24,8 @@ parser$add_argument('--min_gene_counts', type='integer', default = 500,
                     help="Minimum number of gene counts to filter at")
 parser$add_argument('--patients', type='character', nargs ='+',
                     help="Patients to use", default = NULL)
+parser$add_argument('--bcell_labels', type='character', nargs ='+',
+                    help="B cell labels", default = NULL)
 parser$add_argument('--ngene', type='integer',
                     help="Number of top genes to use", default = 50)
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
@@ -32,6 +34,9 @@ args <- parser$parse_args()
 
 sce_path <- args$sce
 sce <- readRDS(sce_path)
+
+sce <- sce %>%
+  scater::filter(celltype_full %in% unlist(args$bcell_labels))
 
 object <- sce %>%
   scater::mutate(malignant_status_manual = factor(malignant_status_manual, levels = c("nonmalignant", "malignant")))
@@ -65,9 +70,13 @@ de_res <- lapply(coefficients, function(coef) {
   down_genes <- down_genes %>% head(args$ngene)
   
   enriched_paths <- lapply(list(up_genes, down_genes), function(genes) {
-    gene_entrez <- mapIds(org.Hs.eg.db, genes, 'ENTREZID', 'SYMBOL')
-    paths <- enrichPathway(gene=unname(gene_entrez),pvalueCutoff=0.05, readable=TRUE, 
-                           universe = unname(background_genes))
+    if (length(genes) > 0) {
+      gene_entrez <- mapIds(org.Hs.eg.db, genes, 'ENTREZID', 'SYMBOL')
+      paths <- enrichPathway(gene=unname(gene_entrez),pvalueCutoff=0.05, readable=TRUE, 
+                             universe = unname(background_genes))
+    } else {
+      paths <- NULL
+    }
     
     return(paths)
   })
