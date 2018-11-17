@@ -1,13 +1,14 @@
 
-configfile: 'config/v1.yaml'
+configfile: 'config/v2.yaml'
 
-singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.2"
+singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.3"
 
 rule all:
     input:
         fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir']),
-        fl_timepoint_figure='{outdir}/figures/fl_timepoint_figure.pdf'.format(outdir=config['outdir']),
         sim_performance_figure='{outdir}/figures/sim_performance_figure.pdf'.format(outdir=config['outdir']),
+        fl_nonmalignant_figure='{outdir}/figures/fl_nonmalignant_figure.pdf'.format(outdir=config['outdir']),
+        fl_malignant_figure='{outdir}/figures/fl_malignant_figure.pdf'.format(outdir=config['outdir']),
 
 
 
@@ -37,6 +38,7 @@ rule simulation_performance_figure:
 rule fl_overview_figure:
     input:
         sce=config['follicular_analysis_results']['sce_annotated'],
+        patient_events=config['follicular_metadata']['patient_progression_file'],
     output:
         fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir'])
     params:
@@ -49,38 +51,66 @@ rule fl_overview_figure:
     shell:
         'Rscript R/fl_overview_figure.R '
         '--sce {input.sce} '
+        '--patient_progression {input.patient_events} '
         '--dimreduce_type {params.dimreduce_type} '
         '--outfname {output.fl_overview_figure} '
         '>& {log}'
 
 
-rule fl_timepoint_figure:
+rule fl_nonmalignant_figure:
     input:
         sce=config['follicular_analysis_results']['sce_annotated'],
         sce_tcell=config['follicular_analysis_results']['sce_tcell_annotated'],
         sce_bcell=config['follicular_analysis_results']['sce_bcell_annotated'],
-        de_malignant=config['follicular_analysis_results']['differential_expression']['malignant'],
+        scvis_merged=config['follicular_analysis_results']['scvis_merged'],
+        de_cytotoxic=config['follicular_analysis_results']['differential_expression']['cytotoxic'],
         azizi_signatures=config['external']['azizi_s4'],
     output:
-        fl_timepoint_figure='{outdir}/figures/fl_timepoint_figure.pdf'.format(outdir=config['outdir'])
+        fl_nonmalignant_figure='{outdir}/figures/fl_nonmalignant_figure.pdf'.format(outdir=config['outdir'])
     params:
         name='fl-timepoint-figure',
         dimreduce_type=config['plot_dimreduce_type'],
         tcell_labels=config['follicular_celltype_labels']['tcell'],
         bcell_labels=config['follicular_celltype_labels']['bcell'],
     log:
-        '{logdir}/logs/fl_timepoint_figure.log'.format(logdir=config['logdir'])
+        '{logdir}/logs/fl_nonmalignant_figure.log'.format(logdir=config['logdir'])
     benchmark:
-        '{logdir}/benchmarks/fl_timepoint_figure.txt'.format(logdir=config['logdir'])
+        '{logdir}/benchmarks/fl_nonmalignant_figure.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/fl_timepoint_figure.R '
+        'Rscript R/fl_nonmalignant_figure.R '
         '--sce {input.sce} '
         '--sce_tcell {input.sce_tcell} '
         '--sce_bcell {input.sce_bcell} '
+        '--sce_scvis_merged {input.scvis_merged} '
         '--tcell_labels {params.tcell_labels} '
         '--bcell_labels {params.bcell_labels} '
         '--azizi_signatures {input.azizi_signatures} '
-        '--de_malignant {input.de_malignant} '
+        '--de_cytotoxic {input.de_cytotoxic} '
         '--dimreduce_type {params.dimreduce_type} '
-        '--outfname {output.fl_timepoint_figure} '
+        '--outfname {output.fl_nonmalignant_figure} '
+        '>& {log}'
+
+rule fl_malignant_figure:
+    input:
+        sce=config['follicular_analysis_results']['sce_annotated'],
+        sce_bcell=config['follicular_analysis_results']['sce_bcell_annotated'],
+        de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
+        de_malignant_timepoint=config['follicular_analysis_results']['differential_expression']['malignant_timepoint'],
+    output:
+        fl_malignant_figure='{outdir}/figures/fl_malignant_figure.pdf'.format(outdir=config['outdir'])
+    params:
+        name='fl-timepoint-figure',
+        bcell_labels=config['follicular_celltype_labels']['bcell'],
+    log:
+        '{logdir}/logs/fl_malignant_figure.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/fl_malignant_figure.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/fl_malignant_figure.R '
+        '--sce {input.sce} '
+        '--sce_bcell {input.sce_bcell} '
+        '--bcell_labels {params.bcell_labels} '
+        '--de_timepoint_dir {input.de_timepoint} '
+        '--de_malignant_timepoint_dir {input.de_malignant_timepoint} '
+        '--outfname {output.fl_malignant_figure} '
         '>& {log}'

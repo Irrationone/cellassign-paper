@@ -1,0 +1,60 @@
+# Directories
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/main/v2'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/main/v2'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/main/v2'
+
+# Simulation results
+simulation_analysis_results:
+  deprob_result_dir: /datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob5
+  wrongmarker_result_dir: /datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers3
+
+delta_deprobs:
+  - 0.15
+  - 0.45
+
+deprob_methods:
+  - cellassign
+  - cellassign_shrinkage
+  - densitycut
+  - dynamicTreeCut
+  - kmeans
+  - phenograph
+  - SC3
+  - scmap
+  - seurat_0.4
+  - seurat_0.8
+  - seurat_1.2
+  - Zheng_cor
+
+
+# Follicular analysis results
+follicular_analysis_results:
+  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_follicular_annotated_final.rds
+  sce_tcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_tcells.rds
+  sce_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_bcells.rds
+  scvis_merged: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v3/sce_follicular_RLN_merged.rds
+  differential_expression: 
+    cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/timepoint/cytotoxic
+
+# Dimensionality reduction type to plot
+plot_dimreduce_type: 'UMAP'
+
+# Follicular celltype labels
+follicular_celltype_labels:
+  tcell:
+    - 'CD4\ \(activated\)'
+    - 'Cytotoxic\ T\ cells\ \(activated\)'
+    - 'Tfh'
+    - 'Naive/resting\ CD4'
+    - 'Cytotoxic\ T\ cells'
+  bcell:
+    - 'B\ cells'
+    - 'B\ cells\ \(malignant\)'
+
+# Follicular metadata
+follicular_metadata:
+  patient_progression_file: "/datadrive/projects/cellassign-paper/metadata/patient_progression.tsv"
+
+# External data
+external:
+  azizi_s4: "/datadrive/projects/cellassign-paper/resources/external/azizi2018/Table_S4.xls"
