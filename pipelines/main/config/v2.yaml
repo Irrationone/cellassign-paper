@@ -44,10 +44,8 @@ plot_dimreduce_type: 'UMAP'
 # Follicular celltype labels
 follicular_celltype_labels:
   tcell:
-    - 'CD4\ \(activated\)'
-    - 'Cytotoxic\ T\ cells\ \(activated\)'
     - 'Tfh'
-    - 'Naive/resting\ CD4'
+    - 'CD4\ T\ cells'
     - 'Cytotoxic\ T\ cells'
   bcell:
     - 'B\ cells'
