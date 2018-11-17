@@ -47,7 +47,7 @@ death_boxes <- patient_progression %>%
                 ymin=ycenter-0.05,
                 ymax=ycenter+0.05)
 
-ggplot(patient_progression, aes(x=years, y=patient)) + 
+timepoint_plot <- ggplot(patient_progression, aes(x=years, y=patient)) + 
   geom_text_repel(data = patient_progression %>% dplyr::filter(observed == 1),
                   aes(label=label), size = 3, nudge_y = 0.1) + 
   theme_bw() + 
