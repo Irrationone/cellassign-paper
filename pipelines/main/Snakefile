@@ -44,6 +44,7 @@ rule fl_overview_figure:
     params:
         name='fl-overview-figure',
         dimreduce_type=config['plot_dimreduce_type'],
+        expr_threshold=config['winsorized_expression']['overview_figure'],
     log:
         '{logdir}/logs/fl_overview_figure.log'.format(logdir=config['logdir'])
     benchmark:
@@ -53,6 +54,7 @@ rule fl_overview_figure:
         '--sce {input.sce} '
         '--patient_progression {input.patient_events} '
         '--dimreduce_type {params.dimreduce_type} '
+        '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.fl_overview_figure} '
         '>& {log}'
 
@@ -72,6 +74,7 @@ rule fl_nonmalignant_figure:
         dimreduce_type=config['plot_dimreduce_type'],
         tcell_labels=config['follicular_celltype_labels']['tcell'],
         bcell_labels=config['follicular_celltype_labels']['bcell'],
+        expr_threshold=config['winsorized_expression']['lambda_kappa'],
     log:
         '{logdir}/logs/fl_nonmalignant_figure.log'.format(logdir=config['logdir'])
     benchmark:
@@ -87,6 +90,7 @@ rule fl_nonmalignant_figure:
         '--azizi_signatures {input.azizi_signatures} '
         '--de_cytotoxic {input.de_cytotoxic} '
         '--dimreduce_type {params.dimreduce_type} '
+        '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.fl_nonmalignant_figure} '
         '>& {log}'
 
@@ -101,6 +105,7 @@ rule fl_malignant_figure:
     params:
         name='fl-timepoint-figure',
         bcell_labels=config['follicular_celltype_labels']['bcell'],
+        expr_threshold=config['winsorized_expression']['proliferation'],
     log:
         '{logdir}/logs/fl_malignant_figure.log'.format(logdir=config['logdir'])
     benchmark:
@@ -112,5 +117,6 @@ rule fl_malignant_figure:
         '--bcell_labels {params.bcell_labels} '
         '--de_timepoint_dir {input.de_timepoint} '
         '--de_malignant_timepoint_dir {input.de_malignant_timepoint} '
+        '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.fl_malignant_figure} '
         '>& {log}'

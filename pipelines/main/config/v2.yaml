@@ -58,3 +58,9 @@ follicular_metadata:
 # External data
 external:
   azizi_s4: "/datadrive/projects/cellassign-paper/resources/external/azizi2018/Table_S4.xls"
+
+# Winsorized expression thresholds
+winsorized_expression:
+  overview_figure: 6
+  lambda_kappa: 6
+  proliferation: 3
