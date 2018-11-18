@@ -35,6 +35,8 @@ parser$add_argument('--azizi_signatures', metavar = 'FILE', type='character',
                     help="XLS file of Azizi et al. Table S4")
 parser$add_argument('--de_cytotoxic_dir', type='character',
                     help="DE results for nonmalignant B cells")
+parser$add_argument('--winsorized_expression_threshold', type='double',
+                    help="Winsorized expression threshold", default = NULL)
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for PDF plot")
 args <- parser$parse_args()
@@ -97,7 +99,8 @@ dr_bcell$layers[[1]]$aes_params$shape <- 16
 dr_bcell$layers[[1]]$mapping$colour <- dr_bcell$layers[[1]]$mapping$fill
 
 dr_bcell <- dr_bcell + 
-  guides(colour = guide_legend(title = "Celltype", override.aes = list(alpha = 1), ncol = 2),
+  guides(colour = guide_legend(title = "Celltype", override.aes = list(alpha = 1,
+                                                                       size = 2), ncol = 2),
          fill = FALSE,
          shape = FALSE) + 
   xlab("UMAP-1") + 
@@ -118,7 +121,8 @@ dr_bcell_sample$layers[[1]]$aes_params$colour <- NULL
 dr_bcell_sample$layers[[1]]$aes_params$shape <- 16
 dr_bcell_sample$layers[[1]]$mapping$colour <- dr_bcell_sample$layers[[1]]$mapping$fill
 dr_bcell_sample <- dr_bcell_sample + 
-  guides(colour = guide_legend(title = "Sample", override.aes = list(alpha = 1), ncol = 2),
+  guides(colour = guide_legend(title = "Sample", override.aes = list(alpha = 1,
+                                                                     size = 2), ncol = 2),
          fill = FALSE,
          shape = FALSE) + 
   xlab("UMAP-1") + 
@@ -134,10 +138,17 @@ kappa_lambda_markers <- c("IGKC", "IGLC2", "IGLC3")
 exprs <- logcounts(sce_bcell)[cellassign.utils::get_ensembl_id(kappa_lambda_markers, sce_bcell),]
 expr_limits <- c(min(exprs), max(exprs))
 
+sce_bcell_tmp <- sce_bcell
+
+if (!is.null(args$winsorized_expression_threshold)) {
+  logcounts(sce_bcell_tmp) <- pmin(logcounts(sce_bcell_tmp), args$winsorized_expression_threshold)
+  expr_limits[2] <- min(expr_limits[2], args$winsorized_expression_threshold)
+}
+
 kappa_lambda_plots <- lapply(kappa_lambda_markers, function(mgene) {
-  p <- plotReducedDim(sce_bcell,
+  p <- plotReducedDim(sce_bcell_tmp,
                       use_dimred = "UMAP",
-                      colour_by = cellassign.utils::get_ensembl_id(mgene, sce),
+                      colour_by = cellassign.utils::get_ensembl_id(mgene, sce_bcell_tmp),
                       point_alpha = 0.5,
                       point_size = 0.75,
                       add_ticks = FALSE)
@@ -178,7 +189,8 @@ scvis_plot <- plotReducedDim(sce_scvis_merged,
                              point_size = 0.75) 
 
 scvis_plot <- scvis_plot + 
-  guides(fill = guide_legend(title = "Celltype", override.aes = list(alpha = 1))) + 
+  guides(fill = guide_legend(title = "Celltype", override.aes = list(alpha = 1,
+                                                                     size = 2))) + 
   xlab("scvis-1") + 
   ylab("scvis-2") + 
   theme_bw() + 

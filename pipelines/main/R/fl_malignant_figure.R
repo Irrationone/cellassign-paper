@@ -29,6 +29,8 @@ parser$add_argument('--de_timepoint_dir', type='character',
                     help="DE results for timepoint comparisons")
 parser$add_argument('--de_malignant_timepoint_dir', type='character',
                     help="DE results for malignant-timepoint interaction comparisons")
+parser$add_argument('--winsorized_expression_threshold', type='double',
+                    help="Winsorized expression threshold", default = NULL)
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for PDF plot")
 args <- parser$parse_args()
@@ -59,14 +61,19 @@ proliferation_markers <- c("MKI67", "TOP2A")
 exprs <- logcounts(sce_bcell)[cellassign.utils::get_ensembl_id(proliferation_markers, sce_bcell),]
 expr_limits <- c(min(exprs), max(exprs))
 
+sce_bcell_tmp <- sce_bcell
 
+if (!is.null(args$winsorized_expression_threshold)) {
+  logcounts(sce_bcell_tmp) <- pmin(logcounts(sce_bcell_tmp), args$winsorized_expression_threshold)
+  expr_limits[2] <- min(expr_limits[2], args$winsorized_expression_threshold)
+}
 
 proliferation_plots <- lapply(patients, function(pat) {
   res <- lapply(proliferation_markers, function(mgene) {
-    p <- plotReducedDim(sce_bcell %>% scater::filter(malignant_status_manual == "malignant",
-                                                     patient == pat),
+    p <- plotReducedDim(sce_bcell_tmp %>% scater::filter(malignant_status_manual == "malignant",
+                                                         patient == pat),
                         use_dimred = "UMAP",
-                        colour_by = cellassign.utils::get_ensembl_id(mgene, sce),
+                        colour_by = cellassign.utils::get_ensembl_id(mgene, sce_bcell_tmp),
                         point_alpha = 0.5,
                         point_size = 0.75,
                         add_ticks = FALSE)
