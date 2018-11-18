@@ -44,7 +44,7 @@ rule fl_overview_figure:
     params:
         name='fl-overview-figure',
         dimreduce_type=config['plot_dimreduce_type'],
-        expr_threshold=config['winsorized_expression']['overview_figure'],
+        expr_threshold=config['winsorized_expression']['markers'],
     log:
         '{logdir}/logs/fl_overview_figure.log'.format(logdir=config['logdir'])
     benchmark:

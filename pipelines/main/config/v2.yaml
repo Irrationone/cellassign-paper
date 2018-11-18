@@ -61,6 +61,6 @@ external:
 
 # Winsorized expression thresholds
 winsorized_expression:
-  overview_figure: 6
+  markers: 4
   lambda_kappa: 6
   proliferation: 3
