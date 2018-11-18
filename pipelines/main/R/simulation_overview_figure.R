@@ -54,9 +54,9 @@ de_eval_measures <- de_eval_measures %>%
 de_plots <- plot_simulation_performance(de_eval_measures %>%
                                           dplyr::mutate(clustering_method=factor(clustering_method, 
                                                                                  levels =factor_orderings$clustering_methods)), 
-                                        measures = c("v_measure",
+                                        measures = c("micro_f1",
                                                      "accuracy"),
-                                        display_measure_names = c("V-measure",
+                                        display_measure_names = c("F1",
                                                                   "Accuracy"),
                                         x_var = "de_prob")
 
@@ -119,9 +119,9 @@ wm_plots <- plot_simulation_performance(wm_eval_measures %>%
                                           dplyr::filter(de_nu == 1,
                                                         de_facscale == 0.06,
                                                         max_genes == 5), 
-                                        measures = c("v_measure",
+                                        measures = c("micro_f1",
                                                      "accuracy"),
-                                        display_measure_names = c("V-measure",
+                                        display_measure_names = c("F1",
                                                                   "Accuracy"),
                                         x_var = "wrong_marker_proportion")
 

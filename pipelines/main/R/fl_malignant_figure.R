@@ -10,6 +10,8 @@ library(scran)
 library(cowplot)
 library(pheatmap)
 library(Matrix)
+library(org.Hs.eg.db)
+library(ReactomePA)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -21,8 +23,6 @@ parser$add_argument('--sce', metavar='FILE', type='character',
                     help="Path to SingleCellExperiment RDS")
 parser$add_argument('--sce_bcell', metavar='FILE', type='character',
                     help="Path to B cell-filtered SCE")
-parser$add_argument('--dimreduce_type', type='character',
-                    help="Type of dimensionality reduction to plot", default = "UMAP")
 parser$add_argument('--bcell_labels', type='character', nargs='+',
                     help="Cell type labels of B cells")
 parser$add_argument('--de_timepoint_dir', type='character',
@@ -143,7 +143,7 @@ cycling_summary <- cycling_stats %>%
 
 min_cell_count <- 15
 
-size_limits <- c(0.01, max(cycling_summary$total_prop))
+prop_limits <- c(0.01, max(cycling_summary$total_prop))
 cycling_plot_results <- lapply(patients, function(pat) {
   cycling_summary_patient <- cycling_summary %>% 
     dplyr::filter(patient == pat)
@@ -167,7 +167,7 @@ cycling_plot_results <- lapply(patients, function(pat) {
     theme_nature() +
     xlab("Timepoint") + 
     ylab("Proportion of cells in S/G2/M") + 
-    scale_size_continuous(trans = "log", breaks = c(0.01, 0.1, 0.5), limits = size_limits) + 
+    scale_size_continuous(trans = "log", breaks = c(0.01, 0.1, 0.5), limits = prop_limits) + 
     scale_colour_manual(values = categorical_palettes$celltype) + 
     guides(colour= FALSE,
            size = FALSE)
@@ -313,23 +313,22 @@ cycling_celltype_legend <- cellassign.utils::ggsimplelegend(vars = names(categor
                                                             legend_rows = 2)
 cycling_celltype_legend <- cellassign.utils::extract_legend(cycling_celltype_legend)
 
-cycling_size_legend <- ggplot(cycling_summary,
-                              aes(x=timepoint, y=cycling_prop, colour=celltype_full)) +
+message("Creating cycling size legend ...")
+
+cycling_size_legend <- ggplot(cycling_summary, aes(x=timepoint, y=cycling_prop)) +
   geom_point(aes(size=total_prop)) +
-  geom_line(aes(group=celltype_full)) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() +
-  xlab("Timepoint") + 
-  ylab("Proportion of cells in S/G2/M") + 
-  scale_size_continuous(trans = "log", breaks = c(0.01, 0.1, 0.3), limits = size_limits) + 
   guides(size = guide_legend(title = "Total proportion",
                              title.position = "top",
-                             title.hjust = 0.5),
-         colour = FALSE) + 
+                             title.hjust = 0.5)) + 
+  scale_size_continuous(trans = "log", breaks = c(0.01, 0.1, 0.3), limits = prop_limits) + 
   theme(legend.title = element_text(size = 7))
 
 cycling_size_legend <- cellassign.utils::extract_legend(cycling_size_legend)
+
+message("Completed cycling size plot.")
 
 # HLA legend
 
@@ -348,6 +347,8 @@ network_pval_legend <- cellassign.utils::ggsimplelegend(padj_limits,
   theme(legend.key.width = unit(2, "lines")) + 
   scale_fill_gradientn(colours = rev(pval_colours), limits = padj_limits, trans = "log10")
 network_pval_legend <- cellassign.utils::extract_legend(network_pval_legend)
+
+message("Creating network size legend ...")
 
 network_size_legend <- emapplot(FL1018_de_malignant_timepoint_down_table,
                                 showCategory = max_pathways,
