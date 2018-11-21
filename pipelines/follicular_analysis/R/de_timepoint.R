@@ -11,6 +11,7 @@ library(gage)
 library(limma)
 library(org.Hs.eg.db)
 library(ReactomePA)
+library(fgsea)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -26,6 +27,10 @@ parser$add_argument('--patients', type='character', nargs ='+',
                     help="Patients to use", default = NULL)
 parser$add_argument('--method_gene', type='character',
                     help="DE method to use", default = "voom")
+parser$add_argument('--method_pathway', type='character',
+                    help="DE method to use", default = "ReactomePA")
+parser$add_argument('--gene_set_file', type='character', metavar = "FILE",
+                    help="Gene set file path, if using fgsea", default = NULL)
 parser$add_argument('--ngene', type='integer',
                     help="Number of top genes to use", default = 50)
 parser$add_argument('--min_gene_counts', type='integer', default = 500,
@@ -81,17 +86,48 @@ if (method_gene == "voom") {
   stop("Unrecognized DE method.")
 }
 
-up_genes <- up_genes %>% head(args$ngene)
-down_genes <- down_genes %>% head(args$ngene)
 
-enriched_paths <- lapply(list(up_genes, down_genes), function(genes) {
-  gene_entrez <- mapIds(org.Hs.eg.db, genes, 'ENTREZID', 'SYMBOL')
-  paths <- enrichPathway(gene=unname(gene_entrez),pvalueCutoff=0.05, readable=TRUE, 
-                         universe = unname(background_genes))
+
+if (args$method_pathway == "ReactomePA") {
+  up_genes <- up_genes %>% head(args$ngene)
+  down_genes <- down_genes %>% head(args$ngene)
   
-  return(paths)
-})
-names(enriched_paths) <- c("up", "down")
+  enriched_paths <- lapply(list(up_genes, down_genes), function(genes) {
+    gene_entrez <- mapIds(org.Hs.eg.db, genes, 'ENTREZID', 'SYMBOL')
+    paths <- enrichPathway(gene=unname(gene_entrez),pvalueCutoff=0.05, readable=TRUE, 
+                           universe = unname(background_genes))
+    
+    return(paths)
+  })
+  names(enriched_paths) <- c("up", "down")
+} else if (args$method_pathway == "fgsea") {
+  # Only allow use of voom with this right now -- can use scran but need to rename columns accordingly
+  stopifnot(method_gene == "voom")
+  
+  if (!is.null(args$gene_set_file)) {
+    pathway_list <- gmtPathways(args$gene_set_file)
+  } else {
+    stop("Must specify a gene set file.")
+  }
+  
+  de_table_summarized <- de_table %>% 
+    dplyr::select(Symbol, t) %>% 
+    na.omit() %>% 
+    distinct() %>% 
+    dplyr::group_by(Symbol) %>% 
+    dplyr::summarise(t = mean(t))
+  
+  fgsea_res <- fgsea(pathways=pathway_list, 
+                     stats = deframe(de_table_summarized), 
+                     nperm = 10000)
+  
+  enriched_paths <- fgsea_res %>%
+    as_tibble() %>%
+    dplyr::arrange(desc(NES))
+} else {
+  stop("Unrecognized pathway enrichment method.")
+}
+
 
 # Save DE result (pathway and gene tables)
 saveRDS(list(gene=de_table, pathway=enriched_paths), args$outfname)

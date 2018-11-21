@@ -27,6 +27,8 @@ parser$add_argument('--bcell_labels', type='character', nargs='+',
                     help="Cell type labels of B cells")
 parser$add_argument('--de_timepoint_dir', type='character',
                     help="DE results for timepoint comparisons")
+parser$add_argument('--de_timepoint_fgsea_dir', type='character',
+                    help="DE results for timepoint comparisons (using FGSEA and hallmark gene set)")
 parser$add_argument('--de_malignant_timepoint_dir', type='character',
                     help="DE results for malignant-timepoint interaction comparisons")
 parser$add_argument('--winsorized_expression_threshold', type='double',
@@ -43,9 +45,11 @@ sce_bcell <- sce_bcell %>%
   scater::filter(celltype_full %in% bcell_labels)
 
 de_timepoint_dir <- args$de_timepoint_dir
+de_timepoint_fgsea_dir <- args$de_timepoint_fgsea_dir
 de_malignant_timepoint_dir <- args$de_malignant_timepoint_dir
 
 de_timepoint_files <- Sys.glob(file.path(de_timepoint_dir, "malignant", "*"))
+de_timepoint_fgsea_files <- Sys.glob(file.path(de_timepoint_fgsea_dir, "malignant", "*"))
 de_malignant_timepoint_files <- Sys.glob(file.path(de_malignant_timepoint_dir, "*", "*"))
 
 
@@ -190,6 +194,11 @@ de_timepoint_res <- lapply(de_timepoint_files, function(f) {
 })
 names(de_timepoint_res) <- tools::file_path_sans_ext(basename(de_timepoint_files))
 
+de_timepoint_fgsea_res <- lapply(de_timepoint_fgsea_files, function(f) {
+  readRDS(f)
+})
+names(de_timepoint_fgsea_res) <- tools::file_path_sans_ext(basename(de_timepoint_fgsea_files))
+
 de_malignant_timepoint_res <- lapply(de_malignant_timepoint_files, function(f) {
   readRDS(f)
 })
@@ -237,6 +246,45 @@ FL1018_malignant_T2_pathway_down_plot <- emapplot(FL1018_de_malignant_timepoint_
 FL1018_malignant_T2_pathway_down_plot$layers[[1]]$aes_params$edge_alpha <- 0.3
 FL1018_malignant_T2_pathway_down_plot$layers[[1]]$aes_params$edge_width <- 1
 FL1018_malignant_T2_pathway_down_plot$layers[[3]]$aes_params$size <- 2.5
+
+
+# Pathway plots for malignant over time
+
+nes_values <- c((de_timepoint_fgsea_res$FL1018$pathway %>% dplyr::filter(padj < 0.05))$NES,
+                (de_timepoint_fgsea_res$FL2001$pathway %>% dplyr::filter(padj < 0.05))$NES)
+nes_limits <- c(min(nes_values), max(nes_values))
+
+fgsea_size_values <- c((de_timepoint_fgsea_res$FL1018$pathway %>% dplyr::filter(padj < 0.05))$size,
+                       (de_timepoint_fgsea_res$FL2001$pathway %>% dplyr::filter(padj < 0.05))$size)
+fgsea_size_limits <- c(min(fgsea_size_values), max(fgsea_size_values))
+
+fgsea_pathway_plot_FL1018 <- ggplot(de_timepoint_fgsea_res$FL1018$pathway %>% 
+         dplyr::filter(padj < 0.05) %>%
+         dplyr::mutate(pathway=str_replace_all(pathway, "^HALLMARK_", "")), aes(reorder(pathway, NES), NES)) +
+  geom_point(aes(size=size)) +
+  coord_flip() +
+  labs(x="Pathway", y="Normalized Enrichment Score") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  scale_y_continuous(limits = nes_limits) + 
+  geom_hline(yintercept = 0, linetype = 'dashed') + 
+  scale_size_continuous(trans = "log10", limits = fgsea_size_limits) + 
+  guides(size = FALSE)
+
+fgsea_pathway_plot_FL2001 <- ggplot(de_timepoint_fgsea_res$FL2001$pathway %>% 
+         dplyr::filter(padj < 0.05) %>%
+         dplyr::mutate(pathway=str_replace_all(pathway, "^HALLMARK_", "")), aes(reorder(pathway, NES), NES)) +
+  geom_point(aes(size=size)) +
+  coord_flip() +
+  labs(x="Pathway", y="Normalized Enrichment Score") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  scale_y_continuous(limits = nes_limits) + 
+  geom_hline(yintercept = 0, linetype = 'dashed') + 
+  scale_size_continuous(trans = "log10", limits = fgsea_size_limits) + 
+  guides(size = FALSE)
 
 
 # HLA expression plots
@@ -376,13 +424,36 @@ network_size_legend <- emapplot(FL1018_de_malignant_timepoint_down_table,
         legend.justification = "center") 
 network_size_legend <- cellassign.utils::extract_legend(network_size_legend)
 
+# fgsea size legend
+
+fgsea_size_legend <- ggplot(de_timepoint_fgsea_res$FL2001$pathway %>% 
+                              dplyr::filter(padj < 0.05) %>%
+                              dplyr::mutate(pathway=str_replace_all(pathway, "^HALLMARK_", "")), aes(reorder(pathway, NES), NES)) +
+  geom_point(aes(size=size)) +
+  coord_flip() +
+  labs(x="Pathway", y="Normalized Enrichment Score") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  scale_y_continuous(limits = nes_limits) + 
+  geom_hline(yintercept = 0, linetype = 'dashed') + 
+  scale_size_continuous(trans = "log10", limits = fgsea_size_limits) + 
+  guides(size = guide_legend(title = "Gene set size"))
+fgsea_size_legend <- cellassign.utils::extract_legend(fgsea_size_legend)
+
 # Build combined plot
+
+fgsea_row <- cowplot::plot_grid(fgsea_pathway_plot_FL1018,
+                                fgsea_pathway_plot_FL2001,
+                                labels = c('a', 'b'),
+                                ncol = 2)
+
 
 top_row <- cowplot::plot_grid(bcell_timepoint_plots$FL1018,
                               proliferation_plots$FL1018$MKI67,
                               proliferation_plots$FL1018$TOP2A,
                               cycling_plot_results$FL1018$plot,
-                              labels = c('a', '', '', 'b'),
+                              labels = c('c', '', '', 'd'),
                               ncol = 4,
                               rel_widths = rep(0.25, 4))
 
@@ -390,7 +461,7 @@ second_row <- cowplot::plot_grid(bcell_timepoint_plots$FL2001,
                                  proliferation_plots$FL2001$MKI67,
                                  proliferation_plots$FL2001$TOP2A,
                                  cycling_plot_results$FL2001$plot,
-                                 labels = c('c', '', '', 'd'),
+                                 labels = c('e', '', '', 'f'),
                                  ncol = 4,
                                  rel_widths = rep(0.25, 4))
 
@@ -401,16 +472,16 @@ top_second_legend <- cowplot::plot_grid(timepoint_legend,
                                         ncol = 4,
                                         rel_widths = c(0.2, 0.35, 0.25, 0.20))
 
-third_row <- cowplot::plot_grid(FL1018_malignant_pathway_down_plot,
-                                FL1018_malignant_T2_pathway_down_plot,
-                                labels = c('e', 'f'),
-                                ncol = 2,
-                                rel_widths = c(0.5, 0.5))
-
-third_row_legend <- cowplot::plot_grid(network_pval_legend,
-                                       network_size_legend,
-                                       ncol = 2,
-                                       rel_widths = c(0.5, 0.5))
+# third_row <- cowplot::plot_grid(FL1018_malignant_pathway_down_plot,
+#                                 FL1018_malignant_T2_pathway_down_plot,
+#                                 labels = c('e', 'f'),
+#                                 ncol = 2,
+#                                 rel_widths = c(0.5, 0.5))
+# 
+# third_row_legend <- cowplot::plot_grid(network_pval_legend,
+#                                        network_size_legend,
+#                                        ncol = 2,
+#                                        rel_widths = c(0.5, 0.5))
 
 fourth_row <- cowplot::plot_grid(hla_lineplots$FL1018,
                                 hla_lineplots$FL2001,
@@ -418,17 +489,19 @@ fourth_row <- cowplot::plot_grid(hla_lineplots$FL1018,
                                 ncol = 2,
                                 rel_widths = c(0.5, 0.5))
 
-final_plot <- cowplot::plot_grid(top_row, 
+final_plot <- cowplot::plot_grid(fgsea_row,
+                                 fgsea_size_legend,
+                                 top_row, 
                                  top_second_legend,
                                  second_row, 
-                                 third_row, 
-                                 third_row_legend,
+                                 #third_row, 
+                                 #third_row_legend,
                                  fourth_row,
                                  hla_gene_legend,
                                  labels = c('', '', '', '', '', '', ''), 
                                  ncol = 1, 
                                  nrow = 7,
-                                 rel_heights = c(0.3, 0.05, 0.3, 0.3, 0.05, 0.3, 0.05))
+                                 rel_heights = c(0.3, 0.05, 0.3, 0.05, 0.3, 0.3, 0.05))
 
 # Plot final plot
 pdf(args$outfname, width = 10, height = 13)
