@@ -99,6 +99,7 @@ rule fl_malignant_figure:
         sce=config['follicular_analysis_results']['sce_annotated'],
         sce_bcell=config['follicular_analysis_results']['sce_bcell_annotated'],
         de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
+        de_timepoint_fgsea=config['follicular_analysis_results']['differential_expression']['timepoint_fgsea'],
         de_malignant_timepoint=config['follicular_analysis_results']['differential_expression']['malignant_timepoint'],
     output:
         fl_malignant_figure='{outdir}/figures/fl_malignant_figure.pdf'.format(outdir=config['outdir'])
@@ -116,6 +117,7 @@ rule fl_malignant_figure:
         '--sce_bcell {input.sce_bcell} '
         '--bcell_labels {params.bcell_labels} '
         '--de_timepoint_dir {input.de_timepoint} '
+        '--de_timepoint_fgsea_dir {input.de_timepoint_fgsea} '
         '--de_malignant_timepoint_dir {input.de_malignant_timepoint} '
         '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.fl_malignant_figure} '

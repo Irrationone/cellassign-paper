@@ -34,9 +34,10 @@ follicular_analysis_results:
   sce_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_bcells.rds
   scvis_merged: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v3/sce_follicular_RLN_merged.rds
   differential_expression: 
-    cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/timepoint/cytotoxic
-    timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/timepoint
-    malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/malignant_timepoint
+    cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/timepoint/cytotoxic
+    timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/timepoint
+    malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/malignant_timepoint
+    timepoint_fgsea: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/fgsea/timepoint
 
 # Dimensionality reduction type to plot
 plot_dimreduce_type: 'UMAP'

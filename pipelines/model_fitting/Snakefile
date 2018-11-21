@@ -1,0 +1,10 @@
+
+configfile: 'config/v1.yaml'
+
+singularity: "docker://alzhang/scrna-analysis-model-fitting-3.5:v1.0"
+
+rule all:
+    input:
+
+
+rule naive_cd4_naive_cd8_fit:
