@@ -324,7 +324,7 @@ rule differential_expression_bcell_malignant_timepoint:
         de_res='{outdir}/differential_expression/ReactomePA/malignant_timepoint/b_cells/{{patient_group}}.rds'.format(outdir=config['outdir']),
     params:
         min_gene_counts=config['differential_expression_settings']['ReactomePA']['min_gene_counts'],
-        patient_group=lambda wildcards: config['differential_expression_settings']['ReactomePA']['patient_groups'],
+        patient_group=lambda wildcards: config['differential_expression_settings']['ReactomePA']['patient_groups'][wildcards.patient_group],
         num_genes=config['differential_expression_settings']['ReactomePA']['num_genes'],
         name='differential-expression-reactome-bcell-malignant-timepoint-{patient_group}',
         bcell_labels=config['b_cell_labels'],
