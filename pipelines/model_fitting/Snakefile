@@ -22,7 +22,7 @@ rule fit_models:
     benchmark:
         '{logdir}/benchmarks/fit_models/{{dataset}}/{{model}}.txt'.format(logdir=config['logdir'])
     shell:
-        '{PYMC3_PYTHON} '
+        '{PYMC3_PYTHON} python/fit_simulation_model.py '
         '--logfc_file {input.logfc_file} '
         '--null_logfc_file {input.null_logfc_file} '
         '--class1 {params.class1} '
