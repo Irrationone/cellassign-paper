@@ -29,6 +29,7 @@ intermediates/
 *.log
 .keras/
 .ExperimentHub/
+analysis/jupyter/modeling_differential_expression_testing.ipynb
 
 ## Allow
 !sce_t4k_params.rds
