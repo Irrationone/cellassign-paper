@@ -14,7 +14,7 @@ rule fit_models:
     params:
         class1=lambda wildcards: config['datasets'][wildcards.dataset]['class1'],
         class2=lambda wildcards: config['datasets'][wildcards.dataset]['class2'],
-        model_type=lambda wildcards: config['models'][wildcards.model],
+        model_type='{model}',
     output:
         outdir=directory('{outdir}/{{dataset}}/{{model}}'.format(outdir=config['outdir'])),
     log:
