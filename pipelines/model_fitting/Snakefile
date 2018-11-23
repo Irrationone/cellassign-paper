@@ -36,7 +36,7 @@ rule create_plots:
     input:
         logfc_file=lambda wildcards: config['datasets'][wildcards.dataset]['foreground'],
         null_logfc_file=lambda wildcards: config['datasets'][wildcards.dataset]['background'],
-        model_results='{outdir}/{{dataset}}/{{model}}/model_results.pkl'.format(outdir=config['outdir']),
+        model_result_dir='{outdir}/{{dataset}}/{{model}}'.format(outdir=config['outdir']),
     params:
         class1=lambda wildcards: config['datasets'][wildcards.dataset]['class1'],
         class2=lambda wildcards: config['datasets'][wildcards.dataset]['class2'],
@@ -48,7 +48,7 @@ rule create_plots:
         '{logdir}/benchmarks/create_plots/{{dataset}}/{{model}}.txt'.format(logdir=config['logdir'])
     shell:
         '{PYMC3_PYTHON} python/create_plots.py '
-        '--model_file {input.model_results} '
+        '--model_dir {input.model_result_dir} '
         '--logfc_file {input.logfc_file} '
         '--null_logfc_file {input.null_logfc_file} '
         '--class1 {params.class1} '
