@@ -17,7 +17,6 @@ rule fit_models:
         model_type='{model}',
     output:
         outdir=directory('{outdir}/{{dataset}}/{{model}}'.format(outdir=config['outdir'])),
-        model_results='{outdir}/{{dataset}}/{{model}}/model_results.pkl'.format(outdir=config['outdir']),
     log:
         '{logdir}/logs/fit_models/{{dataset}}/{{model}}.log'.format(logdir=config['logdir'])
     benchmark:
