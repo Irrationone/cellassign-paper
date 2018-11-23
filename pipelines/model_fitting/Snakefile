@@ -6,6 +6,7 @@ PYMC3_PYTHON='/home/alzhang/miniconda2/envs/pymc3/bin/python'
 rule all:
     input:
         expand('{outdir}/{{dataset}}/{{model}}'.format(outdir=config['outdir']), dataset=config['datasets'], model=config['models']),
+        expand('{outdir}/plots/{{dataset}}/{{model}}'.format(outdir=config['outdir']), dataset = config['datasets'], model=config['models']),
 
 rule fit_models:
     input:
