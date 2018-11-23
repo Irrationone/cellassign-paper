@@ -10,6 +10,7 @@ import copy
 import feather
 import re
 import argparse
+import pickle
 
 import matplotlib.pyplot as plt
 import statsmodels.stats.stattools
@@ -209,11 +210,7 @@ def v3_model(observations, nulls, null_sd, null_b, null_dispersed_prob, iter_cou
 def get_logfcs_comparison(df, type1, type2):
     type2 = re.sub("[ \+\\/]", ".", type2)
     return(np.array(df[df.cluster == type1]["logFC." + type2]))
-
-# Plot QQplot
-def plot_qq(res, logfcs):
-    pred_samples = np.random.choice(res['ppc']['obs'].flatten(), size = logfcs.shape[0])
-    statsmodels.graphics.gofplots.qqplot_2samples(pred_samples, logfcs, line = '45')
+    
 
 # Read in arguments
 def read_args():
@@ -237,6 +234,11 @@ def read_args():
         dest="class2",
         help="Second class to compare")
     parser.add_argument(
+        "--model_type",
+        dest="model_type",
+        help="Model type",
+        choices=['splatter', 'v2', 'v3'])
+    parser.add_argument(
         "-o", "--outdir", dest="outdir", help="Output directory", metavar="DIR")
     args = parser.parse_args()
     
@@ -251,35 +253,45 @@ def main(args):
     logfcs_diff = get_logfcs_comparison(logfc_table, args.class1, args.class2)
     logfcs_same = np.array(null_logfc_table[(null_logfc_table['celltype'] == args.class1) & (null_logfc_table['permutation'] <= 10)].logfc)
     
+    print(args.class1)
+    print(args.class2)
+    
     # Run models
     null_model_results = run_null_model(logfcs_same, iter_count=4000, tune_iters = 2000)
     null_sd_mean = pm.summary(null_model_results['trace'])['mean']['sd_null']
     null_b_mean = pm.summary(null_model_results['trace'])['mean']['b_null']
     null_dispersed_prob_mean = pm.summary(null_model_results['trace'])['mean']['dispersed_prob']
     
-    splatter_model_results = splatter_model(logfcs_diff, logfcs_same, null_sd = null_sd_mean, null_b = null_b_mean, null_dispersed_prob = null_dispersed_prob_mean, iter_count = 1000, tune_iters = 1000)
+    print(null_sd_mean)
+    print(null_b_mean)
+    print(null_dispersed_prob_mean)
     
-    v3_model_results = v3_model(logfcs_diff, logfcs_same, null_sd = null_sd_mean, null_b = null_b_mean, null_dispersed_prob = null_dispersed_prob_mean, iter_count = 2500, tune_iters = 1000)
+    if args.model_type == 'splatter':
+        model_results = splatter_model(logfcs_diff, logfcs_same, null_sd = null_sd_mean, null_b = null_b_mean, null_dispersed_prob = null_dispersed_prob_mean, iter_count = 2500, tune_iters = 1000)
+    elif args.model_type == 'v2':
+        model_results = v2_model(logfcs_diff, logfcs_same, null_sd = null_sd_mean, null_b = null_b_mean, null_dispersed_prob = null_dispersed_prob_mean, iter_count = 2500, tune_iters = 1000)
+    elif args.model_type == 'v3':
+        model_results = v3_model(logfcs_diff, logfcs_same, null_sd = null_sd_mean, null_b = null_b_mean, null_dispersed_prob = null_dispersed_prob_mean, iter_count = 2500, tune_iters = 1000, max_fc = 1000)
+    else:
+        raise Exception('Unrecognized model type.')
     
     # Write outputs
-    
     if not os.path.isdir(args.outdir):
         os.mkdir(args.outdir)
     
-    splatter_model_trace_dir = os.path.join(args.outdir, "splatter")
-    v3_model_trace_dir = os.path.join(args.outdir, "v3_model")
+    trace_outdir = os.path.join(args.outdir, "trace")
+    null_model_outfile = open(os.path.join(args.outdir, "null_model_results.pkl"), 'wb')
+    model_outfile = open(os.path.join(args.outdir, "model_results.pkl"), 'wb')
     
-    ## Save traces
-    pm.save_trace(splatter_model_results['trace'], directory = splatter_model_trace_dir)
-    pm.save_trace(v3_model_results['trace'], directory = v3_model_trace_dir)
+    ## Save trace
+    pm.save_trace(model_results['trace'], directory = trace_outdir)
     
-    ## Save ppc's
-    splatter_model_results['ppc']
+    ## Save results
+    pickle.dump(null_model_results, file = null_model_outfile)
+    pickle.dump(model_results, file = model_outfile)
     
-    ## Save logfcs used
-    
-    
-
+    model_outfile.close()
+    null_model_outfile.close()
 
 if __name__ == '__main__':
     args = read_args()
