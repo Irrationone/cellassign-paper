@@ -17,6 +17,7 @@ rule fit_models:
         model_type='{model}',
     output:
         outdir=directory('{outdir}/{{dataset}}/{{model}}'.format(outdir=config['outdir'])),
+        model_results='{outdir}/{{dataset}}/{{model}}/model_results.pkl'.format(outdir=config['outdir']),
     log:
         '{logdir}/logs/fit_models/{{dataset}}/{{model}}.log'.format(logdir=config['logdir'])
     benchmark:
@@ -28,5 +29,29 @@ rule fit_models:
         '--class1 {params.class1} '
         '--class2 {params.class2} '
         '--model_type {params.model_type} '
+        '--outdir {output.outdir} '
+        '>& {log}'
+
+rule create_plots:
+    input:
+        logfc_file=lambda wildcards: config['datasets'][wildcards.dataset]['foreground'],
+        null_logfc_file=lambda wildcards: config['datasets'][wildcards.dataset]['background'],
+        model_results='{outdir}/{{dataset}}/{{model}}/model_results.pkl'.format(outdir=config['outdir']),
+    params:
+        class1=lambda wildcards: config['datasets'][wildcards.dataset]['class1'],
+        class2=lambda wildcards: config['datasets'][wildcards.dataset]['class2'],
+    output:
+        outdir=directory('{outdir}/plots/{{dataset}}/{{model}}'.format(outdir=config['outdir'])),
+    log:
+        '{logdir}/logs/create_plots/{{dataset}}/{{model}}.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/create_plots/{{dataset}}/{{model}}.txt'.format(logdir=config['logdir'])
+    shell:
+        '{PYMC3_PYTHON} python/create_plots.py '
+        '--model_file {input.model_results} '
+        '--logfc_file {input.logfc_file} '
+        '--null_logfc_file {input.null_logfc_file} '
+        '--class1 {params.class1} '
+        '--class2 {params.class2} '
         '--outdir {output.outdir} '
         '>& {log}'

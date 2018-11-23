@@ -12,5 +12,5 @@ datasets:
   pbmc68k:
     foreground: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/pbmc68k_markers.feather'
     background: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/pbmc_68k_normal_logfcs.feather'
-    class1: Naive\ CD4+
-    class2: Naive\ CD8+
+    class1: Naive\ CD8+
+    class2: Naive\ CD4+
