@@ -6,7 +6,8 @@ PYMC3_PYTHON='/home/alzhang/miniconda2/envs/pymc3/bin/python'
 rule all:
     input:
         expand('{outdir}/{{dataset}}/{{model}}'.format(outdir=config['outdir']), dataset=config['datasets'], model=config['models']),
-        expand('{outdir}/plots/{{dataset}}/{{model}}'.format(outdir=config['outdir']), dataset = config['datasets'], model=config['models']),
+        expand('{outdir}/individual_plots/{{dataset}}/{{model}}'.format(outdir=config['outdir']), dataset = config['datasets'], model=config['models']),
+        expand('{outdir}/combined_plots/{{dataset}}'.format(outdir=config['outdir']), dataset = config['datasets']),
 
 rule fit_models:
     input:
@@ -41,7 +42,7 @@ rule create_plots:
         class1=lambda wildcards: config['datasets'][wildcards.dataset]['class1'],
         class2=lambda wildcards: config['datasets'][wildcards.dataset]['class2'],
     output:
-        outdir=directory('{outdir}/plots/{{dataset}}/{{model}}'.format(outdir=config['outdir'])),
+        outdir=directory('{outdir}/individual_plots/{{dataset}}/{{model}}'.format(outdir=config['outdir'])),
     log:
         '{logdir}/logs/create_plots/{{dataset}}/{{model}}.log'.format(logdir=config['logdir'])
     benchmark:
@@ -49,6 +50,32 @@ rule create_plots:
     shell:
         '{PYMC3_PYTHON} python/create_plots.py '
         '--model_dir {input.model_result_dir} '
+        '--logfc_file {input.logfc_file} '
+        '--null_logfc_file {input.null_logfc_file} '
+        '--class1 {params.class1} '
+        '--class2 {params.class2} '
+        '--outdir {output.outdir} '
+        '>& {log}'
+
+rule combined_plot:
+    input:
+        logfc_file=lambda wildcards: config['datasets'][wildcards.dataset]['foreground'],
+        null_logfc_file=lambda wildcards: config['datasets'][wildcards.dataset]['background'],
+        splatter_model_dir='{outdir}/{{dataset}}/splatter'.format(outdir=config['outdir']),
+        v3_model_dir='{outdir}/{{dataset}}/v3'.format(outdir=config['outdir']),
+    params:
+        class1=lambda wildcards: config['datasets'][wildcards.dataset]['class1'],
+        class2=lambda wildcards: config['datasets'][wildcards.dataset]['class2'],
+    output:
+        outdir=directory('{outdir}/combined_plots/{{dataset}}'.format(outdir=config['outdir'])),
+    log:
+        '{logdir}/logs/combined_plot/{{dataset}}.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/combined_plot/{{dataset}}.txt'.format(logdir=config['logdir'])
+    shell:
+        '{PYMC3_PYTHON} python/combined_plot.py '
+        '--splatter_model_dir {input.splatter_model_dir} '
+        '--v3_model_dir {input.v3_model_dir} '
         '--logfc_file {input.logfc_file} '
         '--null_logfc_file {input.null_logfc_file} '
         '--class1 {params.class1} '
