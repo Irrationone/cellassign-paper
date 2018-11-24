@@ -21,8 +21,6 @@ parser$add_argument('--sce_nonmalignant_bcell', metavar='FILE', type='character'
                     help="Path to SingleCellExperiment RDS")
 parser$add_argument('--cellassign_lambda_kappa', metavar='FILE', type='character',
                     help="Path to CellAssign lambda/kappa results")
-parser$add_argument('--winsorized_expression_threshold', type='double',
-                    help="Winsorized expression threshold", default = NULL)
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for PDF plot")
 args <- parser$parse_args()
