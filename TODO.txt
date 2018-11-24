@@ -1,0 +1,2 @@
+- Rerun simulations with final parameter estimates from runs in the result directory. 
+    Some of them are different (won't make a substantial difference to the results, but would be good to have it consistent)

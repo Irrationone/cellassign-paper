@@ -1,16 +1,28 @@
 
 configfile: 'config/v2.yaml'
 
-singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.3"
+singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.4"
 
 rule all:
     input:
+        ## Main figures
         fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir']),
         sim_performance_figure='{outdir}/figures/sim_performance_figure.pdf'.format(outdir=config['outdir']),
         fl_nonmalignant_figure='{outdir}/figures/fl_nonmalignant_figure.pdf'.format(outdir=config['outdir']),
         fl_malignant_figure='{outdir}/figures/fl_malignant_figure.pdf'.format(outdir=config['outdir']),
+        ## Supplemental figures
+        sim_performance_b_cd8='{outdir}/supplemental_figures/sim_performance_b_cd8.pdf'.format(outdir=config['outdir']),
+        wrong_marker_figure='{outdir}/supplemental_figures/wrong_marker_naivecd8_naivecd4.pdf'.format(outdir=config['outdir']),
+        real_data_evaluation_figure='{outdir}/supplemental_figures/real_data_evaluation.pdf'.format(outdir=config['outdir']),
+        fl_markers_figure='{outdir}/supplemental_figures/fl_markers_supplemental.pdf'.format(outdir=config['outdir']),
+        light_chain_figure='{outdir}/supplemental_figures/light_chain_heatmap.pdf'.format(outdir=config['outdir']),
+        rln_markers_figure='{outdir}/supplemental_figures/rln_markers.pdf'.format(outdir=config['outdir']),
+        fl_de_malignant_figure='{outdir}/supplemental_figures/fl_de_malignant_nonmalignant.pdf'.format(outdir=config['outdir']),
+        fl_nonmalignant_timepoint_network_plot='{outdir}/supplemental_figures/fl_nonmalignant_timepoint.pdf'.format(outdir=config['outdir']),
+        fl_hla_downregulation_plot='{outdir}/supplemental_figures/fl_hla_downregulation.pdf'.format(outdir=config['outdir']),
 
 
+## Main figures
 
 rule simulation_performance_figure:
     input:
@@ -27,7 +39,7 @@ rule simulation_performance_figure:
     benchmark:
         '{logdir}/benchmarks/simulation_performance_figure.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/simulation_overview_figure.R '
+        'Rscript R/main_figures/simulation_overview_figure.R '
         '--deprob_result_dir {input.deprob_result_dir} '
         '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
         '--delta_deprobs {params.delta_deprobs} '
@@ -50,7 +62,7 @@ rule fl_overview_figure:
     benchmark:
         '{logdir}/benchmarks/fl_overview_figure.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/fl_overview_figure.R '
+        'Rscript R/main_figures/fl_overview_figure.R '
         '--sce {input.sce} '
         '--patient_progression {input.patient_events} '
         '--dimreduce_type {params.dimreduce_type} '
@@ -80,7 +92,7 @@ rule fl_nonmalignant_figure:
     benchmark:
         '{logdir}/benchmarks/fl_nonmalignant_figure.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/fl_nonmalignant_figure.R '
+        'Rscript R/main_figures/fl_nonmalignant_figure.R '
         '--sce {input.sce} '
         '--sce_tcell {input.sce_tcell} '
         '--sce_bcell {input.sce_bcell} '
@@ -112,7 +124,7 @@ rule fl_malignant_figure:
     benchmark:
         '{logdir}/benchmarks/fl_malignant_figure.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/fl_malignant_figure.R '
+        'Rscript R/main_figures/fl_malignant_figure.R '
         '--sce {input.sce} '
         '--sce_bcell {input.sce_bcell} '
         '--bcell_labels {params.bcell_labels} '
@@ -121,4 +133,176 @@ rule fl_malignant_figure:
         '--de_malignant_timepoint_dir {input.de_malignant_timepoint} '
         '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.fl_malignant_figure} '
+        '>& {log}'
+
+
+## Supplemental figures
+
+rule simulation_performance_b_cd8:
+    input:
+        deprob_result_dir=config['simulation_analysis_results']['deprob_result_b_cd8_dir'],
+    output:
+        sim_performance_b_cd8='{outdir}/supplemental_figures/sim_performance_b_cd8.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-simulation-performance-b-cd8',
+        delta_deprobs=config['delta_deprobs_supp'],
+        deprob_methods=config['deprob_methods'],
+    log:
+        '{logdir}/logs/simulation_performance_b_cd8.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/simulation_performance_b_cd8.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/simulation_b_cd8.R '
+        '--deprob_result_dir {input.deprob_result_dir} '
+        '--delta_deprobs {params.delta_deprobs} '
+        '--deprob_methods {params.deprob_methods} '
+        '--outfname {output.sim_performance_b_cd8} '
+        '>& {log}'
+
+rule wrong_marker_naivecd8_naivecd4:
+    input:
+        wrongmarker_result_dir=config['simulation_analysis_results']['wrongmarker_result_naivecd8_naivecd4_dir'],
+    output:
+        wrong_marker_figure='{outdir}/supplemental_figures/wrong_marker_naivecd8_naivecd4.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-wrong-marker-naivecd8-naivecd4',
+    log:
+        '{logdir}/logs/wrong_marker_naivecd8_naivecd4.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/wrong_marker_naivecd8_naivecd4.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/wrong_marker_naive_cd4_naive_cd8.R '
+        '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
+        '--outfname {output.wrong_marker_figure} '
+        '>& {log}'
+
+
+rule real_data_evaluation:
+    input:
+        koh_annotated=config['external_analysis_results']['koh_annotated'],
+    output:
+        real_data_evaluation_figure='{outdir}/supplemental_figures/real_data_evaluation.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-real-data-evaluation',
+        dimreduce_type='TSNE',
+    log:
+        '{logdir}/logs/real_data_evaluation.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/real_data_evaluation.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/cellassign_real_data_evaluation.R '
+        '--koh_annotated {input.koh_annotated} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.real_data_evaluation_figure} '
+        '>& {log}'
+
+rule fl_markers_supplemental:
+    input:
+        sce=config['follicular_analysis_results']['sce_annotated'],
+        cellassign_specific_result=config['follicular_analysis_results']['cellassign_specific_result'],
+    output:
+        fl_markers_figure='{outdir}/supplemental_figures/fl_markers_supplemental.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-fl-markers',
+        expr_threshold=config['winsorized_expression']['markers'],
+    log:
+        '{logdir}/logs/fl_markers_supplemental.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/fl_markers_supplemental.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/fl_markers_supplemental.R '
+        '--sce {input.sce} '
+        '--winsorized_expression_threshold {params.expr_threshold} '
+        '--cellassign_results {input.cellassign_specific_result} '
+        '--outfname {output.fl_markers_figure} '
+        '>& {log}'
+
+rule light_chain_constant_region_heatmap:
+    input:
+        sce_nonmalignant_b=config['follicular_analysis_results']['sce_nonmalignant_bcell_annotated'],
+        cellassign_lambda_kappa_result=config['follicular_analysis_results']['cellassign_lambda_kappa_result'],
+    output:
+        light_chain_figure='{outdir}/supplemental_figures/light_chain_heatmap.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-light-chain-heatmap',
+    log:
+        '{logdir}/logs/light_chain_constant_region_heatmap.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/light_chain_constant_region_heatmap.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/fl_markers_supplemental.R '
+        '--sce_nonmalignant_bcell {input.sce_nonmalignant_b} '
+        '--cellassign_lambda_kappa {input.cellassign_lambda_kappa_result} '
+        '--outfname {output.light_chain_figure} '
+        '>& {log}'
+
+rule rln_markers:
+    input:
+        sce=config['follicular_analysis_results']['scvis_merged'],
+    output:
+        rln_markers_figure='{outdir}/supplemental_figures/rln_markers.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-rln-markers',
+        expr_threshold=config['winsorized_expression']['markers'],
+    log:
+        '{logdir}/logs/rln_markers.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/rln_markers.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/rln_markers.R '
+        '--sce {input.sce} '
+        '--winsorized_expression_threshold {params.expr_threshold} '
+        '--outfname {output.rln_markers_figure} '
+        '>& {log}'
+
+rule fl_de_malignant_nonmalignant_bcells:
+    input:
+        de_malignant_timepoint=config['follicular_analysis_results']['differential_expression']['malignant_timepoint'],
+    output:
+        fl_de_malignant_figure='{outdir}/supplemental_figures/fl_de_malignant_nonmalignant.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-fl-de-malignant-nonmalignant-bcells',
+    log:
+        '{logdir}/logs/fl_de_malignant_nonmalignant_bcells.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/fl_de_malignant_nonmalignant_bcells.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/fl_de_malignant_vs_nonmalignant_bcells.R '
+        '--de_malignant_timepoint_dir {input.de_malignant_timepoint} '
+        '--outfname {output.fl_de_malignant_figure} '
+        '>& {log}'
+
+rule fl_nonmalignant_timepoint_pathway:
+    input:
+        de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
+    output:
+        fl_nonmalignant_timepoint_network_plot='{outdir}/supplemental_figures/fl_nonmalignant_timepoint.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-fl-nonmalignant-timepoint-pathway',
+    log:
+        '{logdir}/logs/fl_nonmalignant_timepoint_pathway.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/fl_nonmalignant_timepoint_pathway.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/fl_nonmalignant_timepoint_pathway.R '
+        '--de_timepoint_dir {input.de_timepoint} '
+        '--outfname {output.fl_nonmalignant_timepoint_network_plot} '
+        '>& {log}'
+
+
+rule fl_hla_downregulation:
+    input:
+        de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
+    output:
+        fl_hla_downregulation_plot='{outdir}/supplemental_figures/fl_hla_downregulation.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-fl-hla-downregulation',
+    log:
+        '{logdir}/logs/fl_hla_downregulation.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/fl_hla_downregulation.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/fl_hla_downregulation.R '
+        '--de_timepoint_dir {input.de_timepoint} '
+        '--outfname {output.fl_hla_downregulation_plot} '
         '>& {log}'
