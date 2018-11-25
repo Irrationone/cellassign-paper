@@ -230,7 +230,7 @@ rule light_chain_constant_region_heatmap:
     benchmark:
         '{logdir}/benchmarks/light_chain_constant_region_heatmap.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/supplemental_figures/fl_markers_supplemental.R '
+        'Rscript R/supplemental_figures/light_chain_constant_region.R '
         '--sce_nonmalignant_bcell {input.sce_nonmalignant_b} '
         '--cellassign_lambda_kappa {input.cellassign_lambda_kappa_result} '
         '--outfname {output.light_chain_figure} '
@@ -306,3 +306,14 @@ rule fl_hla_downregulation:
         '--de_timepoint_dir {input.de_timepoint} '
         '--outfname {output.fl_hla_downregulation_plot} '
         '>& {log}'
+
+
+## Supplemental Tables
+
+# rule simulation_performance_table:
+#     input:
+
+# # Marker gene matrices for follicular, Koh
+# rule marker_gene_matrices:
+#     input:
+
