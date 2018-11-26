@@ -269,7 +269,8 @@ fgsea_pathway_plot_FL1018 <- ggplot(de_timepoint_fgsea_res$FL1018$pathway %>%
   theme_nature() + 
   scale_y_continuous(limits = nes_limits) + 
   geom_hline(yintercept = 0, linetype = 'dashed') + 
-  scale_size_continuous(trans = "log10", limits = fgsea_size_limits) + 
+  scale_size_continuous(trans = "log10", limits = fgsea_size_limits,
+                        range = c(1,4)) + 
   guides(size = FALSE)
 
 fgsea_pathway_plot_FL2001 <- ggplot(de_timepoint_fgsea_res$FL2001$pathway %>% 
@@ -283,7 +284,8 @@ fgsea_pathway_plot_FL2001 <- ggplot(de_timepoint_fgsea_res$FL2001$pathway %>%
   theme_nature() + 
   scale_y_continuous(limits = nes_limits) + 
   geom_hline(yintercept = 0, linetype = 'dashed') + 
-  scale_size_continuous(trans = "log10", limits = fgsea_size_limits) + 
+  scale_size_continuous(trans = "log10", limits = fgsea_size_limits,
+                        range = c(1,4)) + 
   guides(size = FALSE)
 
 
@@ -437,17 +439,29 @@ fgsea_size_legend <- ggplot(de_timepoint_fgsea_res$FL2001$pathway %>%
   theme_nature() + 
   scale_y_continuous(limits = nes_limits) + 
   geom_hline(yintercept = 0, linetype = 'dashed') + 
-  scale_size_continuous(trans = "log10", limits = fgsea_size_limits) + 
+  scale_size_continuous(trans = "log10", limits = fgsea_size_limits,
+                        range = c(1, 4)) + 
   guides(size = guide_legend(title = "Gene set size"))
 fgsea_size_legend <- cellassign.utils::extract_legend(fgsea_size_legend)
 
 # Build combined plot
 
+fgsea_pathway_plot_FL1018 <- fgsea_pathway_plot_FL1018 %>%
+  ggplot_build() %>%
+  ggplot_gtable()
+
+fgsea_pathway_plot_FL2001 <- fgsea_pathway_plot_FL2001 %>%
+  ggplot_build() %>%
+  ggplot_gtable()
+
+fgsea_pathway_plot_FL1018$layout$clip[str_detect(fgsea_pathway_plot_FL1018$layout$name, "panel")] <- "off"
+fgsea_pathway_plot_FL2001$layout$clip[str_detect(fgsea_pathway_plot_FL2001$layout$name, "panel")] <- "off"
+
+
 fgsea_row <- cowplot::plot_grid(fgsea_pathway_plot_FL1018,
                                 fgsea_pathway_plot_FL2001,
                                 labels = c('a', 'b'),
                                 ncol = 2)
-
 
 top_row <- cowplot::plot_grid(bcell_timepoint_plots$FL1018,
                               proliferation_plots$FL1018$MKI67,
@@ -501,7 +515,7 @@ final_plot <- cowplot::plot_grid(fgsea_row,
                                  labels = c('', '', '', '', '', '', ''), 
                                  ncol = 1, 
                                  nrow = 7,
-                                 rel_heights = c(0.3, 0.05, 0.3, 0.05, 0.3, 0.3, 0.05))
+                                 rel_heights = c(0.4, 0.05, 0.27, 0.05, 0.27, 0.25, 0.05))
 
 # Plot final plot
 pdf(args$outfname, width = 10, height = 13, useDingbats = FALSE)
