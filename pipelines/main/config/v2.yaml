@@ -34,6 +34,10 @@ deprob_methods:
   - seurat_1.2
   - Zheng_cor
 
+eval_measures_to_report:
+  - accuracy
+  - micro_f1
+
 # External analysis results
 external_analysis_results:
   koh_annotated: /datadrive/projects/cellassign-paper/results/outputs/external/v1/koh/sce_annotated.rds
