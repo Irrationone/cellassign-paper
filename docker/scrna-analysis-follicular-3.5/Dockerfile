@@ -83,3 +83,6 @@ RUN /bin/bash -c "PATH=$HOME/miniconda/bin:$PATH && source activate r-tensorflow
 USER rstudio
 
 RUN /bin/bash -c "PATH=$HOME/miniconda/bin:$PATH && source activate r-tensorflow && pip install /scanorama"
+
+# Container won't stay up without this
+USER root
