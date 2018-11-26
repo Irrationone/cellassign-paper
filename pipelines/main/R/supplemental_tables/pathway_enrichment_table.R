@@ -39,7 +39,7 @@ de_timepoint_files <- Sys.glob(file.path(de_timepoint_dir, "*", "*"))
 de_malignant_timepoint_files <- Sys.glob(file.path(de_malignant_timepoint_dir, "b_cells", "*"))
 de_timepoint_fgsea_files <- Sys.glob(file.path(de_timepoint_fgsea_dir, "malignant", "*"))
 
-de_timepoint_celltypes_include <- c("b", "cytotoxic", "helper", "follicular_helper")
+de_timepoint_celltypes_include <- c("b", "cytotoxic", "helper", "follicular_helper", "malignant")
 de_timepoint_files <- de_timepoint_files[basename(dirname(de_timepoint_files)) %in% de_timepoint_celltypes_include]
 
 read_pathway_result <- function(de_files) {
@@ -119,7 +119,7 @@ malignant_timepoint_pathways <- plyr::rbind.fill(lapply(de_malignant_timepoint_f
 excel_export(list(timepoint_pathways,
                   hallmark_pathways),
              file = args$outfname,
-             table_names = c("T2 vs. T1 reactome pathways (nonmalignant cells, by celltype)",
+             table_names = c("T2 vs. T1 reactome pathways (by celltype)",
                              "T2 vs. T1 hallmark pathways (malignant B cells)"))
 
 cat("Completed.\n")
