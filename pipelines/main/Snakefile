@@ -310,10 +310,16 @@ rule fl_hla_downregulation:
 
 ## Supplemental Tables
 
-# rule simulation_performance_table:
-#     input:
+rule simulation_performance_table:
+    input:
 
-# # Marker gene matrices for follicular, Koh
-# rule marker_gene_matrices:
-#     input:
+
+# Marker gene matrices for follicular, Koh
+rule marker_gene_matrices:
+    input:
+
+# Significantly DE pathways
+rule pathway_enrichment_table:
+    input:
+
 
