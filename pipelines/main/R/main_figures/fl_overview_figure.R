@@ -18,6 +18,8 @@ library(argparse)
 parser <- ArgumentParser(description = "Create overview figure for FL")
 parser$add_argument('--sce', metavar='FILE', type='character',
                     help="Path to SingleCellExperiment RDS")
+parser$add_argument('--sce_raw', metavar='FILE', type='character',
+                    help="Path to raw SingleCellExperiment RDS")
 parser$add_argument('--patient_progression', metavar='FILE', type='character',
                     help="Patient events")
 parser$add_argument('--dimreduce_type', type='character',
@@ -29,7 +31,12 @@ parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
 args <- parser$parse_args()
 
 sce_path <- args$sce
+sce_raw_path <- args$sce_raw
 sce <- readRDS(sce_path)
+sce_raw <- readRDS(sce_raw_path)
+
+cell_counts <- data.frame(raw_cellcount=sce_raw$dataset %>% table)
+colnames(cell_counts) <- c("event", "cellcount")
 
 categorical_palettes <- cat_palettes()
 
@@ -37,7 +44,8 @@ patient_progression <- fread(args$patient_progression, sep = "\t")
 patient_progression <- patient_progression %>%
   dplyr::mutate(patient = factor(patient),
                 label = ifelse(timepoint %in% c("L", "D"), "", plot_label)) %>%
-  dplyr::mutate(patient = factor(patient, levels = rev(levels(patient)))) 
+  dplyr::mutate(patient = factor(patient, levels = rev(levels(patient)))) %>%
+  dplyr::left_join(cell_counts)
 
 dead_patients <- (patient_progression %>% 
                     dplyr::filter(timepoint == "D"))$patient
@@ -52,6 +60,8 @@ death_boxes <- patient_progression %>%
 timepoint_plot <- ggplot(patient_progression, aes(x=years, y=patient)) + 
   geom_text(data = patient_progression %>% dplyr::filter(observed == 1),
                   aes(label=label), size = 2.5, nudge_y = 0.2) + 
+  geom_text(data = patient_progression %>% dplyr::filter(observed == 1),
+            aes(label=cellcount), size = 2.5, nudge_y = -0.2) +
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
@@ -174,7 +184,7 @@ marker_legend <- cellassign.utils::extract_legend(marker_legend)
 
 ## DR plots
 dr_plots <- cowplot::plot_grid(dr_timepoint, dr_celltype, ncol = 2, nrow = 1, labels = c('b', 'c'))
-marker_gene_plots <- cowplot::plot_grid(plotlist = marker_plots, ncol = 4, nrow = 1, labels = c('d', 'e', 'f', 'g'))
+marker_gene_plots <- cowplot::plot_grid(plotlist = marker_plots, ncol = 4, nrow = 1, labels = c('d', '', '', ''))
 
 final_plot <- cowplot::plot_grid(timepoint_plot, 
                                  dr_plots, 
