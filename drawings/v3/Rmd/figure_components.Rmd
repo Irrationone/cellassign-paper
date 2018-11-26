@@ -228,3 +228,16 @@ marker_binary_plot
 dev.off()
 ```
 
+## Random viridis matrix
+
+```{r}
+set.seed(1483)
+
+nrow <- 6
+ncol <- 6
+mat <- rnorm(n = nrow * ncol, mean = 100, sd = 20) %>% matrix(nrow = nrow, ncol = ncol)
+
+pdf("/datadrive/projects/cellassign-paper/drawings/v3/components/expr_heat.pdf", width = 3, height = 3)
+pheatmap(mat, legend = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, border_color = NA, show_colnames = FALSE, show_rownames = FALSE, color = viridisLite::viridis(n = 100))
+dev.off()
+```
