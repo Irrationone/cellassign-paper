@@ -1,5 +1,5 @@
 
-configfile: 'config/v2.yaml'
+configfile: 'config/v3.yaml'
 
 singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.5"
 
