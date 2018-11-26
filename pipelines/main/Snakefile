@@ -20,6 +20,10 @@ rule all:
         fl_de_malignant_figure='{outdir}/supplemental_figures/fl_de_malignant_nonmalignant.pdf'.format(outdir=config['outdir']),
         fl_nonmalignant_timepoint_network_plot='{outdir}/supplemental_figures/fl_nonmalignant_timepoint.pdf'.format(outdir=config['outdir']),
         fl_hla_downregulation_plot='{outdir}/supplemental_figures/fl_hla_downregulation.pdf'.format(outdir=config['outdir']),
+        ## Supplemental tables
+        simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
+        marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
+        pathway_enrichment_table='{outdir}/supplemental_tables/pathway_enrichment_table.xlsx'.format(outdir=config['outdir']),
 
 
 ## Main figures
@@ -312,14 +316,79 @@ rule fl_hla_downregulation:
 
 rule simulation_performance_table:
     input:
-
+        deprob_result_dir_naivecd8_naivecd4=config['deprob_result_dir'],
+        deprob_result_dir_b_cd8=config['deprob_result_b_cd8_dir'],
+        wrongmarker_result_dir_naivecd8_naivecd4=config['wrongmarker_result_naivecd8_naivecd4_dir'],
+        wrongmarker_result_dir_b_cd8=config['wrongmarker_result_dir'],
+    output:
+        simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
+    params:
+        name='supptable-simulation-performance-table',
+        deprob_methods=config['deprob_methods'],
+        eval_measures=config['eval_measures_to_report'],
+    log:
+        '{logdir}/logs/simulation_performance_table.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/simulation_performance_table.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_tables/simulation_performance_table.R '
+        '--deprob_result_dir_naivecd8_naivecd4 {input.deprob_result_dir_naivecd8_naivecd4} '
+        '--deprob_result_dir_b_cd8 {input.deprob_result_dir_b_cd8} '
+        '--wrongmarker_result_dir_naivecd8_naivecd4 {input.wrongmarker_result_dir_naivecd8_naivecd4} '
+        '--wrongmarker_result_dir_b_cd8 {input.wrongmarker_result_dir_b_cd8} '
+        '--deprob_methods {params.deprob_methods} '
+        '--eval_measures {params.eval_measures} '
+        '--outfname {output.simulation_performance_table} '
+        '>& {log}'
 
 # Marker gene matrices for follicular, Koh
-rule marker_gene_matrices:
+rule marker_gene_matrices_table:
     input:
+        koh_rho=config['external_analysis_results']['koh_rho'],
+        follicular_gene_list_specific=config['follicular_analysis_settings']['marker_lists']['big']['path'],
+        follicular_gene_list_lambda_kappa=config['follicular_analysis_settings']['marker_lists']['lambdakappa']['path'],
+    output:
+        marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
+    params:
+        name='supptable-marker-gene-matrices',
+        follicular_specific_other=config['follicular_analysis_settings']['marker_lists']['big']['include_other'],
+        follicular_lk_other=config['follicular_analysis_settings']['marker_lists']['lambdakappa']['include_other'],
+    log:
+        '{logdir}/logs/marker_gene_matrices_table.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/marker_gene_matrices_table.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_tables/marker_gene_matrices_table.R '
+        '--koh_rho {input.koh_rho} '
+        '--follicular_gene_list_specific {input.follicular_gene_list_specific} '
+        '--follicular_gene_list_lambda_kappa {input.follicular_gene_list_lambda_kappa} '
+        '--follicular_specific_other {params.follicular_specific_other} '
+        '--follicular_lk_other {params.follicular_lk_other} '
+        '--outfname {output.marker_gene_matrix_table} '
+        '>& {log}'
 
 # Significantly DE pathways
 rule pathway_enrichment_table:
     input:
+        de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
+        de_malignant_timepoint=config['follicular_analysis_results']['differential_expression']['malignant_timepoint'],
+        de_timepoint_fgsea=config['follicular_analysis_results']['differential_expression']['timepoint_fgsea'],
+    output:
+        pathway_enrichment_table='{outdir}/supplemental_tables/pathway_enrichment_table.xlsx'.format(outdir=config['outdir']),
+    params:
+        name='supptable-pathway-enrichment-table',
+        padj_threshold=config['supptable_settings']['de']['padj_threshold'],
+    log:
+        '{logdir}/logs/pathway_enrichment_table.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/pathway_enrichment_table.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_tables/pathway_enrichment_table.R '
+        '--de_timepoint_dir {input.de_timepoint} '
+        '--de_malignant_timepoint_dir {input.de_malignant_timepoint} '
+        '--de_timepoint_fgsea_dir {input.de_timepoint_fgsea} '
+        '--padj_threshold {params.padj_threshold} '
+        '--outfname {output.pathway_enrichment_table} '
+        '>& {log}'
 
 

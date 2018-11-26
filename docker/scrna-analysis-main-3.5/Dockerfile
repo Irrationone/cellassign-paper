@@ -75,7 +75,8 @@ RUN rm -rf "/scrnaseq" && \
 RUN Rscript -e "install.packages('lmerTest',dependencies=TRUE)" && \
     Rscript -e "install.packages('argparse',dependencies=TRUE)" && \
     Rscript -e "install.packages('dunn.test',dependencies=TRUE)" && \
-    Rscript -e "install.packages('nestedRanksTest',dependencies=TRUE)"
+    Rscript -e "install.packages('nestedRanksTest',dependencies=TRUE)" && \
+    Rscript -e "install.packages('ImportExport',dependencies=TRUE)"
 
 RUN echo 'BiocManager::install(c("ReactomePA"), update = FALSE)' >> /opt/packages.r && \
     Rscript /opt/packages.r

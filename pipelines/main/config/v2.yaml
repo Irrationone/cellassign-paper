@@ -37,6 +37,20 @@ deprob_methods:
 # External analysis results
 external_analysis_results:
   koh_annotated: /datadrive/projects/cellassign-paper/results/outputs/external/v1/koh/sce_annotated.rds
+  koh_rho: /datadrive/projects/cellassign-paper/results/scratch/external/v1/koh/cellassign_rho.tsv
+
+# Follicular settings
+follicular_analysis_settings:
+  marker_lists:
+    small: 
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_small.yaml'
+      include_other: TRUE
+    big: 
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_big_merged.yaml'
+      include_other: TRUE
+    lambdakappa:
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_lambda_kappa.yaml'
+      include_other: TRUE
 
 # Follicular analysis results
 follicular_analysis_results:
@@ -52,7 +66,7 @@ follicular_analysis_results:
     timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/timepoint
     malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/malignant_timepoint
     timepoint_fgsea: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/fgsea/timepoint
-
+ 
 # Dimensionality reduction type to plot
 plot_dimreduce_type: 'UMAP'
 
@@ -79,3 +93,8 @@ winsorized_expression:
   markers: 3
   lambda_kappa: 6
   proliferation: 3
+
+# Supptable settings
+supptable_settings:
+  de:
+    padj_threshold: 0.05
