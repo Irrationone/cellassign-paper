@@ -291,7 +291,7 @@ fgsea_pathway_plot_FL2001 <- ggplot(de_timepoint_fgsea_res$FL2001$pathway %>%
 
 # HLA expression plots
 
-hla_genes <- c("B2M", "HLA-A", "HLA-B", "HLA-C")
+hla_genes <- c("B2M", "HLA-A", "HLA-B", "HLA-C", "CD74", "HLA-DRA", "HLA-DRB1")
 hla_ids <- get_ensembl_id(hla_genes, sce_bcell)
 
 hla_exprs <- logcounts(sce_bcell)[hla_ids,] %>%
