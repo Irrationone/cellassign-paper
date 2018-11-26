@@ -73,7 +73,7 @@ final_plot <- cowplot::plot_grid(plotlist = de_plots,
                                  rel_heights = c(0.5, 0.5))
 
 # Plot final plot
-pdf(args$outfname, width = 7, height = 10)
+pdf(args$outfname, width = 7, height = 10, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

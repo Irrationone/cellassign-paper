@@ -122,7 +122,7 @@ final_plot <- cowplot::plot_grid(plotlist = koh_celltype_plots,
 
 
 # Plot final plot
-pdf(args$outfname, width = 10, height = 10)
+pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

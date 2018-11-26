@@ -406,7 +406,7 @@ final_plot <- cowplot::plot_grid(top_row_annotated, middle_row, bottom_row,
                                  rel_heights = c(0.45, 0.25, 0.3))
 
 # Plot final plot
-pdf(args$outfname, width = 10, height = 10)
+pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

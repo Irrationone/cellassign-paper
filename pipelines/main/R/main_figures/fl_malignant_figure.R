@@ -504,7 +504,7 @@ final_plot <- cowplot::plot_grid(fgsea_row,
                                  rel_heights = c(0.3, 0.05, 0.3, 0.05, 0.3, 0.3, 0.05))
 
 # Plot final plot
-pdf(args$outfname, width = 10, height = 13)
+pdf(args$outfname, width = 10, height = 13, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

@@ -56,12 +56,12 @@ de_plots <- plot_simulation_performance(de_eval_measures %>%
 
 de_plot_markers <- de_plots$markers + 
   guides(fill = FALSE) + 
-  xlab("% DE per group") + 
+  xlab("% of genes differentially expressed per cell type") + 
   scale_fill_manual(values = clust_methods_palette)
 
 de_plot_full <- de_plots$full + 
   guides(fill = FALSE) + 
-  xlab("% DE per group") + 
+  xlab("% of genes differentially expressed per cell type") + 
   scale_fill_manual(values = clust_methods_palette)
 
 
@@ -125,7 +125,7 @@ final_plot <- cowplot::plot_grid(de_plots_labeled, bottom_row,
 
 
 # Plot final plot
-pdf(args$outfname, width = 10, height = 10)
+pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

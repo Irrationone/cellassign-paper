@@ -186,7 +186,7 @@ final_plot <- cowplot::plot_grid(timepoint_plot,
                                  rel_heights = c(0.5, 1, 0.5, 0.1))
 
 # Plot to output file
-pdf(args$outfname, width = 10, height = 10)
+pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

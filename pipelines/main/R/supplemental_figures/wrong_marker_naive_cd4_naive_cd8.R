@@ -45,7 +45,7 @@ wm_plot_cellassign <- wm_plots$cellassign +
 
 
 # Plot final plot
-pdf(args$outfname, width = 7, height = 5)
+pdf(args$outfname, width = 7, height = 5, useDingbats = FALSE)
 plot(wm_plot_cellassign)
 dev.off()
 

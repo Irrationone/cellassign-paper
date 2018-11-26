@@ -146,7 +146,7 @@ final_plot <- cowplot::plot_grid(fl1018_cytotoxic_up_plot,
                                  rel_heights = c(1, .1, 1))
 
 # Plot final plot
-pdf(args$outfname, width = 7, height = 10)
+pdf(args$outfname, width = 7, height = 10, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

@@ -62,12 +62,12 @@ de_plots <- plot_simulation_performance(de_eval_measures %>%
 
 de_plot_markers <- de_plots$markers + 
   guides(fill = FALSE) + 
-  xlab("% DE per group") + 
+  xlab("% of genes differentially expressed per cell type") + 
   scale_fill_manual(values = clust_methods_palette)
   
 de_plot_full <- de_plots$full + 
   guides(fill = FALSE) + 
-  xlab("% DE per group") + 
+  xlab("% of genes differentially expressed per cell type") + 
   scale_fill_manual(values = clust_methods_palette)
 
 
@@ -109,6 +109,11 @@ delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) +
   scale_colour_manual(values = clust_methods_palette) + 
   geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1, vjust = 1, parse = TRUE,
             size = 0.35*8)
+
+delta_plot_legend <- cellassign.utils::ggsimplelegend(names(unique(delta_table$clustering_method)),
+                                                      colour_mapping = unname(clust_methods_palette),
+                                                      legend_title = "Method", legend_rows = 1, fontsize = 7)
+delta_plot_legend <- cellassign.utils::extract_legend(delta_plot_legend)
   
 
 # Wrong marker figure
@@ -127,15 +132,16 @@ wm_plots <- plot_simulation_performance(wm_eval_measures %>%
 
 wm_plot_cellassign <- wm_plots$cellassign + 
   xlab("Proportion of incorrect entries in rho") + 
-  guides(fill = guide_legend(title = "Method"))
+  guides(fill = FALSE) + 
+  scale_fill_manual(values = clust_methods_palette)
 
 
 # Final plot
-de_plots_labeled <- cowplot::plot_grid(de_plot_full, de_plot_markers, de_plot_legend,
-                                       labels = c('a', 'b', ''),
+de_plots_labeled <- cowplot::plot_grid(de_plot_full, de_plot_legend, de_plot_markers,
+                                       labels = c('a', '', 'b'),
                                        ncol = 1,
                                        nrow = 3,
-                                       rel_heights = c(1, 1, 0.2))
+                                       rel_heights = c(1, 0.2, 1))
 
 bottom_row <- cowplot::plot_grid(delta_plots, wm_plot_cellassign,
                                  labels = c('c', 'd'),
@@ -143,15 +149,17 @@ bottom_row <- cowplot::plot_grid(delta_plots, wm_plot_cellassign,
                                  nrow = 1,
                                  rel_widths = c(0.5, 0.5))
 
-final_plot <- cowplot::plot_grid(de_plots_labeled, bottom_row, 
-                                 labels = c('', ''), 
+final_plot <- cowplot::plot_grid(de_plots_labeled, 
+                                 bottom_row,
+                                 delta_plot_legend,
+                                 labels = c('', '', ''), 
                                  ncol = 1, 
-                                 nrow = 2,
-                                 rel_heights = c(0.67, 0.33))
+                                 nrow = 3,
+                                 rel_heights = c(0.67, 0.33, 0.05))
 
 
 # Plot final plot
-pdf(args$outfname, width = 10, height = 10)
+pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

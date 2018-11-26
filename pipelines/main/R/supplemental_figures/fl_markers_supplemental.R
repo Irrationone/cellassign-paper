@@ -111,7 +111,7 @@ final_plot <- cowplot::plot_grid(marker_plot_group,
                                  rel_heights = c(0.7, 0.05, 0.3),
                                  labels = c('a', '', 'b'))
 
-pdf(args$outfname, width = 10, height = 10)
+pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

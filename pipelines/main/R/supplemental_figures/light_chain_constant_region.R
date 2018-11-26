@@ -47,7 +47,7 @@ expression_heatmap <- plot_expression_heatmap(sce,
                                               annotation_colors = list(Class=categorical_palettes$light_chain_class))
 
 # Plot final plot
-pdf(args$outfname, width = 5, height = 5)
+pdf(args$outfname, width = 5, height = 5, useDingbats = FALSE)
 grid.draw(expression_heatmap)
 dev.off()
 
