@@ -10,6 +10,7 @@ library(scran)
 library(cowplot)
 library(Matrix)
 library(org.Hs.eg.db)
+library(ggrepel)
 library(ReactomePA)
 
 library(scrna.utils)

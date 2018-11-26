@@ -9,6 +9,9 @@ library(methods)
 library(scran)
 library(cowplot)
 library(ggrepel)
+library(pheatmap)
+library(grid)
+library(ggplotify)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -29,6 +32,8 @@ args <- parser$parse_args()
 sce_path <- args$sce
 sce <- readRDS(sce_path)
 specific_assignments <- readRDS(args$cellassign_results)
+
+categorical_palettes <- cat_palettes()
 
 # Plots of marker gene expression
 marker_genes <- c("CD2", "MS4A1", "CD8A", "GZMA", "CD4", "CXCR5", "ICOS")
@@ -100,7 +105,7 @@ marker_plot_group <- cowplot::plot_grid(plotlist = marker_plots,
 
 final_plot <- cowplot::plot_grid(marker_plot_group,
                                  marker_legend,
-                                 expression_heatmap,
+                                 as.grob(expression_heatmap),
                                  nrow = 3,
                                  ncol = 1,
                                  rel_heights = c(0.7, 0.05, 0.3),

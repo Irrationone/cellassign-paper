@@ -10,6 +10,7 @@ library(scran)
 library(cowplot)
 library(pheatmap)
 library(Matrix)
+library(grid)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -46,8 +47,8 @@ expression_heatmap <- plot_expression_heatmap(sce,
                                               annotation_colors = list(Class=categorical_palettes$light_chain_class))
 
 # Plot final plot
-pdf(expression_heatmap, width = 5, height = 5)
-plot(expression_heatmap)
+pdf(args$outfname, width = 5, height = 5)
+grid.draw(expression_heatmap)
 dev.off()
 
 cat("Completed.\n")

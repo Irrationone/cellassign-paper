@@ -11,6 +11,7 @@ library(cowplot)
 library(Matrix)
 library(org.Hs.eg.db)
 library(ReactomePA)
+library(ggrepel)
 
 library(scrna.utils)
 library(scrna.sceutils)

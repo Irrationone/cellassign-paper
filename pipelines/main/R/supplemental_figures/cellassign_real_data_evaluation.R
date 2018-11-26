@@ -66,7 +66,7 @@ eval_measure_labels <- c(NA,
                          "seurat_1.2_full",
                          "seurat_1.2_markers")
 
-cluster_levels <- sort(unique(unlist(lapply(annotation_labels[3:8], function(x) as.character(unique(colData(sce_koh)[,x]))))))
+cluster_levels <- sort(unique(unlist(lapply(annotation_labels[3:length(annotation_labels)], function(x) as.character(unique(colData(sce_koh)[,x]))))))
 cluster_palette <- iwanthue(length(cluster_levels))
 names(cluster_palette) <- cluster_levels
 
