@@ -463,6 +463,17 @@ fgsea_row <- cowplot::plot_grid(fgsea_pathway_plot_FL1018,
                                 labels = c('a', 'b'),
                                 ncol = 2)
 
+cycling_plot_results$FL1018$plot <- cycling_plot_results$FL1018$plot %>%
+  ggplot_build() %>%
+  ggplot_gtable()
+cycling_plot_results$FL1018$plot$layout$clip[str_detect(cycling_plot_results$FL1018$plot$layout$name, "panel")] <- "off"
+
+cycling_plot_results$FL2001$plot <- cycling_plot_results$FL2001$plot %>%
+  ggplot_build() %>%
+  ggplot_gtable()
+cycling_plot_results$FL2001$plot$layout$clip[str_detect(cycling_plot_results$FL2001$plot$layout$name, "panel")] <- "off"
+
+
 top_row <- cowplot::plot_grid(bcell_timepoint_plots$FL1018,
                               proliferation_plots$FL1018$MKI67,
                               proliferation_plots$FL1018$TOP2A,
