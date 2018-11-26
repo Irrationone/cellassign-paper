@@ -96,6 +96,7 @@ rval_labels <- rvals %>%
 
 delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) + 
   geom_point(aes(colour=clustering_method), alpha = 0.5) + 
+  theme_bw() +
   theme_Publication() + 
   theme_nature() + 
   stripped_theme() +
@@ -110,8 +111,8 @@ delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) +
   geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1, vjust = 1, parse = TRUE,
             size = 0.35*8)
 
-delta_plot_legend <- cellassign.utils::ggsimplelegend(names(unique(delta_table$clustering_method)),
-                                                      colour_mapping = unname(clust_methods_palette),
+delta_plot_legend <- cellassign.utils::ggsimplelegend(unique(delta_table$clustering_method),
+                                                      colour_mapping = unname(clust_methods_palette[unique(delta_table$clustering_method)]),
                                                       legend_title = "Method", legend_rows = 1, fontsize = 7)
 delta_plot_legend <- cellassign.utils::extract_legend(delta_plot_legend)
   
@@ -121,9 +122,7 @@ wm_eval_measures <- load_annotation_files(wrongmarker_result_dir, pattern = "*_e
 wm_delta_vals <- load_annotation_files(wrongmarker_result_dir, pattern = "*_delta_compare.tsv")
 
 wm_plots <- plot_simulation_performance(wm_eval_measures %>%
-                                          dplyr::filter(de_nu == 1,
-                                                        de_facscale == 0.06,
-                                                        max_genes == 5), 
+                                          dplyr::filter(max_genes == 5), 
                                         measures = c("micro_f1",
                                                      "accuracy"),
                                         display_measure_names = c("F1",
