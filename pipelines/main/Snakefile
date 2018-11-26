@@ -54,6 +54,7 @@ rule simulation_performance_figure:
 rule fl_overview_figure:
     input:
         sce=config['follicular_analysis_results']['sce_annotated'],
+        sce_raw=config['follicular_analysis_results']['sce_raw'],
         patient_events=config['follicular_metadata']['patient_progression_file'],
     output:
         fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir'])
@@ -68,6 +69,7 @@ rule fl_overview_figure:
     shell:
         'Rscript R/main_figures/fl_overview_figure.R '
         '--sce {input.sce} '
+        '--sce_raw {input.sce_raw} '
         '--patient_progression {input.patient_events} '
         '--dimreduce_type {params.dimreduce_type} '
         '--winsorized_expression_threshold {params.expr_threshold} '

@@ -59,6 +59,7 @@ follicular_analysis_settings:
 # Follicular analysis results
 follicular_analysis_results:
   sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_follicular_annotated_final.rds
+  sce_raw: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v3/sce_follicular.rds
   sce_tcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_tcells.rds
   sce_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_bcells.rds
   sce_nonmalignant_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds
