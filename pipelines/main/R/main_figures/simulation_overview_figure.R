@@ -108,7 +108,7 @@ delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) +
   guides(colour = FALSE) + 
   facet_wrap(~ de_prob, ncol = length(delta_deprobs)) + 
   scale_colour_manual(values = clust_methods_palette) + 
-  geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1, vjust = 1, parse = TRUE,
+  geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1.05, vjust = 1.2, parse = TRUE,
             size = 0.35*8)
 
 delta_plot_legend <- cellassign.utils::ggsimplelegend(unique(delta_table$clustering_method),

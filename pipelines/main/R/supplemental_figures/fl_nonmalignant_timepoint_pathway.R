@@ -71,6 +71,8 @@ fl1018_cytotoxic_up_plot <- plot_pathway_network(de_result$FL1018$cytotoxic$path
                                                  guides = FALSE, colour_limits = padj_limits,
                                                  size_limits = size_limits, pval_colours = rev(pval_colours)) + 
   ggtitle("FL1018, CD8 T cells")
+fl1018_cytotoxic_up_plot$layers[[3]]$geom_params$force <- 25
+
 # fl1018_tfh_up_plot <- plot_pathway_network(de_result$FL1018$follicular_helper$pathway$up %>%
 #                                              filter_pathway_result(), shorten_names = TRUE) + 
 #   ggtitle("FL1018, Tfh")

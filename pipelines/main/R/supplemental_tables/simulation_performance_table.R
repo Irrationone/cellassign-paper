@@ -89,7 +89,8 @@ b_cd8_rvals <- compute_pvals_subsets(b_cd8_deltas,
   dplyr::mutate(param_settings = "B vs. CD8")
 
 rvals_merged <- plyr::rbind.fill(naivecd8_naivecd4_rvals,
-                                 b_cd8_rvals)
+                                 b_cd8_rvals) %>%
+  dplyr::rename(correlation_coefficient=estimate)
 
 # Wrong marker tables
 
@@ -97,11 +98,11 @@ naivecd8_naivecd4_wm_eval_measures <- load_annotation_files(wrongmarker_result_d
 b_cd8_wm_eval_measures <- load_annotation_files(wrongmarker_result_dir_b_cd8, pattern = "*_eval_measures.tsv")
 
 naivecd8_naivecd4_wm_eval_measures <- naivecd8_naivecd4_wm_eval_measures %>% 
-  dplyr::select("clustering_method", "max_genes", "wrong_marker_proportion") %>%
+  dplyr::select(c("clustering_method", "max_genes", "wrong_marker_proportion", eval_measures)) %>%
   dplyr::mutate(param_settings = "Naive CD8 vs. Naive CD4")
 
 b_cd8_wm_eval_measures <- b_cd8_wm_eval_measures %>% 
-  dplyr::select("clustering_method", "max_genes", "wrong_marker_proportion") %>%
+  dplyr::select(c("clustering_method", "max_genes", "wrong_marker_proportion", eval_measures)) %>%
   dplyr::mutate(param_settings = "B vs. CD8")
 
 wm_eval_measures_merged <- plyr::rbind.fill(naivecd8_naivecd4_wm_eval_measures,

@@ -108,7 +108,7 @@ final_plot <- cowplot::plot_grid(marker_plot_group,
                                  as.grob(expression_heatmap),
                                  nrow = 3,
                                  ncol = 1,
-                                 rel_heights = c(0.7, 0.05, 0.3),
+                                 rel_heights = c(0.6, 0.05, 0.4),
                                  labels = c('a', '', 'b'))
 
 pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)

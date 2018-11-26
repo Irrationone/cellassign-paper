@@ -82,7 +82,7 @@ koh_celltype_plots <- lapply(seq_along(annotation_labels), function(i) {
   p <- plotReducedDim(sce_koh,
                       use_dimred = args$dimreduce_type,
                       colour_by = lab_col,
-                      point_alpha = 0.8, 
+                      point_alpha = 0.4, 
                       add_ticks = FALSE,
                       point_size = 2)
   p <- p + 
@@ -94,7 +94,8 @@ koh_celltype_plots <- lapply(seq_along(annotation_labels), function(i) {
     theme_Publication() + 
     theme_nature() + 
     scale_fill_manual(values = palettes[[i]]) + 
-    guides(fill = guide_legend(title = legend_titles[i])) + 
+    guides(fill = guide_legend(title = legend_titles[i], 
+                               override.aes = list(alpha = 1))) + 
     ggtitle(plot_titles[i])
   
   if (!is.na(eval_measure_label)) {

@@ -119,8 +119,8 @@ malignant_timepoint_pathways <- plyr::rbind.fill(lapply(de_malignant_timepoint_f
 excel_export(list(timepoint_pathways,
                   hallmark_pathways),
              file = args$outfname,
-             table_names = c("T2 vs. T1 hallmark pathways (malignant B cells)",
-                             "T2 vs. T1 reactome pathways (nonmalignant cells, by celltype)"))
+             table_names = c("T2 vs. T1 reactome pathways (nonmalignant cells, by celltype)",
+                             "T2 vs. T1 hallmark pathways (malignant B cells)"))
 
 cat("Completed.\n")
 

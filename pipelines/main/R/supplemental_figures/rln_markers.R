@@ -92,7 +92,7 @@ final_plot <- cowplot::plot_grid(marker_plot_group,
                                  nrow = 2,
                                  ncol = 1,
                                  rel_heights = c(0.9, 0.1),
-                                 labels = c('a', ''))
+                                 labels = c('', ''))
 
 pdf(args$outfname, width = 8, height = 4.5, useDingbats = FALSE)
 plot(final_plot)

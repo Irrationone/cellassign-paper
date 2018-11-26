@@ -35,7 +35,8 @@ parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
 args <- parser$parse_args()
 
 koh_rho_path <- args$koh_rho
-koh_rho <- read.table(koh_rho_path, sep = "\t", header = TRUE, row.names = 1)
+koh_rho <- read.table(koh_rho_path, sep = "\t", header = TRUE, row.names = 1) %>%
+  tibble::rownames_to_column(var = "Gene")
 
 follicular_gene_list_specific_path <- args$follicular_gene_list_specific
 follicular_gene_list_lambda_kappa_path <- args$follicular_gene_list_lambda_kappa
@@ -54,7 +55,8 @@ rho_dfs <- lapply(seq_along(gene_list_paths), function(i) {
   f <- gene_list_paths[i]
   marker_list <- read_yaml(f)
   rho <- marker_list_to_mat(marker_list, include_other = include_other_settings[i])
-  rho_df <- as.data.frame(rho)
+  rho_df <- as.data.frame(rho) %>%
+    tibble::rownames_to_column(var = "Gene")
   return(rho_df)
 })
 

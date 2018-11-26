@@ -104,6 +104,10 @@ delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) +
   geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1, vjust = 1, parse = TRUE,
             size = 0.35*8)
 
+delta_plot_legend <- cellassign.utils::ggsimplelegend(unique(delta_table$clustering_method),
+                                                      colour_mapping = unname(clust_methods_palette[unique(delta_table$clustering_method)]),
+                                                      legend_title = "Method", legend_rows = 1, fontsize = 7)
+delta_plot_legend <- cellassign.utils::extract_legend(delta_plot_legend)
 
 # Final plot
 de_plots_labeled <- cowplot::plot_grid(de_plot_full, de_plot_markers, de_plot_legend,
@@ -117,11 +121,13 @@ bottom_row <- cowplot::plot_grid(delta_plots,
                                  ncol = 1,
                                  nrow = 1)
 
-final_plot <- cowplot::plot_grid(de_plots_labeled, bottom_row, 
+final_plot <- cowplot::plot_grid(de_plots_labeled, 
+                                 bottom_row,
+                                 delta_plot_legend,
                                  labels = c('', ''), 
                                  ncol = 1, 
-                                 nrow = 2,
-                                 rel_heights = c(0.67, 0.33))
+                                 nrow = 3,
+                                 rel_heights = c(0.67, 0.33, 0.05))
 
 
 # Plot final plot
