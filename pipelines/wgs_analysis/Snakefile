@@ -1,0 +1,39 @@
+
+configfile: 'config/v1.yaml'
+
+# Doesn't need its own singularity container for now
+singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.5"
+
+rule all:
+    input:
+        '{outdir}/immune_filtered_variants'.format(outdir=config['outdir']),
+
+
+rule filter_immune_variants:
+    input:
+        snvs=config['plosmed_paper']['museq_table'],
+        indels=config['plosmed_paper']['strelka_table'],
+        cnvs=config['plosmed_paper']['titan_table'],
+    output:
+        outdir=directory('{outdir}/immune_filtered_variants'.format(outdir=config['outdir'])),
+    params:
+        name='filter-immune-variants',
+        pancancer_annotations=config['nanostring_pancancer']['annotations'],
+        sample_names=config['metadata']['sample_names'],
+        museq_probability=config['museq_settings']['probability'],
+    log:
+        '{logdir}/logs/filter_immune_variants.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/filter_immune_variants.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/find_immune_associated_variants.R '
+        '--snvs {input.snvs} '
+        '--indels {input.indels} '
+        '--cnvs {input.cnvs} '
+        '--sample_names {params.sample_names} '
+        '--museq_probability {params.museq_probability} '
+        '--pancancer_annotations {params.pancancer_annotations} '
+        '--outdir {output.outdir} '
+        '>& {log}'
+        
+

@@ -1,0 +1,23 @@
+# Directories
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/wgs_analysis/v1'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/wgs_analysis/v1'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/wgs_analysis/v1'
+
+plosmed_paper:
+  museq_table: /datadrive/data/plosmed_paper/variant_calls/museq/all.samplePair.museq.pos_list.snpEff_canonical.snps_annotated.distinct.caller_annotated.filtered.txt
+  strelka_table: /datadrive/data/plosmed_paper/variant_calls/strelka/all.passed.somatic.indels.snpEff_canonical.snps_annotated.cosmic_annotated.postprocess.txt
+  titan_table: /datadrive/data/plosmed_paper/variant_calls/titan/all.nem_fixed.selected_params.seg.mask.txt
+  destruct_table: /datadrive/data/plosmed_paper/variant_calls/destruct/all.breakpoints.filtered.breakpoints_reads.txt
+
+nanostring_pancancer:
+  annotations: /datadrive/projects/cellassign-paper/data/nanostring-pancancer-immune-profiling/pancancer_annotations.tsv
+
+metadata:
+  sample_names:
+    - FL1018T1
+    - FL1018T2
+    - FL2001T1
+    - FL2001T2
+
+museq_settings:
+  probability: 0.9
