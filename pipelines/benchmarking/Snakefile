@@ -18,6 +18,7 @@ rule simulate_sce:
         num_groups=lambda wildcards: config['simulation_settings'][wildcards.simtype]['num_groups'],
         num_batches=lambda wildcards: config['simulation_settings'][wildcards.simtype]['num_batches'],
         num_cells=lambda wildcards: config['simulation_settings'][wildcards.simtype]['num_cells'],
+        num_genes=lambda wildcards: config['simulation_settings'][wildcards.simtype]['num_genes'],
         group_probs=lambda wildcards: config['simulation_settings'][wildcards.simtype]['group_probs'],
         batch_probs=lambda wildcards: config['simulation_settings'][wildcards.simtype]['batch_probs'],
         de_facloc=lambda wildcards: config['simulation_settings'][wildcards.simtype]['de_facloc'],
@@ -40,6 +41,7 @@ rule simulate_sce:
         '--num_groups {params.num_groups} '
         '--num_batches {params.num_batches} '
         '--num_cells {params.num_cells} '
+        '--num_genes {params.num_genes} '
         '--group_probs {params.group_probs} '
         '--batch_probs {params.batch_probs} '
         '--de_facscale {params.de_facscale} '
