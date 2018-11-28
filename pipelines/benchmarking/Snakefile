@@ -66,16 +66,16 @@ rule run_cellassign:
         outres='{workdir}/cellassign_results/{{seed}}/{{simtype}}/{{evaltype}}/{{timeseed}}.rdata'.format(workdir=config['workdir']),
         outtime='{outdir}/cellassign_times/{{seed}}/{{simtype}}/{{evaltype}}/{{timeseed}}.rdata'.format(outdir=config['outdir']),
     params:
-        name='run-cellassign-{evaltype}-{timeseed}',
+        name='run-cellassign-{simtype}-{evaltype}-{seed}-{timeseed}',
         max_genes=lambda wildcards: config['evaluation_settings'][wildcards.evaltype]['max_genes'],
         fc_percentile=lambda wildcards: config['evaluation_settings'][wildcards.evaltype]['fc_percentile'],
         expr_percentile=lambda wildcards: config['evaluation_settings'][wildcards.evaltype]['expr_percentile'],
         timeseed='{timeseed}',
         conda_env='r-tensorflow',
     log:
-        '{logdir}/logs/run_cellassign/{{timeseed}}/{{evaltype}}.log'.format(logdir=config['logdir']),
+        '{logdir}/logs/run_cellassign/{{simtype}}/{{evaltype}}/{{seed}}_{{timeseed}}.log'.format(logdir=config['logdir']),
     benchmark:
-        '{logdir}/benchmarks/run_cellassign/{{timeseed}}/{{evaltype}}.txt'.format(logdir=config['logdir']),
+        '{logdir}/benchmarks/run_cellassign/{{simtype}}/{{evaltype}}/{{seed}}_{{timeseed}}.txt'.format(logdir=config['logdir']),
     shell:
         'Rscript R/benchmark_cellassign.R '
         '--sce {input.sce} '
