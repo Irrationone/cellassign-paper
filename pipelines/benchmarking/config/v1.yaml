@@ -3,7 +3,7 @@ workdir: '/datadrive/projects/cellassign-paper/results/scratch/benchmarking/v1'
 outdir: '/datadrive/projects/cellassign-paper/results/outputs/benchmarking/v1'
 logdir: '/datadrive/projects/cellassign-paper/results/logs/benchmarking/v1'
 
-base_sce_param_file: /root/cellassign-paper/pipelines/cellassign-sim-comparison/data/sce_t4k_params.rds
+base_sce_param_file: /datadrive/projects/cellassign-paper/pipelines/cellassign-sim-comparison/data/sce_t4k_params.rds
 seeds:
   - 1483
 
