@@ -1,0 +1,57 @@
+
+configfile: "config/v1.yaml"
+
+rule all:
+    input:
+        expand('{workdir}/simulated_sces/{{seed}}/{{simtype}}.rdata'.format(workdir=config['workdir']), simtype=config['simulation_settings'], seed=config['seeds']),
+
+
+rule simulate_sce:
+    input:
+        base_sce_param=config['base_sce_param_file'],
+    output:
+        '{workdir}/simulated_sces/{{seed}}/{{simtype}}.rdata'.format(workdir=config['workdir']),
+    params:
+        name='simulate-sce-{simtype}-{seed}',
+        num_groups=lambda wildcards: config['simulation_settings'][wildcards.simtype]['num_groups'],
+        num_batches=lambda wildcards: config['simulation_settings'][wildcards.simtype]['num_batches'],
+        num_cells=lambda wildcards: config['simulation_settings'][wildcards.simtype]['num_cells'],
+        group_probs=lambda wildcards: config['simulation_settings'][wildcards.simtype]['group_probs'],
+        batch_probs=lambda wildcards: config['simulation_settings'][wildcards.simtype]['batch_probs'],
+        de_facloc=lambda wildcards: config['simulation_settings'][wildcards.simtype]['de_facloc'],
+        de_facscale=lambda wildcards: config['simulation_settings'][wildcards.simtype]['de_facscale'],
+        de_nu=lambda wildcards: config['simulation_settings'][wildcards.simtype]['de_nu'],
+        de_min=lambda wildcards: config['simulation_settings'][wildcards.simtype]['de_min'],
+        de_max=lambda wildcards: config['simulation_settings'][wildcards.simtype]['de_max'],
+        batch_facloc=lambda wildcards: config['simulation_settings'][wildcards.simtype]['batch_facloc'],
+        batch_facscale=lambda wildcards: config['simulation_settings'][wildcards.simtype]['batch_facscale'],
+        de_prob=lambda wildcards: config['simulation_settings'][wildcards.simtype]['de_prob'],
+        down_prob=lambda wildcards: config['simulation_settings'][wildcards.simtype]['down_prob'],
+        sim_model=lambda wildcards: config['simulation_settings'][wildcards.simtype]['sim_model'],
+        seed=lambda wildcards: config['seeds'][wildcards.seed],
+    log:
+        '{logdir}/logs/simulate_sce/{{seed}}/{{simtype}}.log'.format(logdir=config['logdir']),
+    benchmark:
+        '{logdir}/benchmarks/simulate_sce/{{seed}}/{{simtype}}.txt'.format(logdir=config['logdir']),
+    shell:
+        'Rscript R/simulate_sce.R '
+        '--num_groups {params.num_groups} '
+        '--num_batches {params.num_batches} '
+        '--num_cells {params.num_cells} '
+        '--group_probs {params.group_probs} '
+        '--batch_probs {params.batch_probs} '
+        '--de_facscale {params.de_facscale} '
+        '--de_facloc {params.de_facloc} '
+        '--de_nu {params.de_nu} '
+        '--de_min {params.de_min} '
+        '--de_max {params.de_max} '
+        '--batch_facscale {params.batch_facscale} '
+        '--batch_facloc {params.batch_facloc} '
+        '--de_prob {params.de_prob} '
+        '--down_prob {params.down_prob} '
+        '--seed {params.seed} '
+        '--base_sce_param {input.base_sce_param} '
+        '--sim_model {params.sim_model} '
+        '--outfname {output} '
+        '>& {log}'
+
