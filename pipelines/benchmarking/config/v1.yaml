@@ -12,7 +12,7 @@ simulation_settings:
     num_cells: 1000
     num_groups: 2
     num_batches: 1
-    group_probs: 0.33,0.33,0.34
+    group_probs: 0.5,0.5
     batch_probs: "1"
     de_facloc: 0.0400
     de_facscale: 0.0237
@@ -28,7 +28,7 @@ simulation_settings:
     num_cells: 10000
     num_groups: 2
     num_batches: 1
-    group_probs: 0.33,0.33,0.34
+    group_probs: 0.5,0.5
     batch_probs: "1"
     de_facloc: 0.0400
     de_facscale: 0.0237
@@ -44,7 +44,7 @@ simulation_settings:
     num_cells: 100000
     num_groups: 2
     num_batches: 1
-    group_probs: 0.33,0.33,0.34
+    group_probs: 0.5,0.5
     batch_probs: "1"
     de_facloc: 0.0400
     de_facscale: 0.0237
@@ -60,7 +60,7 @@ simulation_settings:
     num_cells: 1000000
     num_groups: 2
     num_batches: 1
-    group_probs: 0.33,0.33,0.34
+    group_probs: 0.5,0.5
     batch_probs: "1"
     de_facloc: 0.0400
     de_facscale: 0.0237
@@ -76,7 +76,7 @@ simulation_settings:
     num_cells: 1000
     num_groups: 4
     num_batches: 1
-    group_probs: 0.33,0.33,0.34
+    group_probs: 0.25,0.25,0.25,0.25
     batch_probs: "1"
     de_facloc: 0.0400
     de_facscale: 0.0237
@@ -92,7 +92,7 @@ simulation_settings:
     num_cells: 10000
     num_groups: 4
     num_batches: 1
-    group_probs: 0.33,0.33,0.34
+    group_probs: 0.25,0.25,0.25,0.25
     batch_probs: "1"
     de_facloc: 0.0400
     de_facscale: 0.0237
@@ -108,7 +108,7 @@ simulation_settings:
     num_cells: 100000
     num_groups: 2
     num_batches: 1
-    group_probs: 0.33,0.33,0.34
+    group_probs: 0.25,0.25,0.25,0.25
     batch_probs: "1"
     de_facloc: 0.0400
     de_facscale: 0.0237
@@ -124,7 +124,7 @@ simulation_settings:
     num_cells: 1000000
     num_groups: 4
     num_batches: 1
-    group_probs: 0.33,0.33,0.34
+    group_probs: 0.25,0.25,0.25,0.25
     batch_probs: "1"
     de_facloc: 0.0400
     de_facscale: 0.0237
