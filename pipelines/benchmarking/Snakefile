@@ -5,8 +5,8 @@ singularity: "docker://alzhang/scrna-analysis-sim-3.5:v1.14"
 
 rule all:
     input:
-        expand('{workdir}/simulated_sces/{{seed}}/{{simtype}}.rdata'.format(workdir=config['workdir']), simtype=config['simulation_settings'], seed=config['seeds']),
-
+        #expand('{workdir}/simulated_sces/{{seed}}/{{simtype}}.rdata'.format(workdir=config['workdir']), simtype=config['simulation_settings'], seed=config['seeds']),
+        expand('{outdir}/cellassign_times/{{seed}}/{{simtype}}/{{evaltype}}/{{timeseed}}.rdata'.format(outdir=config['outdir']), seed=config['seeds'], simtype=config['simulation_settings'], evaltype=config['evaluation_settings'], timeseed=config['timing_seeds']),
 
 rule simulate_sce:
     input:
@@ -59,3 +59,31 @@ rule simulate_sce:
         '--outfname {output} '
         '>& {log}'
 
+rule run_cellassign:
+    input:
+        sce='{workdir}/simulated_sces/{{seed}}/{{simtype}}.rdata'.format(workdir=config['workdir']),
+    output:
+        outres='{workdir}/cellassign_results/{{seed}}/{{simtype}}/{{evaltype}}/{{timeseed}}.rdata'.format(workdir=config['workdir']),
+        outtime='{outdir}/cellassign_times/{{seed}}/{{simtype}}/{{evaltype}}/{{timeseed}}.rdata'.format(outdir=config['outdir']),
+    params:
+        name='run-cellassign-{evaltype}-{timeseed}',
+        max_genes=lambda wildcards: config['evaluation_settings'][wildcards.evaltype]['max_genes'],
+        fc_percentile=lambda wildcards: config['evaluation_settings'][wildcards.evaltype]['fc_percentile'],
+        expr_percentile=lambda wildcards: config['evaluation_settings'][wildcards.evaltype]['expr_percentile'],
+        timeseed='{timeseed}',
+        conda_env='r-tensorflow',
+    log:
+        '{logdir}/logs/run_cellassign/{{timeseed}}/{{evaltype}}.log'.format(logdir=config['logdir']),
+    benchmark:
+        '{logdir}/benchmarks/run_cellassign/{{timeseed}}/{{evaltype}}.txt'.format(logdir=config['logdir']),
+    shell:
+        'Rscript R/benchmark_cellassign.R '
+        '--sce {input.sce} '
+        '--fc_percentile {params.fc_percentile} '
+        '--expr_percentile {params.expr_percentile} '
+        '--max_genes {params.max_genes} '
+        '--seed {params.timeseed} '
+        '--conda_env {params.conda_env} '
+        '--outfname {output.outres} '
+        '--outtime {output.outtime} '
+        '>& {log}'

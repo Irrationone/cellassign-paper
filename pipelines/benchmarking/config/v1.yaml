@@ -7,6 +7,11 @@ base_sce_param_file: /datadrive/projects/cellassign-paper/pipelines/cellassign-s
 seeds:
   - 1483
 
+timing_seeds:
+  - 1483
+  - 2929
+  - 1150
+
 simulation_settings:
   cells_1000_groups_2:
     num_cells: 1000
@@ -146,4 +151,16 @@ simulation_settings:
     sim_model: splat
 
 
-    
+evaluation_settings:
+  small_genes:
+    max_genes: 5
+    fc_percentile: 0.5
+    expr_percentile: 0.8
+  mid_genes:
+    max_genes: 10
+    fc_percentile: 0.5
+    expr_percentile: 0.8
+  high_genes: 
+    max_genes: 15
+    fc_percentile: 0.5
+    expr_percentile: 0.8
