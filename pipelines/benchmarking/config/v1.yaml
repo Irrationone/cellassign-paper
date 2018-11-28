@@ -153,14 +153,15 @@ simulation_settings:
 
 evaluation_settings:
   small_genes:
-    max_genes: 5
+    max_genes: 4
     fc_percentile: 0.5
-    expr_percentile: 0.8
-  mid_genes:
+    expr_percentile: 0.5
+  mid_genes: 
+    max_genes: 7
+    fc_percentile: 0.5
+    expr_percentile: 0.5
+  max_genes:
     max_genes: 10
     fc_percentile: 0.5
-    expr_percentile: 0.8
-  high_genes: 
-    max_genes: 15
-    fc_percentile: 0.5
-    expr_percentile: 0.8
+    expr_percentile: 0.5
+  
