@@ -30,7 +30,7 @@ rule simulate_sce:
         de_prob=lambda wildcards: config['simulation_settings'][wildcards.simtype]['de_prob'],
         down_prob=lambda wildcards: config['simulation_settings'][wildcards.simtype]['down_prob'],
         sim_model=lambda wildcards: config['simulation_settings'][wildcards.simtype]['sim_model'],
-        seed=lambda wildcards: config['seeds'][wildcards.seed],
+        seed='{seed}',
     log:
         '{logdir}/logs/simulate_sce/{{seed}}/{{simtype}}.log'.format(logdir=config['logdir']),
     benchmark:
