@@ -71,6 +71,7 @@ rule run_cellassign:
         fc_percentile=lambda wildcards: config['evaluation_settings'][wildcards.evaltype]['fc_percentile'],
         expr_percentile=lambda wildcards: config['evaluation_settings'][wildcards.evaltype]['expr_percentile'],
         timeseed='{timeseed}',
+        max_batch_size=5000,
         conda_env='r-tensorflow',
     log:
         '{logdir}/logs/run_cellassign/{{simtype}}/{{evaltype}}/{{seed}}_{{timeseed}}.log'.format(logdir=config['logdir']),
@@ -84,6 +85,7 @@ rule run_cellassign:
         '--max_genes {params.max_genes} '
         '--seed {params.timeseed} '
         '--conda_env {params.conda_env} '
+        '--max_batch_size {params.max_batch_size} '
         '--outfname {output.outres} '
         '--outtime {output.outtime} '
         '>& {log}'
