@@ -112,7 +112,7 @@ simulation_settings:
     sim_model: splat
   cells_100000_groups_4:
     num_cells: 100000
-    num_groups: 2
+    num_groups: 4
     num_batches: 1
     num_genes: 1000
     group_probs: 0.25,0.25,0.25,0.25
