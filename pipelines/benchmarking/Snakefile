@@ -1,6 +1,8 @@
 
 configfile: "config/v1.yaml"
 
+singularity: "docker://alzhang/scrna-analysis-sim-3.5:v1.13"
+
 rule all:
     input:
         expand('{workdir}/simulated_sces/{{seed}}/{{simtype}}.rdata'.format(workdir=config['workdir']), simtype=config['simulation_settings'], seed=config['seeds']),
