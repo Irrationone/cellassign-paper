@@ -12,11 +12,11 @@ simulation_settings:
     num_cells: 1000
     num_groups: 2
     num_batches: 1
-    num_genes: 1000
+    num_genes: 100
     group_probs: 0.5,0.5
     batch_probs: "1"
-    de_facloc: 0.0400
-    de_facscale: 0.0237
+    de_facloc: 0.1
+    de_facscale: 0.1
     de_nu: 0.959
     de_min: 1
     de_max: 1000
@@ -29,11 +29,11 @@ simulation_settings:
     num_cells: 10000
     num_groups: 2
     num_batches: 1
-    num_genes: 1000
+    num_genes: 100
     group_probs: 0.5,0.5
     batch_probs: "1"
-    de_facloc: 0.0400
-    de_facscale: 0.0237
+    de_facloc: 0.1
+    de_facscale: 0.1
     de_nu: 0.959
     de_min: 1
     de_max: 1000
@@ -46,11 +46,11 @@ simulation_settings:
     num_cells: 100000
     num_groups: 2
     num_batches: 1
-    num_genes: 1000
+    num_genes: 100
     group_probs: 0.5,0.5
     batch_probs: "1"
-    de_facloc: 0.0400
-    de_facscale: 0.0237
+    de_facloc: 0.1
+    de_facscale: 0.1
     de_nu: 0.959
     de_min: 1
     de_max: 1000
@@ -63,11 +63,11 @@ simulation_settings:
     num_cells: 1000000
     num_groups: 2
     num_batches: 1
-    num_genes: 1000
+    num_genes: 100
     group_probs: 0.5,0.5
     batch_probs: "1"
-    de_facloc: 0.0400
-    de_facscale: 0.0237
+    de_facloc: 0.1
+    de_facscale: 0.1
     de_nu: 0.959
     de_min: 1
     de_max: 1000
@@ -80,11 +80,11 @@ simulation_settings:
     num_cells: 1000
     num_groups: 4
     num_batches: 1
-    num_genes: 1000
+    num_genes: 100
     group_probs: 0.25,0.25,0.25,0.25
     batch_probs: "1"
-    de_facloc: 0.0400
-    de_facscale: 0.0237
+    de_facloc: 0.1
+    de_facscale: 0.1
     de_nu: 0.959
     de_min: 1
     de_max: 1000
@@ -97,11 +97,11 @@ simulation_settings:
     num_cells: 10000
     num_groups: 4
     num_batches: 1
-    num_genes: 1000
+    num_genes: 100
     group_probs: 0.25,0.25,0.25,0.25
     batch_probs: "1"
-    de_facloc: 0.0400
-    de_facscale: 0.0237
+    de_facloc: 0.1
+    de_facscale: 0.1
     de_nu: 0.959
     de_min: 1
     de_max: 1000
@@ -114,11 +114,11 @@ simulation_settings:
     num_cells: 100000
     num_groups: 2
     num_batches: 1
-    num_genes: 1000
+    num_genes: 100
     group_probs: 0.25,0.25,0.25,0.25
     batch_probs: "1"
-    de_facloc: 0.0400
-    de_facscale: 0.0237
+    de_facloc: 0.1
+    de_facscale: 0.1
     de_nu: 0.959
     de_min: 1
     de_max: 1000
@@ -131,11 +131,11 @@ simulation_settings:
     num_cells: 1000000
     num_groups: 4
     num_batches: 1
-    num_genes: 1000
+    num_genes: 100
     group_probs: 0.25,0.25,0.25,0.25
     batch_probs: "1"
-    de_facloc: 0.0400
-    de_facscale: 0.0237
+    de_facloc: 0.1
+    de_facscale: 0.1
     de_nu: 0.959
     de_min: 1
     de_max: 1000
