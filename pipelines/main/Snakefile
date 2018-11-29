@@ -25,7 +25,7 @@ rule all:
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
         pathway_enrichment_table='{outdir}/supplemental_tables/pathway_enrichment_table.xlsx'.format(outdir=config['outdir']),
         ## Stats
-        stats='{outdir}/stats/stats.json'.format(outdir=config['outdir']),
+        stats='{outdir}/stats/stats.tex'.format(outdir=config['outdir']),
 
 
 ## Main figures
