@@ -411,7 +411,7 @@ rule compile_stats:
         de_timepoint_fgsea=config['follicular_analysis_results']['differential_expression']['timepoint_fgsea'],
         koh_rho=config['external_analysis_results']['koh_rho'],
     output:
-        stats='{outdir}/stats/stats.json'.format(outdir=config['outdir']),
+        stats='{outdir}/stats/stats.tex'.format(outdir=config['outdir']),
     params:
         name='compile-stats',
         delta_deprobs=config['delta_deprobs'],
