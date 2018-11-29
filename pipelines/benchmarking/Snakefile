@@ -5,6 +5,8 @@ singularity: "docker://alzhang/scrna-analysis-sim-3.5:v1.14"
 
 rule all:
     input:
+        #expand('{workdir}/simulated_sces/{{seed}}/{{simtype}}.rdata'.format(workdir=config['workdir']), simtype=config['simulation_settings'], seed=config['seeds']),
+        expand('{outdir}/cellassign_times/{{seed}}/{{simtype}}/{{evaltype}}/{{timeseed}}.rdata'.format(outdir=config['outdir']), seed=config['seeds'], simtype=config['simulation_settings'], evaltype=config['evaluation_settings'], timeseed=config['timing_seeds']),
         '{outdir}/cellassign_times_summary.tsv'.format(outdir=config['outdir']),
 
 rule simulate_sce:
