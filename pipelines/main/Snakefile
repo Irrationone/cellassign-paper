@@ -425,6 +425,7 @@ rule compile_stats:
         '--sce_follicular_bcells {input.sce_bcell} '
         '--sce_follicular_raw {input.sce_raw} '
         '--patient_progression {input.patient_events} '
+        '--deprob_result_dir {input.deprob_result_dir_naivecd8_naivecd4} '
         '--delta_deprobs {params.delta_deprobs} '
         '--sce_follicular_nonmalignant_bcell {input.sce_nonmalignant_b} '
         '--cellassign_lambda_kappa {input.cellassign_lambda_kappa_result} '
