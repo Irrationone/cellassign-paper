@@ -177,11 +177,11 @@ evaluation_settings:
     max_genes: 4
     fc_percentile: 0.8
     expr_percentile: 0.9
-  max_genes:
+  high_genes:
     max_genes: 6
     fc_percentile: 0.8
     expr_percentile: 0.9
-  max_genes:
+  higher_genes:
     max_genes: 8
     fc_percentile: 0.8
     expr_percentile: 0.9
