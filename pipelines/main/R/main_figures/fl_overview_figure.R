@@ -131,7 +131,7 @@ dr_celltype$layers[[1]]$aes_params$shape <- 16
 dr_celltype$layers[[1]]$mapping$colour <- dr_celltype$layers[[1]]$mapping$fill
 
 # Plots of marker gene expression
-marker_genes <- c("CD79A", "CD3D", "CCL5", "IL7R")
+marker_genes <- c("CD79A", "CD3D", "CCL5", "ICOS")
 exprs <- logcounts(sce)[cellassign.utils::get_ensembl_id(marker_genes, sce),]
 expr_limits <- c(min(exprs), max(exprs))
 

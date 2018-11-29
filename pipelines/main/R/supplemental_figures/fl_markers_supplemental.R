@@ -36,7 +36,7 @@ specific_assignments <- readRDS(args$cellassign_results)
 categorical_palettes <- cat_palettes()
 
 # Plots of marker gene expression
-marker_genes <- c("CD2", "MS4A1", "CD8A", "GZMA", "CD4", "CXCR5", "ICOS")
+marker_genes <- c("CD2", "MS4A1", "CD8A", "GZMA", "CD4", "CXCR5", "IL7R", "ICA1")
 exprs <- logcounts(sce)[cellassign.utils::get_ensembl_id(marker_genes, sce),]
 expr_limits <- c(min(exprs), max(exprs))
 
