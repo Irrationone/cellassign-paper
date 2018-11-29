@@ -306,7 +306,30 @@ stats <- list(
 
 # Write outputs
 
-write(rjson::toJSON(stats), file = args$outfname)
+stats_flat <- as.list(unlist(stats))
+names(stats_flat) <- names(stats_flat) %>%
+  tolower() %>%
+  stringr::str_replace("\\.", "") %>%
+  stringr::str_replace("fl1018", "fltrans") %>%
+  stringr::str_replace("fl2001", "flprog") %>%
+  stringr::str_replace("t2", "two") %>%
+  stringr::str_replace("t1", "one")
+
+list_to_tex <- function(x) {
+  strs <- lapply(names(x), function(tag) {
+    ## Remove underscores because this will screw up TeX
+    tag_p <- stringr::str_replace_all(tag, "_", "")
+    command <- paste("\\newcommand{\\", tag_p, "}{", x[[tag]], "}", sep="")
+    return(command)
+  })
+  ## Store in dataframe because of newline ambiguity
+  final_str <- data.frame(texstr=unlist(strs))
+  return(final_str)
+}
+
+output_string <- list_to_tex(stats_flat)
+
+write(output_string, args$outfname)
 
 cat("Completed.\n")
 
