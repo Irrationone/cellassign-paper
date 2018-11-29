@@ -5,8 +5,7 @@ singularity: "docker://alzhang/scrna-analysis-sim-3.5:v1.14"
 
 rule all:
     input:
-        #expand('{workdir}/simulated_sces/{{seed}}/{{simtype}}.rdata'.format(workdir=config['workdir']), simtype=config['simulation_settings'], seed=config['seeds']),
-        expand('{outdir}/cellassign_times/{{seed}}/{{simtype}}/{{evaltype}}/{{timeseed}}.rdata'.format(outdir=config['outdir']), seed=config['seeds'], simtype=config['simulation_settings'], evaltype=config['evaluation_settings'], timeseed=config['timing_seeds']),
+        '{outdir}/cellassign_times_summary.tsv'.format(outdir=config['outdir']),
 
 rule simulate_sce:
     input:
@@ -88,4 +87,23 @@ rule run_cellassign:
         '--max_batch_size {params.max_batch_size} '
         '--outfname {output.outres} '
         '--outtime {output.outtime} '
+        '>& {log}'
+
+rule collate_results:
+    input:
+        timefiles=expand('{outdir}/cellassign_times/{{seed}}/{{simtype}}/{{evaltype}}/{{timeseed}}.rdata'.format(outdir=config['outdir']), seed=config['seeds'], simtype=config['simulation_settings'], evaltype=config['evaluation_settings'], timeseed=config['timing_seeds']),
+    output:
+        '{outdir}/cellassign_times_summary.tsv'.format(outdir=config['outdir']),
+    params:
+        name='collate-results',
+        benchmark_config=config['benchmark_config_file'],
+    log:
+        '{logdir}/logs/collate_results.log'.format(logdir=config['logdir']),
+    benchmark:
+        '{logdir}/benchmarks/collate_results.txt'.format(logdir=config['logdir']),
+    shell:
+        'Rscript R/collate_results.R '
+        '--timing_files {input.timefiles} '
+        '--benchmark_config {params.benchmark_config} '
+        '--outfname {output} '
         '>& {log}'
