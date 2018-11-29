@@ -17,151 +17,172 @@ simulation_settings:
     num_cells: 1000
     num_groups: 2
     num_batches: 1
-    num_genes: 1000
+    num_genes: 10000
     group_probs: 0.5,0.5
     batch_probs: "1"
     de_facloc: 0.1
     de_facscale: 0.1
-    de_nu: 0.959
+    de_nu: 1
     de_min: 1
     de_max: 1000
     batch_facloc: 1
     batch_facscale: 1
-    de_prob: 0.25
+    de_prob: 0.2
+    down_prob: 0.5
+    sim_model: splat
+  cells_2000_groups_2:
+    num_cells: 2000
+    num_groups: 2
+    num_batches: 1
+    num_genes: 10000
+    group_probs: 0.5,0.5
+    batch_probs: "1"
+    de_facloc: 0.1
+    de_facscale: 0.1
+    de_nu: 1
+    de_min: 1
+    de_max: 1000
+    batch_facloc: 1
+    batch_facscale: 1
+    de_prob: 0.2
+    down_prob: 0.5
+    sim_model: splat
+  cells_4000_groups_2:
+    num_cells: 4000
+    num_groups: 2
+    num_batches: 1
+    num_genes: 10000
+    group_probs: 0.5,0.5
+    batch_probs: "1"
+    de_facloc: 0.1
+    de_facscale: 0.1
+    de_nu: 1
+    de_min: 1
+    de_max: 1000
+    batch_facloc: 1
+    batch_facscale: 1
+    de_prob: 0.2
+    down_prob: 0.5
+    sim_model: splat
+  cells_8000_groups_2:
+    num_cells: 8000
+    num_groups: 2
+    num_batches: 1
+    num_genes: 10000
+    group_probs: 0.5,0.5
+    batch_probs: "1"
+    de_facloc: 0.1
+    de_facscale: 0.1
+    de_nu: 1
+    de_min: 1
+    de_max: 1000
+    batch_facloc: 1
+    batch_facscale: 1
+    de_prob: 0.2
     down_prob: 0.5
     sim_model: splat
   cells_10000_groups_2:
     num_cells: 10000
     num_groups: 2
     num_batches: 1
-    num_genes: 1000
+    num_genes: 10000
     group_probs: 0.5,0.5
     batch_probs: "1"
     de_facloc: 0.1
     de_facscale: 0.1
-    de_nu: 0.959
+    de_nu: 1
     de_min: 1
     de_max: 1000
     batch_facloc: 1
     batch_facscale: 1
-    de_prob: 0.25
+    de_prob: 0.2
     down_prob: 0.5
     sim_model: splat
-  cells_100000_groups_2:
-    num_cells: 100000
+  cells_20000_groups_2:
+    num_cells: 20000
     num_groups: 2
     num_batches: 1
-    num_genes: 1000
+    num_genes: 10000
     group_probs: 0.5,0.5
     batch_probs: "1"
     de_facloc: 0.1
     de_facscale: 0.1
-    de_nu: 0.959
+    de_nu: 1
     de_min: 1
     de_max: 1000
     batch_facloc: 1
     batch_facscale: 1
-    de_prob: 0.25
+    de_prob: 0.2
     down_prob: 0.5
     sim_model: splat
-  # cells_1000000_groups_2:
-  #   num_cells: 1000000
-  #   num_groups: 2
-  #   num_batches: 1
-  #   num_genes: 1000
-  #   group_probs: 0.5,0.5
-  #   batch_probs: "1"
-  #   de_facloc: 0.1
-  #   de_facscale: 0.1
-  #   de_nu: 0.959
-  #   de_min: 1
-  #   de_max: 1000
-  #   batch_facloc: 1
-  #   batch_facscale: 1
-  #   de_prob: 0.25
-  #   down_prob: 0.5
-  #   sim_model: splat
   cells_1000_groups_4:
     num_cells: 1000
     num_groups: 4
     num_batches: 1
-    num_genes: 1000
+    num_genes: 10000
     group_probs: 0.25,0.25,0.25,0.25
     batch_probs: "1"
     de_facloc: 0.1
     de_facscale: 0.1
-    de_nu: 0.959
+    de_nu: 1
     de_min: 1
     de_max: 1000
     batch_facloc: 1
     batch_facscale: 1
-    de_prob: 0.25
+    de_prob: 0.2
     down_prob: 0.5
     sim_model: splat
-  cells_10000_groups_4:
-    num_cells: 10000
-    num_groups: 4
+  cells_1000_groups_6:
+    num_cells: 1000
+    num_groups: 6
     num_batches: 1
-    num_genes: 1000
-    group_probs: 0.25,0.25,0.25,0.25
+    num_genes: 10000
+    group_probs: 0.166,0.166,0.167,0.167,0.167,0.167
     batch_probs: "1"
     de_facloc: 0.1
     de_facscale: 0.1
-    de_nu: 0.959
+    de_nu: 1
     de_min: 1
     de_max: 1000
     batch_facloc: 1
     batch_facscale: 1
-    de_prob: 0.25
+    de_prob: 0.2
     down_prob: 0.5
     sim_model: splat
-  cells_100000_groups_4:
-    num_cells: 100000
-    num_groups: 4
+  cells_1000_groups_8:
+    num_cells: 1000
+    num_groups: 8
     num_batches: 1
-    num_genes: 1000
-    group_probs: 0.25,0.25,0.25,0.25
+    num_genes: 10000
+    group_probs: 0.125,0.125,0.125,0.125,0.125,0.125,0.125,0.125
     batch_probs: "1"
     de_facloc: 0.1
     de_facscale: 0.1
-    de_nu: 0.959
+    de_nu: 1
     de_min: 1
     de_max: 1000
     batch_facloc: 1
     batch_facscale: 1
-    de_prob: 0.25
+    de_prob: 0.2
     down_prob: 0.5
     sim_model: splat
-  # cells_1000000_groups_4:
-  #   num_cells: 1000000
-  #   num_groups: 4
-  #   num_batches: 1
-  #   num_genes: 1000
-  #   group_probs: 0.25,0.25,0.25,0.25
-  #   batch_probs: "1"
-  #   de_facloc: 0.1
-  #   de_facscale: 0.1
-  #   de_nu: 0.959
-  #   de_min: 1
-  #   de_max: 1000
-  #   batch_facloc: 1
-  #   batch_facscale: 1
-  #   de_prob: 0.25
-  #   down_prob: 0.5
-  #   sim_model: splat
 
 
 evaluation_settings:
   small_genes:
-    max_genes: 4
-    fc_percentile: 0.5
-    expr_percentile: 0.5
+    max_genes: 2
+    fc_percentile: 0.8
+    expr_percentile: 0.9
   mid_genes: 
-    max_genes: 7
-    fc_percentile: 0.5
-    expr_percentile: 0.5
+    max_genes: 4
+    fc_percentile: 0.8
+    expr_percentile: 0.9
   max_genes:
-    max_genes: 10
-    fc_percentile: 0.5
-    expr_percentile: 0.5
+    max_genes: 6
+    fc_percentile: 0.8
+    expr_percentile: 0.9
+  max_genes:
+    max_genes: 8
+    fc_percentile: 0.8
+    expr_percentile: 0.9
   
