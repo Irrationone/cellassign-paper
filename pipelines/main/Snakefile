@@ -24,6 +24,8 @@ rule all:
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
         pathway_enrichment_table='{outdir}/supplemental_tables/pathway_enrichment_table.xlsx'.format(outdir=config['outdir']),
+        ## Stats
+        stats='{outdir}/stats/stats.json'.format(outdir=config['outdir']),
 
 
 ## Main figures
@@ -393,4 +395,43 @@ rule pathway_enrichment_table:
         '--outfname {output.pathway_enrichment_table} '
         '>& {log}'
 
+## Generate stats for the paper
 
+rule compile_stats:
+    input:
+        sce=config['follicular_analysis_results']['sce_annotated'],
+        sce_bcell=config['follicular_analysis_results']['sce_bcell_annotated'],
+        sce_raw=config['follicular_analysis_results']['sce_raw'],
+        patient_events=config['follicular_metadata']['patient_progression_file'],
+        deprob_result_dir_naivecd8_naivecd4=config['simulation_analysis_results']['deprob_result_dir'],
+        sce_nonmalignant_b=config['follicular_analysis_results']['sce_nonmalignant_bcell_annotated'],
+        cellassign_lambda_kappa_result=config['follicular_analysis_results']['cellassign_lambda_kappa_result'],
+        de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
+        de_malignant_timepoint=config['follicular_analysis_results']['differential_expression']['malignant_timepoint'],
+        de_timepoint_fgsea=config['follicular_analysis_results']['differential_expression']['timepoint_fgsea'],
+        koh_rho=config['external_analysis_results']['koh_rho'],
+    output:
+        stats='{outdir}/stats/stats.json'.format(outdir=config['outdir']),
+    params:
+        name='compile-stats',
+        delta_deprobs=config['delta_deprobs'],
+    log:
+        '{logdir}/logs/compile_stats.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/compile_stats.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/stats/compile_stats.R '
+        '--sce_follicular {input.sce} '
+        '--sce_follicular_bcells {input.sce_bcell} '
+        '--sce_follicular_raw {input.sce_raw} '
+        '--patient_progression {input.patient_events} '
+        '--delta_deprobs {params.delta_deprobs} '
+        '--sce_follicular_nonmalignant_bcell {input.sce_nonmalignant_b} '
+        '--cellassign_lambda_kappa {input.cellassign_lambda_kappa_result} '
+        '--de_timepoint_dir {input.de_timepoint} '
+        '--de_malignant_timepoint_dir {input.de_malignant_timepoint} '
+        '--de_timepoint_fgsea_dir {input.de_timepoint_fgsea} '
+        '--koh_rho {input.koh_rho} '
+        '--outfname {output.stats} '
+        '>& {log}'
+    
