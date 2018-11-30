@@ -218,7 +218,9 @@ marker_binary_plot <- ggplot(example_rho_df, aes(x=celltype, y=gene)) +
   theme(axis.text.x = element_blank(),
         axis.line = element_blank(),
         axis.ticks = element_blank(),
-        axis.text.y = element_blank()) +
+        axis.text.y = element_blank(),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_fill_manual(values = c('0'='#FFFFFF', '1'='#000000')) + 
   guides(fill = FALSE) + 
   coord_fixed(ratio = 1)
