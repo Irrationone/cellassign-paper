@@ -18,7 +18,7 @@ import statsmodels.stats.stattools
 import statsmodels.graphics.gofplots
 
 
-def combined_plot(splatter_res, v3_res, logfcs_diff, logfcs_same, outfname, seed = 1481):
+def combined_plot(splatter_res, v3_res, logfcs_diff, logfcs_same, outfname, seed = 1481, xmin, xmax):
     np.random.seed(seed)
     splatter_pred_samples = np.random.choice(splatter_res['ppc']['obs'].flatten(), size = logfcs_diff.shape[0])
     
@@ -30,12 +30,12 @@ def combined_plot(splatter_res, v3_res, logfcs_diff, logfcs_same, outfname, seed
     axs = axs.flat
     
     axs[0].hist(logfcs_same, bins = 'auto')
-    axs[0].set_xlim((-0.02, 0.02))
+    axs[0].set_xlim((xmin, xmax))
     axs[0].set_xlabel("logFC")
     axs[0].set_ylabel("Frequency")
     
     axs[1].hist(logfcs_same, bins = 'auto')
-    axs[1].set_xlim((-0.02, 0.02))
+    axs[1].set_xlim((xmin, xmax))
     axs[1].set_xlabel("logFC")
     axs[1].set_ylabel("Frequency")
     
@@ -94,6 +94,18 @@ def read_args():
         dest="class2",
         help="Second class to compare")
     parser.add_argument(
+        "--xmin",
+        type=float,
+        dest="xmin",
+        help="Minimum logFC value to plot", 
+        default = 2)
+    parser.add_argument(
+        "--xmax",
+        type=float,
+        dest="xmax",
+        help="Maximum logFC value to plot", 
+        default = 2)
+    parser.add_argument(
         "-o", "--outdir", dest="outdir", help="Output directory", metavar="DIR")
     args = parser.parse_args()
     
@@ -129,7 +141,8 @@ def main(args):
     print("Creating combined plot ...")
     sys.stdout.flush()
     combined_plot(splatter_model_result, v3_model_result, 
-                  logfcs_diff, logfcs_same, combined_plot_file, seed = 1481)
+                  logfcs_diff, logfcs_same, combined_plot_file, seed = 1481,
+                  xmin = args.xmin, xmax=args.xmax)
 
 if __name__ == '__main__':
     args = read_args()

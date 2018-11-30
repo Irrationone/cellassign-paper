@@ -66,6 +66,9 @@ rule combined_plot:
     params:
         class1=lambda wildcards: config['datasets'][wildcards.dataset]['class1'],
         class2=lambda wildcards: config['datasets'][wildcards.dataset]['class2'],
+        ## For plotting
+        xmin=lambda wildcards: config['datasets'][wildcards.dataset]['xmin'],
+        xmax=lambda wildcards: config['datasets'][wildcards.dataset]['xmax'],
     output:
         outdir=directory('{outdir}/combined_plots/{{dataset}}'.format(outdir=config['outdir'])),
     log:

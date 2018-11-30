@@ -13,13 +13,16 @@ rule all:
         ## Supplemental figures
         sim_performance_b_cd8='{outdir}/supplemental_figures/sim_performance_b_cd8.pdf'.format(outdir=config['outdir']),
         wrong_marker_figure='{outdir}/supplemental_figures/wrong_marker_naivecd8_naivecd4.pdf'.format(outdir=config['outdir']),
+        benchmarking_figure='{outdir}/supplemental_figures/benchmarking_evaluation.pdf'.format(outdir=config['outdir']),
         real_data_evaluation_figure='{outdir}/supplemental_figures/real_data_evaluation.pdf'.format(outdir=config['outdir']),
         fl_markers_figure='{outdir}/supplemental_figures/fl_markers_supplemental.pdf'.format(outdir=config['outdir']),
         light_chain_figure='{outdir}/supplemental_figures/light_chain_heatmap.pdf'.format(outdir=config['outdir']),
         rln_markers_figure='{outdir}/supplemental_figures/rln_markers.pdf'.format(outdir=config['outdir']),
         fl_de_malignant_figure='{outdir}/supplemental_figures/fl_de_malignant_nonmalignant.pdf'.format(outdir=config['outdir']),
         fl_nonmalignant_timepoint_network_plot='{outdir}/supplemental_figures/fl_nonmalignant_timepoint.pdf'.format(outdir=config['outdir']),
+        tcell_activation_de_plot='{outdir}/supplemental_figures/tcell_activation_de.pdf'.format(outdir=config['outdir']),
         fl_hla_downregulation_plot='{outdir}/supplemental_figures/fl_hla_downregulation.pdf'.format(outdir=config['outdir']),
+        fl_malignant_timepoint_pathway_downregulation_plot='{outdir}/supplemental_figures/fl_malignant_timepoint_pathway_downregulation.pdf'.format(outdir=config['outdir']),
         ## Supplemental tables
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
@@ -184,6 +187,22 @@ rule wrong_marker_naivecd8_naivecd4:
         '--outfname {output.wrong_marker_figure} '
         '>& {log}'
 
+rule benchmarking_evaluation:
+    input:
+        benchmark_times: config['benchmarking_results']['timing_results'],
+    output:
+        benchmarking_figure='{outdir}/supplemental_figures/benchmarking_evaluation.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-benchmarking-evaluation',
+    log:
+        '{logdir}/logs/benchmarking_evaluation.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/benchmarking_evaluation.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/benchmarking_evaluation.R '
+        '--benchmark_times {input.benchmark_times} '
+        '--outfname {output.benchmarking_figure} '
+        '>& {log}'
 
 rule real_data_evaluation:
     input:
@@ -297,6 +316,22 @@ rule fl_nonmalignant_timepoint_pathway:
         '--outfname {output.fl_nonmalignant_timepoint_network_plot} '
         '>& {log}'
 
+rule tcell_activation_de:
+    input:
+        de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
+    output:
+        tcell_activation_de_plot='{outdir}/supplemental_figures/tcell_activation_de.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-tcell-activation-de',
+    log:
+        '{logdir}/logs/tcell_activation_de.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/tcell_activation_de.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/tcell_activation_transformation.R '
+        '--de_timepoint_dir {input.de_timepoint} '
+        '--outfname {output.tcell_activation_de_plot} '
+        '>& {log}'
 
 rule fl_hla_downregulation:
     input:
@@ -315,6 +350,23 @@ rule fl_hla_downregulation:
         '--outfname {output.fl_hla_downregulation_plot} '
         '>& {log}'
 
+
+rule fl_malignant_timepoint_pathway_downregulation:
+    input:
+        de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
+    output:
+        fl_malignant_timepoint_pathway_downregulation_plot='{outdir}/supplemental_figures/fl_malignant_timepoint_pathway_downregulation.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-fl-malignant-timepoint-pathway-downregulation',
+    log:
+        '{logdir}/logs/fl_malignant_timepoint_pathway_downregulation.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/fl_malignant_timepoint_pathway_downregulation.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/fl_malignant_timepoint_pathway_downregulation.R '
+        '--de_timepoint_dir {input.de_timepoint} '
+        '--outfname {output.fl_malignant_timepoint_pathway_downregulation_plot} '
+        '>& {log}'
 
 ## Supplemental Tables
 

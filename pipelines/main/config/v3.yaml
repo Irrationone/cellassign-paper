@@ -38,6 +38,10 @@ eval_measures_to_report:
   - accuracy
   - micro_f1
 
+# Benchmarking results
+benchmarking_results:
+  timing_results: /datadrive/projects/cellassign-paper/results/outputs/benchmarking/v1/cellassign_times_summary.tsv
+
 # External analysis results
 external_analysis_results:
   koh_annotated: /datadrive/projects/cellassign-paper/results/outputs/external/v1/koh/sce_annotated.rds

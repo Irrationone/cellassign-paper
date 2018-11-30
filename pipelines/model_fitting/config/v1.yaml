@@ -14,23 +14,33 @@ datasets:
     background: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/pbmc_68k_normal_logfcs.feather'
     class1: Naive\ CD8+
     class2: Naive\ CD4+
+    xmin: -0.02
+    xmax: 0.02
   pbmc68k_b_cd8:
     foreground: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/pbmc68k_markers.feather'
     background: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/pbmc_68k_normal_logfcs.feather'
     class1: B
     class2: CD8+
+    xmin: -0.02
+    xmax: 0.02
   koh_aps_mps:
     foreground: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/koh_markers.feather'
     background: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/koh_normal_logfcs.feather'
     class1: APS
     class2: MPS
+    xmin: -3
+    xmax: 3
   koh_d2ltm_dll1ppxm:
     foreground: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/koh_markers.feather'
     background: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/koh_normal_logfcs.feather'
     class1: D2LtM
     class2: DLL1pPXM
+    xmin: -5
+    xmax: 5
   koh_hesc_esmt:
     foreground: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/koh_markers.feather'
     background: '/datadrive/projects/cellassign-paper/intermediates/bayesian_deprob/koh_normal_logfcs.feather'
     class1: hESC
     class2: ESMT
+    xmin: -4
+    xmax: 4
