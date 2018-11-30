@@ -316,26 +316,20 @@ hla_exprs_annotated_summary <- hla_exprs_annotated %>%
   dplyr::summarise(logcount_mean=mean(logcounts)) %>%
   dplyr::ungroup()
 
-patients <- hla_exprs_annotated$patient %>% unique
-hla_boxplots <- lapply(patients, function(pat) {
-  p <- ggplot(hla_exprs_annotated %>%
-                           dplyr::filter(patient == pat) %>%
-                           dplyr::mutate(xlab=paste(malignant_status_manual, timepoint, sep = ", ")),
-                         aes(x=xlab, y = logcounts)) +
-    geom_boxplot(aes(fill=malignant_status_manual)) +
-    theme_bw() + 
-    theme_Publication() +
-    theme_nature() + 
-    stripped_theme(strip_face = "bold") +
-    facet_wrap(~ Symbol, nrow = 1, scales = "free") +
-    xlab("B cell population") +
-    ylab("Logcounts") + 
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-    scale_fill_manual(values = categorical_palettes$bcell_population) +
-    guides(fill = FALSE)
-  return(p)
-})
-names(hla_boxplots) <- patients
+hla_boxplots_faceted <- ggplot(hla_exprs_annotated %>%
+                                 dplyr::mutate(xlab=paste(malignant_status_manual, timepoint, sep = ", ")),
+                               aes(x=xlab, y = logcounts)) +
+  geom_boxplot(aes(fill=xlab)) +
+  theme_bw() + 
+  theme_Publication() +
+  theme_nature() + 
+  stripped_theme(strip_face = "bold") +
+  facet_grid(patient ~ Symbol, scales = "free") +
+  xlab("B cell population") +
+  ylab("Logcounts") + 
+  theme(axis.text.x = element_text(angle = 40, hjust = 1)) + 
+  scale_fill_manual(values = categorical_palettes$bcell_population) +
+  guides(fill = FALSE)
 
 # Create legends
 
@@ -509,12 +503,11 @@ final_plot <- cowplot::plot_grid(fgsea_row,
                                  second_row, 
                                  #third_row, 
                                  #third_row_legend,
-                                 hla_boxplots$FL1018,
-                                 hla_boxplots$FL2001,
+                                 hla_boxplots_faceted,
                                  labels = c('', '', '', '', '', 'g', 'h'), 
                                  ncol = 1, 
                                  nrow = 7,
-                                 rel_heights = c(0.4, 0.05, 0.22, 0.05, 0.22, 0.25, 0.25))
+                                 rel_heights = c(0.4, 0.05, 0.25, 0.05, 0.25, 0.4))
 
 # Plot final plot
 pdf(args$outfname, width = 10, height = 13, useDingbats = FALSE)
