@@ -51,31 +51,57 @@ de_eval_measures <- de_eval_measures %>%
   dplyr::filter(clustering_method %in% deprob_methods)
 
 ## TODO: When reruns have been done with ARI and NMI, add those too
-de_plots <- plot_simulation_performance(de_eval_measures %>%
-                                          dplyr::mutate(clustering_method=factor(clustering_method, 
-                                                                                 levels =factor_orderings$clustering_methods)), 
-                                        measures = c("micro_f1",
-                                                     "accuracy"),
-                                        display_measure_names = c("F1",
-                                                                  "Accuracy"),
-                                        x_var = "de_prob")
+de_eval_measures_filtered <- de_eval_measures %>% dplyr::filter(is.na(mapping_type) | mapping_type == "de")
+eval_measures_markers <- de_eval_measures_filtered %>% dplyr::filter(is.na(gene_set) | 
+                                                                       gene_set == "markers")
+eval_measures_full <- de_eval_measures_filtered %>% dplyr::filter(is.na(gene_set) | 
+                                                                    gene_set == "full")
+elist <- list(markers = eval_measures_markers, full = eval_measures_full)
+de_plots <- lapply(elist, function(gs) {
+  eval_measures_markers_de_melted <- gs %>% reshape2::melt(measure.vars = c("micro_f1",
+                                                                            "accuracy"), 
+                                                           variable.name = "measure", value.name = "value") %>% 
+    dplyr::mutate_(.dots = setNames(list(lazyeval::interp(~factor(x), 
+                                                          x = as.name("de_prob"))), "xval")) %>% dplyr::mutate(measure = plyr::mapvalues(measure, 
+                                                                                                                                     c("micro_f1",
+                                                                                                                                       "accuracy"),
+                                                                                                                                     c("F1",
+                                                                                                                                       "Accuracy")))
+  method_ordering <- (eval_measures_markers_de_melted %>% 
+    dplyr::filter(de_prob == 0.35,
+                  measure == "F1") %>%
+    dplyr::group_by(clustering_method) %>%
+    dplyr::summarise(mean_value=mean(value, na.rm=TRUE)) %>%
+    dplyr::arrange(-mean_value))$clustering_method
+  
+  marker_de_plot <- ggplot(eval_measures_markers_de_melted %>%
+                             dplyr::mutate(clustering_method=factor(clustering_method, levels = method_ordering)), 
+                           aes(x = clustering_method, y = value, fill = clustering_method)) + 
+    geom_boxplot(outlier.size = -1) + theme_bw() + theme_Publication() + 
+    theme_nature() + stripped_theme() + facet_grid(measure~de_prob, 
+                                                   scales = "free") + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7)) + 
+    xlab("Method") + ylab("Score") + 
+    guides(fill = FALSE) 
+  return(marker_de_plot)
+})
 
 de_plot_markers <- de_plots$markers + 
   guides(fill = FALSE) + 
-  xlab("% of genes differentially expressed per cell type") + 
+  ggtitle("% of genes differentially expressed per cell type") + 
   scale_fill_manual(values = clust_methods_palette)
   
 de_plot_full <- de_plots$full + 
   guides(fill = FALSE) + 
-  xlab("% of genes differentially expressed per cell type") + 
+  ggtitle("% of genes differentially expressed per cell type") + 
   scale_fill_manual(values = clust_methods_palette)
 
-
-
-de_plot_legend <- cellassign.utils::ggsimplelegend(names(clust_methods_palette),
-                                                   colour_mapping = unname(clust_methods_palette),
-                                                   legend_title = "Method", legend_rows = 2, fontsize = 7)
-de_plot_legend <- cellassign.utils::extract_legend(de_plot_legend)
+# 
+# 
+# de_plot_legend <- cellassign.utils::ggsimplelegend(names(clust_methods_palette),
+#                                                    colour_mapping = unname(clust_methods_palette),
+#                                                    legend_title = "Method", legend_rows = 2, fontsize = 7)
+# de_plot_legend <- cellassign.utils::extract_legend(de_plot_legend)
 
 # Delta plots
 
@@ -136,11 +162,11 @@ wm_plot_cellassign <- wm_plots$cellassign +
 
 
 # Final plot
-de_plots_labeled <- cowplot::plot_grid(de_plot_full, de_plot_legend, de_plot_markers,
-                                       labels = c('a', '', 'b'),
+de_plots_labeled <- cowplot::plot_grid(de_plot_full, de_plot_markers, #de_plot_legend,
+                                       labels = c('a', 'b'),
                                        ncol = 1,
-                                       nrow = 3,
-                                       rel_heights = c(1, 0.2, 1))
+                                       nrow = 2,
+                                       rel_heights = c(1, 1))
 
 bottom_row <- cowplot::plot_grid(delta_plots, wm_plot_cellassign,
                                  labels = c('c', 'd'),

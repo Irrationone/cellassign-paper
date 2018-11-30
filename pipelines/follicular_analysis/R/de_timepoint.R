@@ -101,8 +101,9 @@ if (args$method_pathway == "ReactomePA") {
   })
   names(enriched_paths) <- c("up", "down")
 } else if (args$method_pathway == "fgsea") {
-  # Only allow use of voom with this right now -- can use scran but need to rename columns accordingly
-  stopifnot(method_gene == "voom")
+  # Only allow use of scran with this right now -- can use scran but need to rename columns accordingly
+  #stopifnot(method_gene == "voom")
+  stopifnot(method_gene == "scran")
   
   if (!is.null(args$gene_set_file)) {
     pathway_list <- gmtPathways(args$gene_set_file)
@@ -111,11 +112,11 @@ if (args$method_pathway == "ReactomePA") {
   }
   
   de_table_summarized <- de_table %>% 
-    dplyr::select(Symbol, t) %>% 
+    dplyr::select(Symbol, logFC.T1) %>% 
     na.omit() %>% 
     distinct() %>% 
     dplyr::group_by(Symbol) %>% 
-    dplyr::summarise(t = mean(t))
+    dplyr::summarise(logFC = mean(logFC.T1))
   
   fgsea_res <- fgsea(pathways=pathway_list, 
                      stats = deframe(de_table_summarized), 

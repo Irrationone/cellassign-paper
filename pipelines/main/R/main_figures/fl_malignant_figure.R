@@ -302,7 +302,7 @@ hla_exprs_annotated <- colData(sce_bcell) %>%
   data.frame(check.names = FALSE) %>%
   cbind(hla_exprs) %>%
   reshape2::melt(
-    id.vars = c("patient", "timepoint", "malignant_status_manual"),
+    id.vars = c("patient", "timepoint", "dataset", "malignant_status_manual"),
     measure.vars = hla_genes,
     variable.name = "Symbol",
     value.name = "logcounts"
@@ -312,36 +312,30 @@ hla_exprs_annotated <- colData(sce_bcell) %>%
                 malignant_status_manual = factor(malignant_status_manual, levels = c("nonmalignant", "malignant")))
 
 hla_exprs_annotated_summary <- hla_exprs_annotated %>%
-  dplyr::group_by(patient, timepoint, malignant_status_manual, Symbol) %>%
+  dplyr::group_by(patient, dataset, timepoint, malignant_status_manual, Symbol) %>%
   dplyr::summarise(logcount_mean=mean(logcounts)) %>%
   dplyr::ungroup()
 
-hla_lineplots <- lapply(patients, function(pat) {
-  hla_exprs_annotated_summary_patient <- hla_exprs_annotated_summary %>%
-    dplyr::filter(patient == pat)
-  hla_exprs_annotated_patient <- hla_exprs_annotated %>% 
-    dplyr::filter(patient == pat)
-  
-  hla_lineplot <- ggplot(hla_exprs_annotated_patient, 
-                         aes(x=timepoint, y=logcounts, colour=Symbol)) + 
-    stat_summary(aes(colour=Symbol), fun.data = function(x) mean_se(x, mult = 10), geom = "errorbar", width = 0.05) +
-    geom_line(data = hla_exprs_annotated_summary_patient, aes(x=timepoint, y=logcount_mean,
-                                                      colour=Symbol, group=Symbol)) + 
-    geom_point(data = hla_exprs_annotated_summary_patient, aes(x=timepoint, y=logcount_mean)) + 
+patients <- hla_exprs_annotated$patient %>% unique
+hla_boxplots <- lapply(patients, function(pat) {
+  p <- ggplot(hla_exprs_annotated %>%
+                           dplyr::filter(patient == pat) %>%
+                           dplyr::mutate(xlab=paste(malignant_status_manual, timepoint, sep = ", ")),
+                         aes(x=xlab, y = logcounts)) +
+    geom_boxplot(aes(fill=malignant_status_manual)) +
     theme_bw() + 
-    theme_Publication() + 
+    theme_Publication() +
     theme_nature() + 
-    xlab("Timepoint") + 
-    ylab("Expression") + 
-    scale_x_discrete(expand = c(0.2, 0.2)) + 
-    scale_colour_manual(values = categorical_palettes$hla_genes) + 
-    facet_wrap(~ malignant_status_manual) + 
-    stripped_theme() + 
-    guides(colour = FALSE)
-  return(hla_lineplot)
+    stripped_theme(strip_face = "bold") +
+    facet_wrap(~ Symbol, nrow = 1, scales = "free") +
+    xlab("B cell population") +
+    ylab("Logcounts") + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    scale_fill_manual(values = categorical_palettes$bcell_population) +
+    guides(fill = FALSE)
+  return(p)
 })
-names(hla_lineplots) <- patients
-
+names(hla_boxplots) <- patients
 
 # Create legends
 
@@ -389,11 +383,11 @@ message("Completed cycling size plot.")
 
 # HLA legend
 
-hla_gene_legend <- cellassign.utils::ggsimplelegend(vars = names(categorical_palettes$hla_genes[hla_genes]),
-                                                    colour_mapping = categorical_palettes$hla_genes[hla_genes],
-                                                    legend_title = "Gene",
-                                                    legend_rows = 1)
-hla_gene_legend <- cellassign.utils::extract_legend(hla_gene_legend)
+# hla_gene_legend <- cellassign.utils::ggsimplelegend(vars = names(categorical_palettes$hla_genes[hla_genes]),
+#                                                     colour_mapping = categorical_palettes$hla_genes[hla_genes],
+#                                                     legend_title = "Gene",
+#                                                     legend_rows = 1)
+# hla_gene_legend <- cellassign.utils::extract_legend(hla_gene_legend)
 
 # Network legends
 
@@ -508,12 +502,6 @@ top_second_legend <- cowplot::plot_grid(timepoint_legend,
 #                                        ncol = 2,
 #                                        rel_widths = c(0.5, 0.5))
 
-fourth_row <- cowplot::plot_grid(hla_lineplots$FL1018,
-                                hla_lineplots$FL2001,
-                                labels = c('g', 'h'),
-                                ncol = 2,
-                                rel_widths = c(0.5, 0.5))
-
 final_plot <- cowplot::plot_grid(fgsea_row,
                                  fgsea_size_legend,
                                  top_row, 
@@ -521,12 +509,12 @@ final_plot <- cowplot::plot_grid(fgsea_row,
                                  second_row, 
                                  #third_row, 
                                  #third_row_legend,
-                                 fourth_row,
-                                 hla_gene_legend,
-                                 labels = c('', '', '', '', '', '', ''), 
+                                 hla_boxplots$FL1018,
+                                 hla_boxplots$FL2001,
+                                 labels = c('', '', '', '', '', 'g', 'h'), 
                                  ncol = 1, 
                                  nrow = 7,
-                                 rel_heights = c(0.4, 0.05, 0.27, 0.05, 0.27, 0.25, 0.05))
+                                 rel_heights = c(0.4, 0.05, 0.22, 0.05, 0.22, 0.25, 0.25))
 
 # Plot final plot
 pdf(args$outfname, width = 10, height = 13, useDingbats = FALSE)
