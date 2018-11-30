@@ -29,7 +29,6 @@ timing_df <- fread(benchmark_file)
 categorical_palettes <- cat_palettes()
 factor_orderings <- factor_orders()
 
-clust_methods_palette <- categorical_palettes$clustering_methods[deprob_methods]
 
 ## Create subfigure for num cells scaling
 
@@ -37,25 +36,49 @@ timing_df_ncells <- timing_df %>%
   dplyr::filter(num_groups == 2,
                 num_genes == 1e4)
 
-ggplot(timing_df_ncells, aes(x=num_cells, y = time, fill=factor(max_genes))) + 
-  geom_boxplot(aes(fill=factor(max_genes))) + 
+cell_timing_plot <- ggplot(timing_df_ncells, aes(x=factor(num_cells), y = time, fill=factor(max_genes))) + 
+  geom_boxplot() + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
   xlab("Number of cells") + 
-  ylab("Time to convergence (seconds)")
+  ylab("Time to convergence (seconds)") + 
+  scale_fill_manual(values = categorical_palettes$num_markers) +
+  guides(fill = FALSE)
 
-final_plot <- cowplot::plot_grid(de_plots_labeled, 
-                                 bottom_row,
-                                 delta_plot_legend,
-                                 labels = c('', ''), 
+timing_df_ngroups <- timing_df %>% 
+  dplyr::filter(num_cells == 1000,
+                num_genes == 1e4)
+
+group_timing_plot <- ggplot(timing_df_ngroups, aes(x=factor(num_groups), y = time, fill=factor(max_genes))) + 
+  geom_boxplot(width = 0.5) + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  xlab("Number of cell types") + 
+  ylab("Time to convergence (seconds)") + 
+  scale_fill_manual(values = categorical_palettes$num_markers) +
+  guides(fill = FALSE)
+
+## Legends
+
+marker_legend <- cellassign.utils::ggsimplelegend(unique(timing_df_ngroups$max_genes),
+                                                  colour_mapping = categorical_palettes$num_markers,
+                                                  legend_title = "Markers per celltype",
+                                                  type = "discrete") 
+marker_legend <- cellassign.utils::extract_legend(marker_legend)
+
+final_plot <- cowplot::plot_grid(cell_timing_plot, 
+                                 marker_legend,
+                                 group_timing_plot,
+                                 labels = c('a', '', 'b'), 
                                  ncol = 1, 
                                  nrow = 3,
-                                 rel_heights = c(0.67, 0.33, 0.05))
+                                 rel_heights = c(1, 0.1, 1))
 
 
 # Plot final plot
-pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
+pdf(args$outfname, width = 8, height = 8, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

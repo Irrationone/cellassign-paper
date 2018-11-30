@@ -188,7 +188,8 @@ fgsea_res <- lapply(de_timepoint_fgsea_files, function(f) {
 names(fgsea_res) <- tools::file_path_sans_ext(basename(de_timepoint_fgsea_files))
 
 FL2001_E2F_padj <- (fgsea_res$FL2001$pathway %>% 
-  dplyr::filter(str_detect(pathway, "E2F")))$padj
+  dplyr::filter(str_detect(pathway, "E2F")))$padj %>%
+  signif(2)
 
 ## Proliferation stats -- use scran for pairwise T tests
 
@@ -205,11 +206,13 @@ scran_results <- plyr::rbind.fill(lapply(unique(sce_follicular$patient), functio
 }))
 
 fl1018_prolif_pvals <- scran_results %>%
+  dplyr::mutate(FDR=signif(FDR,2)) %>%
   dplyr::filter(patient == "FL1018") %>%
   dplyr::rename(adj.P.Val=FDR) %>%
   df_to_list()
 
 fl2001_prolif_pvals <- scran_results %>%
+  dplyr::mutate(FDR=signif(FDR,2)) %>%
   dplyr::filter(patient == "FL2001") %>%
   dplyr::rename(adj.P.Val=FDR) %>%
   df_to_list()
@@ -240,10 +243,12 @@ timepoint_correlations <- plyr::rbind.fill(lapply(unique(sce_follicular$patient)
 
 fl1018_malignant_timepoint_var <- (timepoint_correlations %>%
                                      dplyr::filter(malignant_status_manual == "malignant",
-                                                   patient == "FL1018"))$cor
+                                                   patient == "FL1018"))$cor %>%
+  signif(3)
 fl2001_malignant_timepoint_var <- (timepoint_correlations %>%
                                      dplyr::filter(malignant_status_manual == "malignant",
-                                                   patient == "FL2001"))$cor
+                                                   patient == "FL2001"))$cor %>% 
+  signif(3)
 
 hla_genes <- c("HLA-A", "HLA-B",
                "HLA-C", "B2M",
@@ -295,12 +300,12 @@ stats <- list(
   fl2001MalignantVar=fl2001_malignant_timepoint_var,
   T1NonMalignantB=T1_nonmalignant_b_pct,
   T2NonMalignantB=T2_nonmalignant_b_pct,
-  maxCD69Pval=max_t_cd69_pval,
-  fl2001E2Fp=FL2001_E2F_padj,
+  maxCDsixninePval=max_t_cd69_pval,
+  fl2001etwofp=FL2001_E2F_padj,
   fl1018Prolifp=fl1018_prolif_pvals,
   fl2001Prolifp=fl2001_prolif_pvals,
-  maxMalignantPval=max_hla_malignant_pval,
-  fl1018class1MHCp=fl1018_class1_MHC_p,
+  maxHLAMalignantPval=max_hla_malignant_pval,
+  fl1018classoneMHCp=fl1018_class1_MHC_p,
   fl1018maxHLAtimepointPval=fl1018_hla_timepoint_maxpval
 )
 
@@ -313,7 +318,9 @@ names(stats_flat) <- names(stats_flat) %>%
   stringr::str_replace("fl1018", "fltrans") %>%
   stringr::str_replace("fl2001", "flprog") %>%
   stringr::str_replace("t2", "two") %>%
-  stringr::str_replace("t1", "one")
+  stringr::str_replace("t1", "one") %>%
+  stringr::str_replace("mki67", "mki") %>%
+  stringr::str_replace("top2a", "topo")
 
 list_to_tex <- function(x) {
   strs <- lapply(names(x), function(tag) {
@@ -329,7 +336,7 @@ list_to_tex <- function(x) {
 
 output_string <- list_to_tex(stats_flat)
 
-write(output_string, args$outfname)
+write.table(output_string, file=args$outfname, row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 cat("Completed.\n")
 
