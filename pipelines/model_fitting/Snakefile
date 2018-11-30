@@ -83,5 +83,7 @@ rule combined_plot:
         '--null_logfc_file {input.null_logfc_file} '
         '--class1 {params.class1} '
         '--class2 {params.class2} '
+        '--xmin {params.xmin} '
+        '--xmax {params.xmax} '
         '--outdir {output.outdir} '
         '>& {log}'
