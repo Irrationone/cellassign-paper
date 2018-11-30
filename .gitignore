@@ -30,6 +30,7 @@ intermediates/
 .keras/
 .ExperimentHub/
 analysis/jupyter/modeling_differential_expression_testing.ipynb
+.snakemake_timestamp
 
 ## Allow
 !sce_t4k_params.rds
