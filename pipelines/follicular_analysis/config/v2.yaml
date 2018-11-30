@@ -150,7 +150,7 @@ differential_expression_settings:
       FL2001:
         - FL2001
   fgsea:
-    gene_method: voom
+    gene_method: scran
     # Minimum number of UMIs to test a gene for DE
     min_gene_counts: 500
     celltype_groups:
