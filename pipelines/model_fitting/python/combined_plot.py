@@ -29,7 +29,7 @@ def combined_plot(splatter_res, v3_res, logfcs_diff, logfcs_same, outfname, xmin
     plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.3, hspace=0.3)
     axs = axs.flat
     
-    axs[0].hist(logfcs_same, bins = 'auto')
+    axs[0].hist(logfcs_diff, bins = 'auto')
     axs[0].set_xlim((xmin, xmax))
     axs[0].set_xlabel("logFC")
     axs[0].set_ylabel("Frequency")
