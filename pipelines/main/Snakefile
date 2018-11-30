@@ -189,7 +189,7 @@ rule wrong_marker_naivecd8_naivecd4:
 
 rule benchmarking_evaluation:
     input:
-        benchmark_times: config['benchmarking_results']['timing_results'],
+        benchmark_times=config['benchmarking_results']['timing_results'],
     output:
         benchmarking_figure='{outdir}/supplemental_figures/benchmarking_evaluation.pdf'.format(outdir=config['outdir'])
     params:
