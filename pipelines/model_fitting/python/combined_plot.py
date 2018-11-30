@@ -18,7 +18,7 @@ import statsmodels.stats.stattools
 import statsmodels.graphics.gofplots
 
 
-def combined_plot(splatter_res, v3_res, logfcs_diff, logfcs_same, outfname, seed = 1481, xmin, xmax):
+def combined_plot(splatter_res, v3_res, logfcs_diff, logfcs_same, outfname, xmin, xmax, seed = 1481):
     np.random.seed(seed)
     splatter_pred_samples = np.random.choice(splatter_res['ppc']['obs'].flatten(), size = logfcs_diff.shape[0])
     
@@ -141,8 +141,8 @@ def main(args):
     print("Creating combined plot ...")
     sys.stdout.flush()
     combined_plot(splatter_model_result, v3_model_result, 
-                  logfcs_diff, logfcs_same, combined_plot_file, seed = 1481,
-                  xmin = args.xmin, xmax=args.xmax)
+                  logfcs_diff, logfcs_same, combined_plot_file,
+                  xmin = args.xmin, xmax=args.xmax, seed = 1481)
 
 if __name__ == '__main__':
     args = read_args()
