@@ -176,7 +176,7 @@ dr_plot <- plotTSNE(sce_sim, ncomponents = 2, colour_by = "cluster", add_ticks =
   theme(axis.text = element_blank()) + 
   scale_fill_manual(values = colour_map)
 
-pdf("/datadrive/projects/cellassign-paper/drawings/v3/components/dr_plot.pdf", width = 3, height = 3)
+pdf("/datadrive/projects/cellassign-paper/drawings/v4/components/dr_plot.pdf", width = 3, height = 3)
 dr_plot
 dev.off()
 ```
@@ -187,8 +187,8 @@ set.seed(101)
 uncertain_group_vals <- pmax(pmin(rnorm(n = 2, mean = 0.5, sd = 0.05), 1), 0)
 extra_rows <- data.frame(DEFacGroup1=uncertain_group_vals, DEFacGroup2=0, DEFacGroup3=0, DEFacGroup4=1-uncertain_group_vals)
 
-pdf("/datadrive/projects/cellassign-paper/drawings/v3/components/probs.pdf", width = 3, height = 5, onefile = FALSE)
-pheatmap(rbind(res$mle_params$gamma[sample(1:nrow(res$mle_params$gamma),18),], extra_rows)[sample(1:20, size = 20),], legend = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, border_color = NA, show_colnames = FALSE, show_rownames = FALSE)
+pdf("/datadrive/projects/cellassign-paper/drawings/v4/components/probs.pdf", width = 5, height = 2.5, onefile = FALSE)
+pheatmap(t(rbind(res$mle_params$gamma[sample(1:nrow(res$mle_params$gamma),18),], extra_rows)[sample(1:20, size = 20),]), legend = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, border_color = NA, show_colnames = FALSE, show_rownames = FALSE)
 dev.off()
 ```
 
@@ -208,14 +208,14 @@ example_rho_df <- example_rho %>%
 ```
 
 ```{r, echo = FALSE}
-marker_binary_plot <- ggplot(example_rho_df, aes(x=gene, y=celltype)) + 
+marker_binary_plot <- ggplot(example_rho_df, aes(x=celltype, y=gene)) + 
   geom_tile(aes(fill=factor(entry)), colour='black', size = 1) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
   xlab("") +
   ylab("") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, face = 'bold', size = 10, family = 'Helvetica'),
+  theme(axis.text.x = element_blank(),
         axis.line = element_blank(),
         axis.ticks = element_blank(),
         axis.text.y = element_blank()) +
@@ -223,7 +223,7 @@ marker_binary_plot <- ggplot(example_rho_df, aes(x=gene, y=celltype)) +
   guides(fill = FALSE) + 
   coord_fixed(ratio = 1)
 
-pdf("/datadrive/projects/cellassign-paper/drawings/v3/components/marker_plot.pdf", width = 6, height = 3)
+pdf("/datadrive/projects/cellassign-paper/drawings/v4/components/marker_plot.pdf", width = 6, height = 3)
 marker_binary_plot
 dev.off()
 ```
