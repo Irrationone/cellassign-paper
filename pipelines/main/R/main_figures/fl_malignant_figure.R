@@ -250,18 +250,30 @@ FL1018_malignant_T2_pathway_down_plot$layers[[3]]$aes_params$size <- 2.5
 
 # Pathway plots for malignant over time
 
-nes_values <- c((de_timepoint_fgsea_res$FL1018$pathway %>% dplyr::filter(padj < 0.05))$NES,
-                (de_timepoint_fgsea_res$FL2001$pathway %>% dplyr::filter(padj < 0.05))$NES)
+# Always include cell cycle pathways
+force_include_pathways <- c("HALLMARK_MITOTIC_SPINDLE",
+                            "HALLMARK_E2F_TARGETS",
+                            "HALLMARK_G2M_CHECKPOINT")
+
+FL1018_fgsea_filtered <- de_timepoint_fgsea_res$FL1018$pathway %>% 
+  dplyr::filter(padj < 0.05 | pathway %in% force_include_pathways)
+FL2001_fgsea_filtered <- de_timepoint_fgsea_res$FL2001$pathway %>% 
+  dplyr::filter(padj < 0.05 | pathway %in% force_include_pathways)
+
+nes_values <- c(FL1018_fgsea_filtered$NES,
+                FL2001_fgsea_filtered$NES)
 nes_limits <- c(min(nes_values), max(nes_values))
 
-fgsea_size_values <- c((de_timepoint_fgsea_res$FL1018$pathway %>% dplyr::filter(padj < 0.05))$size,
-                       (de_timepoint_fgsea_res$FL2001$pathway %>% dplyr::filter(padj < 0.05))$size)
+fgsea_size_values <- c(FL1018_fgsea_filtered$size,
+                       FL2001_fgsea_filtered$size)
 fgsea_size_limits <- c(min(fgsea_size_values), max(fgsea_size_values))
 
-fgsea_pathway_plot_FL1018 <- ggplot(de_timepoint_fgsea_res$FL1018$pathway %>% 
-         dplyr::filter(padj < 0.05) %>%
-         dplyr::mutate(pathway=str_replace_all(pathway, "^HALLMARK_", "")), aes(reorder(pathway, NES), NES)) +
-  geom_point(aes(size=size)) +
+fgsea_pathway_plot_FL1018 <- ggplot(FL1018_fgsea_filtered %>%
+         dplyr::mutate(pathway=str_replace_all(pathway, "^HALLMARK_", ""),
+                       significance=ifelse(padj <= 0.05, 
+                                           "P <= 0.05",
+                                           "P > 0.05")), aes(reorder(pathway, NES), NES)) +
+  geom_point(aes(size=size, colour=significance)) +
   coord_flip() +
   labs(x="Pathway", y="Normalized Enrichment Score") + 
   theme_bw() + 
@@ -271,12 +283,16 @@ fgsea_pathway_plot_FL1018 <- ggplot(de_timepoint_fgsea_res$FL1018$pathway %>%
   geom_hline(yintercept = 0, linetype = 'dashed') + 
   scale_size_continuous(trans = "log10", limits = fgsea_size_limits,
                         range = c(1,4)) + 
-  guides(size = FALSE)
+  scale_colour_manual(values = categorical_palettes$significance) +
+  guides(size = FALSE,
+         colour = FALSE)
 
-fgsea_pathway_plot_FL2001 <- ggplot(de_timepoint_fgsea_res$FL2001$pathway %>% 
-         dplyr::filter(padj < 0.05) %>%
-         dplyr::mutate(pathway=str_replace_all(pathway, "^HALLMARK_", "")), aes(reorder(pathway, NES), NES)) +
-  geom_point(aes(size=size)) +
+fgsea_pathway_plot_FL2001 <- ggplot(FL2001_fgsea_filtered %>%
+                                      dplyr::mutate(pathway=str_replace_all(pathway, "^HALLMARK_", ""),
+                                                    significance=ifelse(padj <= 0.05, 
+                                                                        "P <= 0.05",
+                                                                        "P > 0.05")), aes(reorder(pathway, NES), NES)) +
+  geom_point(aes(size=size, colour=significance)) +
   coord_flip() +
   labs(x="Pathway", y="Normalized Enrichment Score") + 
   theme_bw() + 
@@ -286,7 +302,9 @@ fgsea_pathway_plot_FL2001 <- ggplot(de_timepoint_fgsea_res$FL2001$pathway %>%
   geom_hline(yintercept = 0, linetype = 'dashed') + 
   scale_size_continuous(trans = "log10", limits = fgsea_size_limits,
                         range = c(1,4)) + 
-  guides(size = FALSE)
+  scale_colour_manual(values = categorical_palettes$significance) +
+  guides(size = FALSE,
+         colour = FALSE)
 
 
 # HLA expression plots
@@ -326,7 +344,7 @@ hla_boxplots_faceted <- ggplot(hla_exprs_annotated %>%
   stripped_theme(strip_face = "bold") +
   facet_grid(patient ~ Symbol, scales = "free") +
   xlab("B cell population") +
-  ylab("Logcounts") + 
+  ylab("Log normalized counts") + 
   theme(axis.text.x = element_text(angle = 40, hjust = 1)) + 
   scale_fill_manual(values = categorical_palettes$bcell_population) +
   guides(fill = FALSE)
@@ -432,6 +450,13 @@ fgsea_size_legend <- ggplot(de_timepoint_fgsea_res$FL2001$pathway %>%
   guides(size = guide_legend(title = "Gene set size"))
 fgsea_size_legend <- cellassign.utils::extract_legend(fgsea_size_legend)
 
+
+fgsea_colour_legend <- cellassign.utils::ggsimplelegend(names(categorical_palettes$significance),
+                                                        colour_mapping = categorical_palettes$significance,
+                                                        legend_title = "Significance",
+                                                        type = "discrete") 
+fgsea_colour_legend <- cellassign.utils::extract_legend(fgsea_colour_legend)
+
 # Build combined plot
 
 fgsea_pathway_plot_FL1018 <- fgsea_pathway_plot_FL1018 %>%
@@ -450,6 +475,11 @@ fgsea_row <- cowplot::plot_grid(fgsea_pathway_plot_FL1018,
                                 fgsea_pathway_plot_FL2001,
                                 labels = c('a', 'b'),
                                 ncol = 2)
+
+fgsea_legend_row <- cowplot::plot_grid(fgsea_size_legend, 
+                                       fgsea_colour_legend,
+                                       labels = c('', ''),
+                                       ncol = 2)
 
 cycling_plot_results$FL1018$plot <- cycling_plot_results$FL1018$plot %>%
   ggplot_build() %>%
@@ -497,16 +527,16 @@ top_second_legend <- cowplot::plot_grid(timepoint_legend,
 #                                        rel_widths = c(0.5, 0.5))
 
 final_plot <- cowplot::plot_grid(fgsea_row,
-                                 fgsea_size_legend,
+                                 fgsea_legend_row,
                                  top_row, 
                                  top_second_legend,
                                  second_row, 
                                  #third_row, 
                                  #third_row_legend,
                                  hla_boxplots_faceted,
-                                 labels = c('', '', '', '', '', 'g', 'h'), 
+                                 labels = c('', '', '', '', '', 'g'), 
                                  ncol = 1, 
-                                 nrow = 7,
+                                 nrow = 6,
                                  rel_heights = c(0.4, 0.05, 0.25, 0.05, 0.25, 0.4))
 
 # Plot final plot

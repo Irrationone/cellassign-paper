@@ -187,33 +187,43 @@ fgsea_res <- lapply(de_timepoint_fgsea_files, function(f) {
 })
 names(fgsea_res) <- tools::file_path_sans_ext(basename(de_timepoint_fgsea_files))
 
-FL2001_E2F_padj <- (fgsea_res$FL2001$pathway %>% 
-  dplyr::filter(str_detect(pathway, "E2F")))$padj %>%
+# FL2001_E2F_padj <- (fgsea_res$FL2001$pathway %>% 
+#   dplyr::filter(str_detect(pathway, "E2F")))$padj %>%
+#   signif(2)
+
+fl1018_prolif_replicative_pvals <- max((fgsea_res$FL1018$pathway %>%
+                                          dplyr::filter(pathway %in% 
+                                                          c("HALLMARK_MYC_TARGETS_V1",
+                                                            "HALLMARK_MYC_TARGETS_V2",
+                                                            "HALLMARK_E2F_TARGETS",
+                                                            "HALLMARK_G2M_CHECKPOINT")))$padj %>%
+                                         signif(2))
+
+fl2001_mitotic_spindle_padj <- (fgsea_res$FL2001$pathway %>%
+  dplyr::filter(str_detect(pathway, "MITOTIC_SPINDLE")))$padj %>%
   signif(2)
 
-## Proliferation stats -- use scran for pairwise T tests
+fl2001_myc_vone_padj <- (fgsea_res$FL2001$pathway %>%
+                           dplyr::filter(str_detect(pathway, "MYC_TARGETS_V1")))$padj %>%
+  signif(2)
 
-scran_results <- plyr::rbind.fill(lapply(unique(sce_follicular$patient), function(pat) {
-  sce_subset <- sce_follicular %>% 
-    scater::filter(patient == pat)
-  de_res <- de_analysis(sce_subset, de_method = "scran", 
-              formula = NULL, cluster = sce_subset$timepoint, 
-              filter_mito = TRUE, filter_ribo = TRUE, block = NULL, coef = NULL)
-  proliferation_results <- de_res$de_table %>%
-    dplyr::filter(Symbol %in% c("MKI67", "TOP2A"),
-                  contrast == "T2")
-  return(data.frame(patient=pat, proliferation_results))
-}))
+fl2001_etwof_gtwom_padj <- min((fgsea_res$FL2001$pathway %>%
+                                  dplyr::filter(pathway %in% 
+                                                  c("HALLMARK_E2F_TARGETS",
+                                                    "HALLMARK_G2M_CHECKPOINT")))$padj %>%
+                                 signif(2))
 
-fl1018_prolif_pvals <- scran_results %>%
-  dplyr::mutate(FDR=signif(FDR,2)) %>%
-  dplyr::filter(patient == "FL1018") %>%
+## Replication stats
+
+fl1018_prolif_pvals <- fgsea_res$FL1018$gene %>% 
+  dplyr::filter(Symbol %in% c("MKI67", "TOP2A"), 
+                contrast == "T2") %>%
   dplyr::rename(adj.P.Val=FDR) %>%
   df_to_list()
 
-fl2001_prolif_pvals <- scran_results %>%
-  dplyr::mutate(FDR=signif(FDR,2)) %>%
-  dplyr::filter(patient == "FL2001") %>%
+fl2001_prolif_pvals <- fgsea_res$FL2001$gene %>% 
+  dplyr::filter(Symbol %in% c("MKI67", "TOP2A"), 
+                contrast == "T2") %>%
   dplyr::rename(adj.P.Val=FDR) %>%
   df_to_list()
 
@@ -301,12 +311,15 @@ stats <- list(
   T1NonMalignantB=T1_nonmalignant_b_pct,
   T2NonMalignantB=T2_nonmalignant_b_pct,
   maxCDsixninePval=max_t_cd69_pval,
-  fl2001etwofp=FL2001_E2F_padj,
   fl1018Prolifp=fl1018_prolif_pvals,
   fl2001Prolifp=fl2001_prolif_pvals,
   maxHLAMalignantPval=max_hla_malignant_pval,
   fl1018classoneMHCp=fl1018_class1_MHC_p,
-  fl1018maxHLAtimepointPval=fl1018_hla_timepoint_maxpval
+  fl1018maxHLAtimepointPval=fl1018_hla_timepoint_maxpval,
+  fl2001mitoticspindlePval=fl2001_mitotic_spindle_padj,
+  fl1018prolifreplicativepvals=fl1018_prolif_replicative_pvals,
+  fl2001myconepval=fl2001_myc_vone_padj,
+  fl2001etwofgtwompadj=fl2001_etwof_gtwom_padj
 )
 
 # Write outputs

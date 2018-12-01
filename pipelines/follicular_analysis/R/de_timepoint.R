@@ -102,8 +102,8 @@ if (args$method_pathway == "ReactomePA") {
   names(enriched_paths) <- c("up", "down")
 } else if (args$method_pathway == "fgsea") {
   # Only allow use of scran with this right now -- can use scran but need to rename columns accordingly
-  stopifnot(method_gene == "voom")
-  #stopifnot(method_gene == "scran")
+  #stopifnot(method_gene == "voom")
+  stopifnot(method_gene == "scran")
   
   if (!is.null(args$gene_set_file)) {
     pathway_list <- gmtPathways(args$gene_set_file)
@@ -111,20 +111,20 @@ if (args$method_pathway == "ReactomePA") {
     stop("Must specify a gene set file.")
   }
   
+  de_table_summarized <- de_table %>%
+    dplyr::filter(contrast == "T2") %>%
+    dplyr::select(Symbol, logFC.T1) %>%
+    distinct() %>%
+    dplyr::group_by(Symbol) %>%
+    dplyr::summarise(logFC = mean(logFC.T1))
+  
   # de_table_summarized <- de_table %>% 
-  #   dplyr::select(Symbol, logFC.T1) %>% 
+  #   dplyr::select(Symbol, t) %>% 
   #   na.omit() %>% 
   #   distinct() %>% 
   #   dplyr::group_by(Symbol) %>% 
-  #   dplyr::summarise(logFC = mean(logFC.T1))
-  
-  de_table_summarized <- de_table %>% 
-    dplyr::select(Symbol, t) %>% 
-    na.omit() %>% 
-    distinct() %>% 
-    dplyr::group_by(Symbol) %>% 
-    dplyr::summarise(t = mean(t))
-  
+  #   dplyr::summarise(t = mean(t))
+  # 
   fgsea_res <- fgsea(pathways=pathway_list, 
                      stats = deframe(de_table_summarized), 
                      nperm = 10000)

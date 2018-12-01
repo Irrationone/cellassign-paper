@@ -411,7 +411,7 @@ cytotoxic_boxplots <- ggplot(expr_table_melted, aes(x=timepoint, y=expression)) 
   facet_grid(patient ~ Symbol) + 
   guides(colour = FALSE) + 
   xlab("Timepoint") + 
-  ylab("Expression") + 
+  ylab("Log normalized counts") + 
   geom_text(data = cytotoxic_pvals, aes(label=p.adj.text), 
             parse = TRUE, size = 0.35*8, x=Inf, y=Inf,
             hjust = 1.1, vjust = 1.3)
