@@ -25,7 +25,6 @@ deprob_methods:
   - cellassign_shrinkage
   - densitycut
   - dynamicTreeCut
-  - kmeans
   - phenograph
   - SC3
   - scmap
