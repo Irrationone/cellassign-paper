@@ -51,7 +51,9 @@ de_eval_measures <- de_eval_measures %>%
   dplyr::filter(clustering_method %in% deprob_methods)
 
 ## TODO: When reruns have been done with ARI and NMI, add those too
-de_eval_measures_filtered <- de_eval_measures %>% dplyr::filter(is.na(mapping_type) | mapping_type == "de")
+de_eval_measures_filtered <- de_eval_measures %>% 
+  dplyr::filter(is.na(mapping_type) | mapping_type == "de",
+                de_prob <= 0.45) # Just do up to 0.45
 eval_measures_markers <- de_eval_measures_filtered %>% dplyr::filter(is.na(gene_set) | 
                                                                        gene_set == "markers")
 eval_measures_full <- de_eval_measures_filtered %>% dplyr::filter(is.na(gene_set) | 

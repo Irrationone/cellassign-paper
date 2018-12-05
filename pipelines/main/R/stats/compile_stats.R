@@ -219,12 +219,14 @@ fl1018_prolif_pvals <- fgsea_res$FL1018$gene %>%
   dplyr::filter(Symbol %in% c("MKI67", "TOP2A"), 
                 contrast == "T2") %>%
   dplyr::rename(adj.P.Val=FDR) %>%
+  dplyr::mutate(adj.P.Val=signif(adj.P.Val,2)) %>%
   df_to_list()
 
 fl2001_prolif_pvals <- fgsea_res$FL2001$gene %>% 
   dplyr::filter(Symbol %in% c("MKI67", "TOP2A"), 
                 contrast == "T2") %>%
   dplyr::rename(adj.P.Val=FDR) %>%
+  dplyr::mutate(adj.P.Val=signif(adj.P.Val,2)) %>%
   df_to_list()
 
 
