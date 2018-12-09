@@ -1,0 +1,57 @@
+# Directories
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v1'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/hgsc_analysis/v1'
+
+# Random seeds
+cluster_random_seed: 19279
+
+# Sample names (in same order as filtered matrices)
+hgsc_sample_names:
+  - Left\ Ovary
+  - Right\ Ovary
+
+# Paths to filtered gene expression matrices
+hgsc_data:
+  VOA11543SA:
+    dataset: Left\ Ovary
+    patient: VOA11543
+    timepoint: T1
+    site: Left\ ovary
+    filtered_matrix_path: '/datadrive/data/hgsc/5prime_GE_batch2_GRCh38/VOA11543SA/filtered_gene_bc_matrices/GRCh38'
+  VOA11543SB:
+    dataset: Right\ Ovary
+    patient: VOA11543
+    timepoint: T1
+    site: Right\ ovary
+    filtered_matrix_path: '/datadrive/data/hgsc/5prime_GE_batch2_GRCh38/VOA11543SB/filtered_gene_bc_matrices/GRCh38'
+
+
+# Filtering thresholds
+filter_settings:
+  mito_thres: 20
+  ribo_thres: 50
+
+# Marker list matrices for CellAssign
+marker_lists:
+  big: 
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/hgsc_big.yaml'
+    include_other: TRUE
+  small:
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/hgsc_small.yaml'
+    include_other: TRUE
+
+# CellAssign settings
+cellassign_settings:
+  num_runs: 3
+  B: 20
+  extra_opts: "--delta_prior"
+  threads: 18
+
+gene_sets: 
+  reactome: '/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt'
+  hallmark: '/datadrive/projects/cellassign-analysis/downloads/h.all.v6.2.symbols.gmt'
+
+scvis:
+  default_config: '/datadrive/projects/cellassign-paper/resources/scvis/config/default_config.yaml'
+  dimname: PCA # no need to use scanorama PCA
