@@ -33,6 +33,9 @@ Ovarian stromal cells:
   - MUM1L1
   - FOXL2
   - ARX
+  - DCN
+  - TPT1
+  - RBP1
 Ovarian myofibroblast:
   - VIM
   - MUM1L1
@@ -41,6 +44,7 @@ Ovarian myofibroblast:
   - ACTA2
   - COL1A1
   - COL3A1
+  - SERPINH1
 Vascular smooth muscle cells:
   - VIM
   - ACTA2
@@ -50,6 +54,7 @@ Vascular smooth muscle cells:
   - MCAM
   - COL1A1
   - COL3A1
+  - SERPINH1
 Endothelial cells:
   - VIM
   - EMCN
@@ -58,3 +63,4 @@ Endothelial cells:
   - PECAM1
   - VWF
   - MCAM
+  - SERPINH1
