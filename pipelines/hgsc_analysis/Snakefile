@@ -7,6 +7,7 @@ rule all:
         #hgsc_cellassign_annotated='{workdir}/sce_hgsc_celltype_annotated.rds'.format(workdir=config['workdir']),
         #'{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
         hgsc_annotated='{outdir}/sce_hgsc_annotated_final.rds'.format(outdir=config['outdir']),
+        broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
 
 
 # Create SingleCellExperiment
@@ -107,11 +108,41 @@ rule cellassign_hgsc_big:
         '--outfname {output.specific_assignments} '
         '>& {log}'
 
+# Assign cells to broad subtypes (i.e no T cell split)
+rule cellassign_hgsc_small:
+    input:
+        hgsc_normalized='{workdir}/sce_hgsc_normalized.rds'.format(workdir=config['workdir']),
+        marker_list_small=config['marker_lists']['small']['path'],
+    output:
+        broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
+    params:
+        name='cellassign-hgsc-small',
+        include_other=config['marker_lists']['small']['include_other'],
+        num_runs=config['cellassign_settings']['num_runs'],
+        B=config['cellassign_settings']['B'],
+        extra_opts=config['cellassign_settings']['extra_opts'],
+    threads: 15
+    log:
+        '{logdir}/logs/cellassign_hgsc_small.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/cellassign_hgsc_small.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/cellassign_sce.R '
+        '--sce {input.hgsc_normalized} '
+        '--marker_list {input.marker_list_small} '
+        '--include_other {params.include_other} '
+        '--num_runs {params.num_runs} '
+        '--rbf_pieces {params.B} '
+        '{params.extra_opts} '
+        '--outfname {output.broad_assignments} '
+        '>& {log}'
+
 # Annotate HGSC SCE with assignments
 rule annotate_cellassign_sce:
     input:
         hgsc_normalized='{workdir}/sce_hgsc_normalized.rds'.format(workdir=config['workdir']),
         specific_assignments='{outdir}/specific_assignments.rds'.format(outdir=config['outdir']),
+        broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
     output:
         hgsc_cellassign_annotated='{workdir}/sce_hgsc_celltype_annotated.rds'.format(workdir=config['workdir']),
     params:
@@ -123,6 +154,7 @@ rule annotate_cellassign_sce:
     shell:
         'Rscript R/annotate_cellassign.R '
         '--sce {input.hgsc_normalized} '
+        '--broad {input.broad_assignments} '
         '--specific {input.specific_assignments} '
         '--outfname {output.hgsc_cellassign_annotated} '
         '>& {log}'
