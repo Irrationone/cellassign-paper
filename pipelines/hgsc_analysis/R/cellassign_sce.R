@@ -71,7 +71,11 @@ sce_markers <- sce[get_ensembl_id(rownames(rho), sce),]
 rownames(sce_markers) <- rownames(rho)
 counts(sce_markers) <- as.matrix(counts(sce_markers))
 
-design <- model.matrix(~ patient, data = colData(sce_markers))
+if (length(unique(sce_markers$patient)) > 1) {
+  design <- model.matrix(~ patient, data = colData(sce_markers))
+} else {
+  design <- NULL
+}
 
 cellassign_res <- cellassign_em(exprs_obj = sce_markers, 
                                 s = s, 
