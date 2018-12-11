@@ -91,7 +91,7 @@ scvis:
 cluster_settings:
   hgsc_epithelial:
     methods: 
-      - 'seurat_0.8'
+      - 'seurat_0.2'
       - 'phenograph'
       - 'SC3'
     use_method: 'seurat'
