@@ -8,8 +8,8 @@ rule all:
         #'{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
         hgsc_annotated='{outdir}/sce_hgsc_annotated_final.rds'.format(outdir=config['outdir']),
         broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
-        #de_tables_reactome=expand('{outdir}/differential_expression/ReactomePA/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['ReactomePA']['celltype_groups'], patient_group=config['differential_expression_settings']['ReactomePA']['patient_groups']),
-        #de_tables_fgsea=expand('{outdir}/differential_expression/fgsea/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['fgsea']['celltype_groups'], patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
+        de_tables_reactome=expand('{outdir}/differential_expression/ReactomePA/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['ReactomePA']['celltype_groups'], patient_group=config['differential_expression_settings']['ReactomePA']['patient_groups']),
+        de_tables_fgsea=expand('{outdir}/differential_expression/fgsea/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['fgsea']['celltype_groups'], patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
 
 
 # Create SingleCellExperiment
