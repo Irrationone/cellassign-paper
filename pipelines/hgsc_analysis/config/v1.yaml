@@ -48,6 +48,37 @@ cellassign_settings:
   extra_opts: "--delta_prior"
   threads: 18
 
+differential_expression_settings:
+  ReactomePA:
+    gene_method: voom
+    num_genes: 50
+    # Minimum number of UMIs to test a gene for DE
+    min_gene_counts: 500
+    celltype_groups:
+      endothelial:
+        - Endothelial\ cells
+      epithelial:
+        - Epithelial\ cells
+      smoothmuscle:
+        - Vascular\ smooth\ muscle\ cells
+      monocyte:
+        - Monocyte/Macrophage
+      myofibroblast:
+        - Ovarian\ myofibroblast
+    patient_groups:
+      VOA11543:
+        - VOA11543
+  fgsea:
+    gene_method: scran
+    # Minimum number of UMIs to test a gene for DE
+    min_gene_counts: 500
+    celltype_groups:
+      epithelial:
+        - Epithelial\ cells
+    patient_groups:
+      VOA11543:
+        - VOA11543
+
 gene_sets: 
   reactome: '/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt'
   hallmark: '/datadrive/projects/cellassign-analysis/downloads/h.all.v6.2.symbols.gmt'
@@ -55,3 +86,13 @@ gene_sets:
 scvis:
   default_config: '/datadrive/projects/cellassign-paper/resources/scvis/config/default_config.yaml'
   dimname: PCA # no need to use scanorama PCA
+
+# Unsupervised clustering settings
+cluster_settings:
+  epithelial:
+    methods: 
+      - 'seurat_0.8'
+      - 'phenograph'
+    use_method: 'seurat'
+    celltypes:
+      - Epithelial\ cells
