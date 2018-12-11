@@ -93,6 +93,7 @@ cluster_settings:
     methods: 
       - 'seurat_0.8'
       - 'phenograph'
+      - 'SC3'
     use_method: 'seurat'
     celltypes:
       - Epithelial\ cells
