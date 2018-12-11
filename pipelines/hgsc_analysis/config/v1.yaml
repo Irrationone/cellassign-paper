@@ -89,7 +89,7 @@ scvis:
 
 # Unsupervised clustering settings
 cluster_settings:
-  epithelial:
+  hgsc_epithelial:
     methods: 
       - 'seurat_0.8'
       - 'phenograph'
