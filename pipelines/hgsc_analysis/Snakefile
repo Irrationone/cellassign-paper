@@ -10,6 +10,7 @@ rule all:
         broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
         de_tables_reactome=expand('{outdir}/differential_expression/ReactomePA/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['ReactomePA']['celltype_groups'], patient_group=config['differential_expression_settings']['ReactomePA']['patient_groups']),
         de_tables_fgsea=expand('{outdir}/differential_expression/fgsea/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['fgsea']['celltype_groups'], patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
+        de_tables_epithelial_clusters=expand('{outdir}/differential_expression/fgsea/epithelial_clusters/{{patient_group}}.rds'.format(outdir=config['outdir']), patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
 
 
 # Create SingleCellExperiment
@@ -231,6 +232,7 @@ rule differential_expression_site_by_celltype:
         '--celltypes {params.celltype_group} '
         '--patients {params.patient_group} '
         '--method_gene {params.de_method} '
+        '--min_gene_counts {params.min_gene_counts} '
         '--method_pathway ReactomePA '
         '--ngene {params.num_genes} '
         '--outfname {output.de_tables} '
@@ -258,7 +260,33 @@ rule differential_expression_fgsea_site:
         '--celltypes {params.celltype_group} '
         '--patients {params.patient_group} '
         '--method_gene {params.de_method} '
+        '--min_gene_counts {params.min_gene_counts} '
         '--method_pathway fgsea '
+        '--gene_set_file {params.gene_set_file} '
+        '--outfname {output.de_tables} '
+        '>& {log}'
+
+rule differential_expression_epithelial_clusters:
+    input:
+        hgsc_annotated='{outdir}/sce_hgsc_annotated_final.rds'.format(outdir=config['outdir']),
+    output:
+        de_tables='{outdir}/differential_expression/fgsea/epithelial_clusters/{{patient_group}}.rds'.format(outdir=config['outdir']),
+    params:
+        patient_group=lambda wildcards: config['differential_expression_settings']['ReactomePA']['patient_groups'][wildcards.patient_group],
+        cluster_col='epithelial_cluster',
+        min_gene_counts=config['differential_expression_settings']['fgsea']['min_gene_counts'],
+        gene_set_file=config['gene_sets']['hallmark'],
+        name='differential-expression-fgsea-epithelial-clusters-{patient_group}',
+    log:
+        '{logdir}/logs/differential_expression_epithelial_clusters/fgsea/{{patient_group}}.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/differential_expression_epithelial_clusters/fgsea/{{patient_group}}.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/de_epithelial_clusters.R '
+        '--sce {input.hgsc_annotated} '
+        '--patients {params.patient_group} '
+        '--cluster_col {params.cluster_col} '
+        '--min_gene_counts {params.min_gene_counts} '
         '--gene_set_file {params.gene_set_file} '
         '--outfname {output.de_tables} '
         '>& {log}'
