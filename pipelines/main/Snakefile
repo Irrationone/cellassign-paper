@@ -564,6 +564,11 @@ rule compile_stats:
         de_malignant_timepoint=config['follicular_analysis_results']['differential_expression']['malignant_timepoint'],
         de_timepoint_fgsea=config['follicular_analysis_results']['differential_expression']['timepoint_fgsea'],
         koh_rho=config['external_analysis_results']['koh_rho'],
+        sce_hgsc=config['hgsc_analysis_results']['sce_annotated'],
+        sce_hgsc_raw=config['hgsc_analysis_results']['sce_raw'],
+        de_site=config['hgsc_analysis_results']['differential_expression']['site'],
+        de_site_fgsea=config['hgsc_analysis_results']['differential_expression']['site_fgsea'],
+        de_site_epithelial=config['hgsc_analysis_results']['differential_expression']['epithelial_fgsea'],
     output:
         stats='{outdir}/stats/stats.tex'.format(outdir=config['outdir']),
     params:
@@ -587,6 +592,11 @@ rule compile_stats:
         '--de_malignant_timepoint_dir {input.de_malignant_timepoint} '
         '--de_timepoint_fgsea_dir {input.de_timepoint_fgsea} '
         '--koh_rho {input.koh_rho} '
+        '--sce_hgsc {input.sce_hgsc} '
+        '--sce_hgsc_raw {input.sce_hgsc_raw} '
+        '--de_site {input.de_site} '
+        '--de_site_fgsea {input.de_site_fgsea} '
+        '--de_epithelial {input.de_site_epithelial} '
         '--outfname {output.stats} '
         '>& {log}'
     
