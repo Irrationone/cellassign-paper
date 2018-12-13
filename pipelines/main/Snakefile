@@ -24,6 +24,8 @@ rule all:
         tcell_activation_de_plot='{outdir}/supplemental_figures/tcell_activation_de.pdf'.format(outdir=config['outdir']),
         fl_hla_downregulation_plot='{outdir}/supplemental_figures/fl_hla_downregulation.pdf'.format(outdir=config['outdir']),
         fl_malignant_timepoint_pathway_downregulation_plot='{outdir}/supplemental_figures/fl_malignant_timepoint_pathway_downregulation.pdf'.format(outdir=config['outdir']),
+        hgsc_markers_figure='{outdir}/supplemental_figures/hgsc_markers_supplemental.pdf'.format(outdir=config['outdir']),
+        shih_normal_markers_figure='{outdir}/supplemental_figures/shih_normal_markers.pdf'.format(outdir=config['outdir']),
         hgsc_malignant_cluster_de='{outdir}/supplemental_figures/hgsc_malignant_cluster_de.pdf'.format(outdir=config['outdir']),
         ## Supplemental tables
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
@@ -400,6 +402,46 @@ rule fl_malignant_timepoint_pathway_downregulation:
         'Rscript R/supplemental_figures/fl_malignant_timepoint_pathway_downregulation.R '
         '--de_timepoint_dir {input.de_timepoint} '
         '--outfname {output.fl_malignant_timepoint_pathway_downregulation_plot} '
+        '>& {log}'
+
+rule hgsc_markers_supplemental:
+    input:
+        sce=config['hgsc_analysis_results']['sce_annotated'],
+    output:
+        hgsc_markers_figure='{outdir}/supplemental_figures/hgsc_markers_supplemental.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-hgsc-markers',
+        expr_threshold=config['winsorized_expression']['hgsc_supplemental_markers'],
+    log:
+        '{logdir}/logs/hgsc_markers_supplemental.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/hgsc_markers_supplemental.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/hgsc_markers_supplemental.R '
+        '--sce {input.sce} '
+        '--dimreduce_type TSNE '
+        '--winsorized_expression_threshold {params.expr_threshold} '
+        '--outfname {output.hgsc_markers_figure} '
+        '>& {log}'
+
+rule shih_normal_markers:
+    input:
+        sce=config['shih_analysis_results']['sce_normalized'],
+    output:
+        shih_normal_markers_figure='{outdir}/supplemental_figures/shih_normal_markers.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-shih-normal-markers',
+        expr_threshold=config['winsorized_expression']['shih_normal_markers'],
+    log:
+        '{logdir}/logs/shih_normal_markers.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/shih_normal_markers.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/shih_normal_markers.R '
+        '--sce {input.sce} '
+        '--dimreduce_type TSNE '
+        '--winsorized_expression_threshold {params.expr_threshold} '
+        '--outfname {output.shih_normal_markers_figure} '
         '>& {log}'
 
 rule hgsc_malignant_cluster_de:

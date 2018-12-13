@@ -75,7 +75,7 @@ follicular_analysis_results:
     malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/malignant_timepoint
     timepoint_fgsea: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/fgsea/timepoint
 
-# HGSC anlaysis results
+# HGSC analysis results
 hgsc_analysis_results:
   sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1/sce_hgsc_annotated_final.rds
   sce_raw: /datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v1/sce_hgsc.rds
@@ -83,6 +83,10 @@ hgsc_analysis_results:
     site: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1/differential_expression/ReactomePA/site
     site_fgsea: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1/differential_expression/fgsea/site
     epithelial_fgsea: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1/differential_expression/fgsea/epithelial_clusters
+
+# Shih analysis results
+shih_analysis_results:
+  sce_normalized: /datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v1/sce_shih_normal_normalized.rds
 
 # Dimensionality reduction type to plot
 plot_dimreduce_type: 'UMAP'
@@ -114,6 +118,8 @@ winsorized_expression:
   hgsc_epithelial_cluster_markers: 3
   hgsc_hla_markers: 8
   hgsc_hypoxia_markers: 4
+  hgsc_supplemental_markers: 4
+  shih_normal_markers: 4
 
 # Supptable settings
 supptable_settings:
