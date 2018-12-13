@@ -74,7 +74,16 @@ follicular_analysis_results:
     timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/timepoint
     malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/malignant_timepoint
     timepoint_fgsea: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/fgsea/timepoint
- 
+
+# HGSC anlaysis results
+hgsc_analysis_results:
+  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1/sce_hgsc_annotated_final.rds
+  sce_raw: /datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v1/sce_hgsc.rds
+  differential_expression: 
+    site: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1/differential_expression/ReactomePA/site
+    site_fgsea: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1/differential_expression/fgsea/site
+    epithelial_fgsea: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1/differential_expression/fgsea/epithelial_clusters
+
 # Dimensionality reduction type to plot
 plot_dimreduce_type: 'UMAP'
 
@@ -101,6 +110,8 @@ winsorized_expression:
   markers: 3
   lambda_kappa: 6
   proliferation: 3
+  hgsc_markers: 4
+  hgsc_epithelial_cluster_markers: 3
 
 # Supptable settings
 supptable_settings:
