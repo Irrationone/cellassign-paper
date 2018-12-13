@@ -112,6 +112,8 @@ winsorized_expression:
   proliferation: 3
   hgsc_markers: 4
   hgsc_epithelial_cluster_markers: 3
+  hgsc_hla_markers: 8
+  hgsc_hypoxia_markers: 4
 
 # Supptable settings
 supptable_settings:
