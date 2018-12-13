@@ -2,10 +2,10 @@
 
 FROM rocker/rstudio:3.5.0 as intermediate
 
-# docker build --no-cache -t scrna-analysis-main-3.5:latest -t scrna-analysis-main-3.5:v1.6 .
-# docker tag scrna-analysis-main-3.5:v1.6 alzhang/scrna-analysis-main-3.5:v1.6
+# docker build --no-cache -t scrna-analysis-main-3.5:latest -t scrna-analysis-main-3.5:v1.7 .
+# docker tag scrna-analysis-main-3.5:v1.7 alzhang/scrna-analysis-main-3.5:v1.7
 # docker tag scrna-analysis-main-3.5:latest alzhang/scrna-analysis-main-3.5:latest
-# docker push alzhang/scrna-analysis-main-3.5:v1.6
+# docker push alzhang/scrna-analysis-main-3.5:v1.7
 # docker push alzhang/scrna-analysis-main-3.5:latest
 
 # Install git
