@@ -505,12 +505,14 @@ rule marker_gene_matrices_table:
         koh_rho=config['external_analysis_results']['koh_rho'],
         follicular_gene_list_specific=config['follicular_analysis_settings']['marker_lists']['big']['path'],
         follicular_gene_list_lambda_kappa=config['follicular_analysis_settings']['marker_lists']['lambdakappa']['path'],
+        hgsc_gene_list=config['hgsc_analysis_settings']['marker_lists']['small']['path'],
     output:
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
     params:
         name='supptable-marker-gene-matrices',
         follicular_specific_other=config['follicular_analysis_settings']['marker_lists']['big']['include_other'],
         follicular_lk_other=config['follicular_analysis_settings']['marker_lists']['lambdakappa']['include_other'],
+        hgsc_other=config['hgsc_analysis_settings']['marker_lists']['small']['include_other'],
     log:
         '{logdir}/logs/marker_gene_matrices_table.log'.format(logdir=config['logdir'])
     benchmark:
@@ -522,6 +524,8 @@ rule marker_gene_matrices_table:
         '--follicular_gene_list_lambda_kappa {input.follicular_gene_list_lambda_kappa} '
         '--follicular_specific_other {params.follicular_specific_other} '
         '--follicular_lk_other {params.follicular_lk_other} '
+        '--hgsc_gene_list {input.hgsc_gene_list} '
+        '--hgsc_other {params.hgsc_other} '
         '--outfname {output.marker_gene_matrix_table} '
         '>& {log}'
 
@@ -531,6 +535,9 @@ rule pathway_enrichment_table:
         de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
         de_malignant_timepoint=config['follicular_analysis_results']['differential_expression']['malignant_timepoint'],
         de_timepoint_fgsea=config['follicular_analysis_results']['differential_expression']['timepoint_fgsea'],
+        de_site=config['hgsc_analysis_results']['differential_expression']['site'],
+        de_site_fgsea=config['hgsc_analysis_results']['differential_expression']['site_fgsea'],
+        de_site_epithelial=config['hgsc_analysis_results']['differential_expression']['epithelial_fgsea'],
     output:
         pathway_enrichment_table='{outdir}/supplemental_tables/pathway_enrichment_table.xlsx'.format(outdir=config['outdir']),
     params:
@@ -545,8 +552,41 @@ rule pathway_enrichment_table:
         '--de_timepoint_dir {input.de_timepoint} '
         '--de_malignant_timepoint_dir {input.de_malignant_timepoint} '
         '--de_timepoint_fgsea_dir {input.de_timepoint_fgsea} '
+        '--de_site_dir {input.de_site} '
+        '--de_site_fgsea_dir {input.de_site_fgsea} '
+        '--de_site_epithelial_dir {input.de_site_epithelial} '
         '--padj_threshold {params.padj_threshold} '
         '--outfname {output.pathway_enrichment_table} '
+        '>& {log}'
+
+# Significantly DE pathways
+rule gene_enrichment_table:
+    input:
+        de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
+        de_malignant_timepoint=config['follicular_analysis_results']['differential_expression']['malignant_timepoint'],
+        de_timepoint_fgsea=config['follicular_analysis_results']['differential_expression']['timepoint_fgsea'],
+        de_site=config['hgsc_analysis_results']['differential_expression']['site'],
+        de_site_fgsea=config['hgsc_analysis_results']['differential_expression']['site_fgsea'],
+        de_site_epithelial=config['hgsc_analysis_results']['differential_expression']['epithelial_fgsea'],
+    output:
+        gene_enrichment_table='{outdir}/supplemental_tables/gene_enrichment_table.xlsx'.format(outdir=config['outdir']),
+    params:
+        name='supptable-gene-enrichment-table',
+        padj_threshold=config['supptable_settings']['de']['padj_threshold'],
+    log:
+        '{logdir}/logs/gene_enrichment_table.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/gene_enrichment_table.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_tables/gene_enrichment_table.R '
+        '--de_timepoint_dir {input.de_timepoint} '
+        '--de_malignant_timepoint_dir {input.de_malignant_timepoint} '
+        '--de_timepoint_fgsea_dir {input.de_timepoint_fgsea} '
+        '--de_site_dir {input.de_site} '
+        '--de_site_fgsea_dir {input.de_site_fgsea} '
+        '--de_site_epithelial_dir {input.de_site_epithelial} '
+        '--padj_threshold {params.padj_threshold} '
+        '--outfname {output.gene_enrichment_table} '
         '>& {log}'
 
 ## Generate stats for the paper

@@ -1,7 +1,7 @@
 # Directories
-workdir: '/datadrive/projects/cellassign-paper/results/scratch/main/v5'
-outdir: '/datadrive/projects/cellassign-paper/results/outputs/main/v5'
-logdir: '/datadrive/projects/cellassign-paper/results/logs/main/v5'
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/main/v6'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/main/v6'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/main/v6'
 
 # Simulation results
 simulation_analysis_results:
@@ -74,6 +74,13 @@ follicular_analysis_results:
     timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/timepoint
     malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/malignant_timepoint
     timepoint_fgsea: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/fgsea/timepoint
+
+# HGSC settings
+hgsc_analysis_settings:
+  marker_lists:
+    small:
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/hgsc_small.yaml'
+      include_other: TRUE
 
 # HGSC analysis results
 hgsc_analysis_results:
