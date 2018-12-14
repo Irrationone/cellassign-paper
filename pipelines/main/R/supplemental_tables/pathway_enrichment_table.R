@@ -24,11 +24,11 @@ parser$add_argument('--de_malignant_timepoint_dir', metavar = 'DIR', type = 'cha
                     help="Path to DE malignant-timepoint results")
 parser$add_argument('--de_timepoint_fgsea_dir', metavar = 'DIR', type = 'character',
                     help="Path to DE fgsea dir")
-parser$add_argument('--de_site', metavar='DIR', type='character',
+parser$add_argument('--de_site_dir', metavar='DIR', type='character',
                     help="Directory to DE site results")
-parser$add_argument('--de_site_fgsea', metavar='DIR', type='character',
+parser$add_argument('--de_site_fgsea_dir', metavar='DIR', type='character',
                     help="Directory to DE site fgsea results")
-parser$add_argument('--de_epithelial', metavar='DIR', type='character',
+parser$add_argument('--de_epithelial_dir', metavar='DIR', type='character',
                     help="Directory to DE epithelial clusters results")
 parser$add_argument('--padj_threshold', type = 'double',
                     help="Threshold to filter pathways at", default = 0.05)
@@ -52,9 +52,9 @@ de_timepoint_files <- de_timepoint_files[basename(dirname(de_timepoint_files)) %
 
 ## HGSC
 
-de_site_dir <- args$de_site
-de_site_fgsea_dir <- args$de_site_fgsea
-de_epithelial_dir <- args$de_epithelial
+de_site_dir <- args$de_site_dir
+de_site_fgsea_dir <- args$de_site_fgsea_dir
+de_epithelial_dir <- args$de_epithelial_dir
 
 de_site_fgsea_files <- Sys.glob(file.path(de_site_fgsea_dir, "epithelial", "*"))
 de_epithelial_files <- Sys.glob(file.path(de_epithelial_dir, "*"))
@@ -177,8 +177,8 @@ hgsc_epithelial_cluster_hallmark_pathways$leadingEdge <- sapply(hgsc_epithelial_
 # Write supplemental table xlsx
 excel_export(list(timepoint_pathways,
                   hallmark_pathways,
-                  hgsc_hallmark_pathways,
-                  hgsc_epithelial_cluster_hallmark_pathways),
+                  hgsc_hallmark_pathways %>% as.data.frame,
+                  hgsc_epithelial_cluster_hallmark_pathways %>% as.data.frame),
              file = args$outfname,
              table_names = c("T2 vs. T1 reactome pathways (by celltype)",
                              "T2 vs. T1 hallmark pathways (malignant B cells)",
