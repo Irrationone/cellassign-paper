@@ -289,14 +289,14 @@ epithelial_cluster_legend <- cellassign.utils::extract_legend(epithelial_cluster
 
 marker_legend <- cellassign.utils::ggsimplelegend(expr_limits,
                                                   colour_mapping = gradient_colours,
-                                                  legend_title = "Expression",
+                                                  legend_title = "Log normalized counts",
                                                   type = "continuous") + 
   theme(legend.key.width = unit(2, "lines"))
 marker_legend <- cellassign.utils::extract_legend(marker_legend)
 
 epithelial_marker_legend <- cellassign.utils::ggsimplelegend(epithelial_expr_limits,
                                                              colour_mapping = gradient_colours,
-                                                             legend_title = "Expression",
+                                                             legend_title = "Log normalized counts",
                                                              type = "continuous") + 
   theme(legend.key.width = unit(2, "lines"))
 epithelial_marker_legend <- cellassign.utils::extract_legend(epithelial_marker_legend)
@@ -336,14 +336,14 @@ dr_plots <- cowplot::plot_grid(dr_site,
 dr_plots_legend <- cowplot::plot_grid(site_legend, celltype_legend,
                                       ncol = 2,
                                       rel_widths = c(0.4, 0.6))
-marker_gene_plots <- cowplot::plot_grid(plotlist = marker_plots, ncol = 4, labels = c('c', '', '', ''))
+marker_gene_plots <- cowplot::plot_grid(plotlist = marker_plots, ncol = 4, labels = c('d', '', '', ''))
 
 
 epithelial_plots <- cowplot::plot_grid(fgsea_site_pathway_plot,
                                        dr_epithelial_site,
                                        dr_epithelial_cluster,
                                        ncol = 3,
-                                       labels = c('d', 'e', ''),
+                                       labels = c('e', 'f', ''),
                                        rel_widths = c(0.5, 0.25, 0.25))
 epithelial_plots_legend <- cowplot::plot_grid(fgsea_size_legend,
                                               fgsea_colour_legend,
@@ -353,7 +353,7 @@ epithelial_plots_legend <- cowplot::plot_grid(fgsea_size_legend,
 
 epithelial_marker_plots_combined <- cowplot::plot_grid(plotlist = epithelial_marker_plots,
                                                        ncol = 4,
-                                                       labels = c('f', '', 'g', ''))
+                                                       labels = c('g', '', 'h', ''))
 
 final_plot <- cowplot::plot_grid(dr_plots, 
                                  dr_plots_legend,

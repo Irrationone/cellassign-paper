@@ -75,7 +75,7 @@ marker_plots <- lapply(marker_genes, function(mgene) {
 
 marker_legend <- cellassign.utils::ggsimplelegend(expr_limits,
                                                   colour_mapping = gradient_colours,
-                                                  legend_title = "Expression",
+                                                  legend_title = "Log normalized counts",
                                                   type = "continuous") + 
   theme(legend.key.width = unit(2, "lines"))
 marker_legend <- cellassign.utils::extract_legend(marker_legend)

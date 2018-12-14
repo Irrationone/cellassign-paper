@@ -80,7 +80,7 @@ names(marker_plots) <- marker_genes
 
 marker_legend <- cellassign.utils::ggsimplelegend(expr_limits,
                                                   colour_mapping = gradient_colours,
-                                                  legend_title = "Expression",
+                                                  legend_title = "Log normalized counts",
                                                   type = "continuous") + 
   theme(legend.key.width = unit(2, "lines"))
 marker_legend <- cellassign.utils::extract_legend(marker_legend)
@@ -102,12 +102,12 @@ final_plot <- cowplot::plot_grid(celltype_marker_plots_combined,
                                  marker_legend,
                                  labels = c('a', 'b', ''),
                                  nrow = 3,
-                                 rel_heights = c(1, 1, 0.1))
+                                 rel_heights = c(1, 0.5, 0.1))
 
 
 
 # Plot to output file
-pdf(args$outfname, width = 10, height = 8, useDingbats = FALSE)
+pdf(args$outfname, width = 10, height = 7, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

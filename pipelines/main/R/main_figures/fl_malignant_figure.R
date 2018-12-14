@@ -361,7 +361,7 @@ timepoint_legend <- cellassign.utils::extract_legend(timepoint_legend)
 
 proliferation_expression_legend <- cellassign.utils::ggsimplelegend(expr_limits,
                                                                     colour_mapping = gradient_colours,
-                                                                    legend_title = "Expression",
+                                                                    legend_title = "Log normalized counts",
                                                                     type = "continuous") + 
   theme(legend.key.width = unit(2, "lines"))
 proliferation_expression_legend <- cellassign.utils::extract_legend(proliferation_expression_legend)

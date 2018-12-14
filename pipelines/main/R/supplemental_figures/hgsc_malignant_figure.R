@@ -252,14 +252,14 @@ epithelial_cluster_legend <- cellassign.utils::extract_legend(epithelial_cluster
 
 hla_marker_legend <- cellassign.utils::ggsimplelegend(hla_expr_limits,
                                                   colour_mapping = gradient_colours,
-                                                  legend_title = "Expression",
+                                                  legend_title = "Log normalized counts",
                                                   type = "continuous") + 
   theme(legend.key.width = unit(2, "lines"))
 hla_marker_legend <- cellassign.utils::extract_legend(hla_marker_legend)
 
 hypoxia_marker_legend <- cellassign.utils::ggsimplelegend(hypoxia_expr_limits,
                                                           colour_mapping = gradient_colours,
-                                                          legend_title = "Expression",
+                                                          legend_title = "Log normalized counts",
                                                           type = "continuous") + 
   theme(legend.key.width = unit(2, "lines"))
 hypoxia_marker_legend <- cellassign.utils::extract_legend(hypoxia_marker_legend)

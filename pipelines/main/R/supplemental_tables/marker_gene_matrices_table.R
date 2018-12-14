@@ -30,6 +30,10 @@ parser$add_argument('--follicular_specific_other', type = 'character',
                     help="Include an other column in the marker gene matrix if using a marker_list")
 parser$add_argument('--follicular_lk_other', type = 'character',
                     help="Include an other column in the marker gene matrix if using a marker_list")
+parser$add_argument('--hgsc_gene_list', metavar = 'FILE', type = 'character',
+                    help="Path to HGSC gene list")
+parser$add_argument('--hgsc_other', type = 'character',
+                    help="Include an other column in the marker gene matrix if using a marker_list")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for table")
 args <- parser$parse_args()
@@ -42,14 +46,19 @@ follicular_gene_list_specific_path <- args$follicular_gene_list_specific
 follicular_gene_list_lambda_kappa_path <- args$follicular_gene_list_lambda_kappa
 follicular_specific_other <- as.logical(args$follicular_specific_other)
 follicular_lk_other <- as.logical(args$follicular_lk_other)
+hgsc_gene_list_path <- args$hgsc_gene_list
+hgsc_other <- as.logical(args$hgsc_other)
 
 gene_list_paths <- c(follicular_gene_list_specific_path,
-                     follicular_gene_list_lambda_kappa_path)
+                     follicular_gene_list_lambda_kappa_path,
+                     hgsc_gene_list_path)
 include_other_settings <- c(follicular_specific_other,
-                            follicular_lk_other)
+                            follicular_lk_other,
+                            hgsc_other)
 gene_list_names <- c("Koh et al.",
                      "FL celltype",
-                     "FL light chain")
+                     "FL light chain",
+                     "HGSC celltype")
 
 rho_dfs <- lapply(seq_along(gene_list_paths), function(i) {
   f <- gene_list_paths[i]

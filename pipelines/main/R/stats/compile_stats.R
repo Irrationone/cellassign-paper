@@ -42,6 +42,16 @@ parser$add_argument('--de_malignant_timepoint_dir', type='character',
                     help="DE results for malignant-timepoint interaction comparisons")
 parser$add_argument('--koh_rho', type='character', metavar='FILE',
                     help="Koh et al. rho matrix")
+parser$add_argument('--sce_hgsc', metavar='FILE', type='character',
+                    help="Path to SingleCellExperiment RDS for HGSC")
+parser$add_argument('--sce_hgsc_raw', metavar='FILE', type='character',
+                    help="Path to raw SingleCellExperiment RDS for HGSC")
+parser$add_argument('--de_site', metavar='DIR', type='character',
+                    help="Directory to DE site results")
+parser$add_argument('--de_site_fgsea', metavar='DIR', type='character',
+                    help="Directory to DE site fgsea results")
+parser$add_argument('--de_epithelial', metavar='DIR', type='character',
+                    help="Directory to DE epithelial clusters results")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for stats file")
 args <- parser$parse_args()
@@ -64,6 +74,14 @@ de_malignant_timepoint_files <- Sys.glob(file.path(de_malignant_timepoint_dir, "
 
 koh_rho <- read.table(args$koh_rho, sep = "\t", header = TRUE, row.names = 1) %>%
   tibble::rownames_to_column(var = "Gene")
+
+# HGSC data
+
+sce_hgsc <- readRDS(args$sce_hgsc)
+sce_hgsc_raw <- readRDS(args$sce_hgsc_raw)
+de_site_dir <- args$de_site
+de_site_fgsea_dir <- args$de_site_fgsea
+de_epithelial_dir <- args$de_epithelial
 
 ## Delta stats
 
@@ -291,6 +309,67 @@ fl1018_hla_timepoint_maxpval <- (fl1018_malignant$gene %>%
   max %>%
   signif(2)
 
+## HGSC
+
+remap_hgsc_names <- function(x) {
+  x %>% plyr::mapvalues(c("Left Ovary", "Right Ovary"),
+                        c("leftovary", "rightovary"))
+}
+
+hgsc_total_cell_count <- ncol(sce_hgsc_raw)
+hgsc_cell_counts <- as.list(table(sce_hgsc_raw$patient))
+hgsc_cell_counts_by_sample <- as.list(table(sce_hgsc_raw$dataset %>%
+                                              remap_hgsc_names()))
+
+hgsc_num_celltypes <- length(unique(sce_hgsc$celltype))
+
+hgsc_celltype_table <- with(colData(sce_hgsc), table(dataset, celltype))
+hgsc_celltype_props <- hgsc_celltype_table/rowSums(hgsc_celltype_table)
+immune_prevalence <- (rowSums(hgsc_celltype_props[,c("B cells", "T cells", "Monocyte/Macrophage")]) * 100) %>%
+  signif(digits = 2)
+names(immune_prevalence) <- names(immune_prevalence) %>% 
+  remap_hgsc_names()
+myeloid_prevalence <- (hgsc_celltype_props[,c("Monocyte/Macrophage")]* 100) %>%
+  signif(digits = 2)
+names(myeloid_prevalence) <- names(myeloid_prevalence) %>% 
+  remap_hgsc_names()
+
+myeloid_immune_prop <- round(hgsc_celltype_props[,c("Monocyte/Macrophage")]/rowSums(hgsc_celltype_props[,c("B cells", "T cells", "Monocyte/Macrophage")])*100, 1)
+names(myeloid_immune_prop) <- names(myeloid_immune_prop) %>% 
+  remap_hgsc_names()
+
+de_site_epithelial_fgsea_res <- readRDS(Sys.glob(file.path(de_site_fgsea_dir, "epithelial", "*.rds")))
+epithelial_emt_padj <- (de_site_epithelial_fgsea_res$pathway %>%
+  dplyr::filter(str_detect(pathway, "MESENCHYMAL")))$padj %>%
+  signif(2)
+
+epithelial_ecad_padj <- (de_site_epithelial_fgsea_res$gene %>%
+                           dplyr::filter(Symbol == "CDH1"))$FDR[1] %>%
+  signif(2)
+
+de_cluster_epithelial_fgsea_res <- readRDS(Sys.glob(file.path(de_epithelial_dir, "*.rds")))
+
+hypoxia_padj <- (de_cluster_epithelial_fgsea_res$pathway %>%
+  dplyr::filter(str_detect(pathway, "HYPOXIA"),
+                clust1 == "2",
+                clust2 %in% c("0", "4")))$padj %>%
+  signif(2) %>%
+  max
+
+apoptosis_padj <- (de_cluster_epithelial_fgsea_res$pathway %>%
+                     dplyr::filter(str_detect(pathway, "APOPTOSIS"),
+                                   clust1 == "2",
+                                   clust2 %in% c("0", "4")))$padj %>%
+  signif(2) %>%
+  max
+
+glycolysis_padj <- (de_cluster_epithelial_fgsea_res$pathway %>%
+                     dplyr::filter(str_detect(pathway, "GLYCOLYSIS"),
+                                   clust1 == "2",
+                                   clust2 %in% c("0", "4")))$padj %>%
+  signif(2) %>%
+  max
+
 ## Stats
 
 stats <- list(
@@ -321,7 +400,17 @@ stats <- list(
   fl2001mitoticspindlePval=fl2001_mitotic_spindle_padj,
   fl1018prolifreplicativepvals=fl1018_prolif_replicative_pvals,
   fl2001myconepval=fl2001_myc_vone_padj,
-  fl2001etwofgtwompadj=fl2001_etwof_gtwom_padj
+  fl2001etwofgtwompadj=fl2001_etwof_gtwom_padj,
+  hgscTotalCellCount=hgsc_total_cell_count,
+  hgscCellCountsByPatient=hgsc_cell_counts,
+  hgscCellCountsBySample=hgsc_cell_counts_by_sample,
+  hgscNumCelltypes=hgsc_num_celltypes,
+  hgscImmunePrevalence=as.list(immune_prevalence),
+  myeloidImmuneProp=as.list(myeloid_immune_prop),
+  epithelialemtpval=epithelial_emt_padj,
+  epithelialecadpval=epithelial_ecad_padj,
+  epithelialclusterhypoxiapval=hypoxia_padj,
+  epithelialclusterapoptosisglycolysispval=max(glycolysis_padj, apoptosis_padj)
 )
 
 # Write outputs
@@ -335,7 +424,8 @@ names(stats_flat) <- names(stats_flat) %>%
   stringr::str_replace("t2", "two") %>%
   stringr::str_replace("t1", "one") %>%
   stringr::str_replace("mki67", "mki") %>%
-  stringr::str_replace("top2a", "topo")
+  stringr::str_replace("top2a", "topo") %>%
+  stringr::str_replace("voa11543", "hgscpatientone")
 
 list_to_tex <- function(x) {
   strs <- lapply(names(x), function(tag) {
