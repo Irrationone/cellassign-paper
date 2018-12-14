@@ -31,6 +31,7 @@ rule all:
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
         pathway_enrichment_table='{outdir}/supplemental_tables/pathway_enrichment_table.xlsx'.format(outdir=config['outdir']),
+        gene_enrichment_table='{outdir}/supplemental_tables/gene_enrichment_table.xlsx'.format(outdir=config['outdir']),
         ## Stats
         stats='{outdir}/stats/stats.tex'.format(outdir=config['outdir']),
 
@@ -554,7 +555,7 @@ rule pathway_enrichment_table:
         '--de_timepoint_fgsea_dir {input.de_timepoint_fgsea} '
         '--de_site_dir {input.de_site} '
         '--de_site_fgsea_dir {input.de_site_fgsea} '
-        '--de_site_epithelial_dir {input.de_site_epithelial} '
+        '--de_epithelial_dir {input.de_site_epithelial} '
         '--padj_threshold {params.padj_threshold} '
         '--outfname {output.pathway_enrichment_table} '
         '>& {log}'
@@ -584,7 +585,7 @@ rule gene_enrichment_table:
         '--de_timepoint_fgsea_dir {input.de_timepoint_fgsea} '
         '--de_site_dir {input.de_site} '
         '--de_site_fgsea_dir {input.de_site_fgsea} '
-        '--de_site_epithelial_dir {input.de_site_epithelial} '
+        '--de_epithelial_dir {input.de_site_epithelial} '
         '--padj_threshold {params.padj_threshold} '
         '--outfname {output.gene_enrichment_table} '
         '>& {log}'
