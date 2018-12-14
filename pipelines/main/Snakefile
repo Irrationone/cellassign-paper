@@ -31,7 +31,7 @@ rule all:
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
         pathway_enrichment_table='{outdir}/supplemental_tables/pathway_enrichment_table.xlsx'.format(outdir=config['outdir']),
-        gene_enrichment_table='{outdir}/supplemental_tables/gene_enrichment_table.xlsx'.format(outdir=config['outdir']),
+        #gene_enrichment_table='{outdir}/supplemental_tables/gene_enrichment_table.xlsx'.format(outdir=config['outdir']),
         ## Stats
         stats='{outdir}/stats/stats.tex'.format(outdir=config['outdir']),
 
@@ -560,7 +560,7 @@ rule pathway_enrichment_table:
         '--outfname {output.pathway_enrichment_table} '
         '>& {log}'
 
-# Significantly DE pathways
+# Significantly DE genes -- works but just runs out of memory :(
 rule gene_enrichment_table:
     input:
         de_timepoint=config['follicular_analysis_results']['differential_expression']['timepoint'],
