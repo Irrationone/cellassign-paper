@@ -321,7 +321,7 @@ hgsc_cell_counts <- as.list(table(sce_hgsc_raw$patient))
 hgsc_cell_counts_by_sample <- as.list(table(sce_hgsc_raw$dataset %>%
                                               remap_hgsc_names()))
 
-hgsc_num_celltypes <- length(unique(sce_hgsc$celltype))
+hgsc_num_celltypes <- length(setdiff(unique(sce_hgsc$celltype), "other"))
 
 hgsc_celltype_table <- with(colData(sce_hgsc), table(dataset, celltype))
 hgsc_celltype_props <- hgsc_celltype_table/rowSums(hgsc_celltype_table)
