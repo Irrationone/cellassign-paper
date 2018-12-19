@@ -1,7 +1,7 @@
 # Directories
-workdir: '/datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v1'
-outdir: '/datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1'
-logdir: '/datadrive/projects/cellassign-paper/results/logs/hgsc_analysis/v1'
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v2'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v2'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/hgsc_analysis/v2'
 
 # Random seeds
 cluster_random_seed: 19279
