@@ -106,7 +106,13 @@ cluster_settings:
       - 'seurat_0.2'
       - 'phenograph'
       - 'SC3'
-    use_method: 'seurat'
+    use_method: 'seurat_0.2'
     celltypes:
       - Epithelial\ cells
+  hgsc_all:
+    methods:
+      - 'seurat_0.8'
+      - 'seurat_1.2'
+      - 'SC3'
+    use_method: 'seurat_0.8'
 

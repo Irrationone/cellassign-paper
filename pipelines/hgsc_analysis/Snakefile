@@ -192,12 +192,37 @@ rule hgsc_unsupervised_epithelial:
         '--outfname {output.unsupervised_epithelial_assignments} '
         '>& {log}'
 
+# Unsupervised clustering of all cells
+rule hgsc_unsupervised_all:
+    input:
+        hgsc_cellassign_annotated='{workdir}/sce_hgsc_celltype_annotated.rds'.format(workdir=config['workdir']),
+    output:
+        unsupervised_all_assignments='{outdir}/unsupervised_all_assignments.tsv'.format(outdir=config['outdir']),
+    params:
+        name='hgsc-unsupervised-all',
+        random_seed=config['cluster_random_seed'],
+        cluster_methods=config['cluster_settings']['hgsc_all']['methods'],
+        cluster_use_method=config['cluster_settings']['hgsc_all']['use_method'],
+    log:
+        '{logdir}/logs/hgsc_unsupervised_all.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/hgsc_unsupervised_all.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/unsupervised_cluster_sce.R '
+        '--sce {input.hgsc_cellassign_annotated} '
+        '--clustering_methods {params.cluster_methods} '
+        '--clustering_method_use {params.cluster_use_method} '
+        '--random_seed {params.random_seed} '
+        '--outfname {output.unsupervised_all_assignments} '
+        '>& {log}'
+
 # Annotate HGSC SCE with assignments
 rule annotate_hgsc_final:
     input:
         hgsc_cellassign_annotated='{workdir}/sce_hgsc_celltype_annotated.rds'.format(workdir=config['workdir']),
         cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
         unsupervised_epithelial_assignments='{outdir}/unsupervised_epithelial_assignments.tsv'.format(outdir=config['outdir']),
+        unsupervised_all_assignments='{outdir}/unsupervised_all_assignments.tsv'.format(outdir=config['outdir']),
     output:
         hgsc_annotated='{outdir}/sce_hgsc_annotated_final.rds'.format(outdir=config['outdir']),
     params:
@@ -211,6 +236,7 @@ rule annotate_hgsc_final:
         '--sce {input.hgsc_cellassign_annotated} '
         '--cyclone {input.cc_result} '
         '--unsupervised_epithelial {input.unsupervised_epithelial_assignments} '
+        '--unsupervised_all {input.unsupervised_all_assignments} '
         '--outfname {output.hgsc_annotated} '
         '>& {log}'
 
@@ -294,6 +320,8 @@ rule differential_expression_epithelial_clusters:
         '--gene_set_file {params.gene_set_file} '
         '--outfname {output.de_tables} '
         '>& {log}'
+
+## SHIH
 
 # Create SingleCellExperiment
 rule create_shih_normal_sce:
