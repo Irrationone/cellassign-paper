@@ -11,7 +11,7 @@ rule all:
         #broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
         de_tables_reactome=expand('{outdir}/differential_expression/ReactomePA/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['ReactomePA']['celltype_groups'], patient_group=config['differential_expression_settings']['ReactomePA']['patient_groups']),
         de_tables_fgsea=expand('{outdir}/differential_expression/fgsea/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['fgsea']['celltype_groups'], patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
-        de_tables_epithelial_clusters=expand('{outdir}/differential_expression/fgsea/epithelial_clusters/{{patient_group}}.rds'.format(outdir=config['outdir']), patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
+        #de_tables_epithelial_clusters=expand('{outdir}/differential_expression/fgsea/epithelial_clusters/{{patient_group}}.rds'.format(outdir=config['outdir']), patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
         shih_normal_normalized='{workdir}/sce_shih_normal_normalized.rds'.format(workdir=config['workdir']),
 
 
