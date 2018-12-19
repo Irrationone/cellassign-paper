@@ -4,14 +4,15 @@ singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.6"
 
 rule all:
     input:
+        hgsc_normalized='{workdir}/sce_hgsc_normalized.rds'.format(workdir=config['workdir']),
         #hgsc_cellassign_annotated='{workdir}/sce_hgsc_celltype_annotated.rds'.format(workdir=config['workdir']),
         #'{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
-        hgsc_annotated='{outdir}/sce_hgsc_annotated_final.rds'.format(outdir=config['outdir']),
-        broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
-        de_tables_reactome=expand('{outdir}/differential_expression/ReactomePA/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['ReactomePA']['celltype_groups'], patient_group=config['differential_expression_settings']['ReactomePA']['patient_groups']),
-        de_tables_fgsea=expand('{outdir}/differential_expression/fgsea/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['fgsea']['celltype_groups'], patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
-        de_tables_epithelial_clusters=expand('{outdir}/differential_expression/fgsea/epithelial_clusters/{{patient_group}}.rds'.format(outdir=config['outdir']), patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
-        shih_normal_normalized='{workdir}/sce_shih_normal_normalized.rds'.format(workdir=config['workdir']),
+        #hgsc_annotated='{outdir}/sce_hgsc_annotated_final.rds'.format(outdir=config['outdir']),
+        #broad_assignments='{outdir}/broad_assignments.rds'.format(outdir=config['outdir']),
+        #de_tables_reactome=expand('{outdir}/differential_expression/ReactomePA/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['ReactomePA']['celltype_groups'], patient_group=config['differential_expression_settings']['ReactomePA']['patient_groups']),
+        #de_tables_fgsea=expand('{outdir}/differential_expression/fgsea/site/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['fgsea']['celltype_groups'], patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
+        #de_tables_epithelial_clusters=expand('{outdir}/differential_expression/fgsea/epithelial_clusters/{{patient_group}}.rds'.format(outdir=config['outdir']), patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
+        #shih_normal_normalized='{workdir}/sce_shih_normal_normalized.rds'.format(workdir=config['workdir']),
 
 
 # Create SingleCellExperiment
@@ -60,6 +61,8 @@ rule preprocess_hgsc_sce:
         '--sce {input.hgsc_raw} '
         '--mito_thres {params.mito_thres} '
         '--ribo_thres {params.ribo_thres} '
+        '--umap_neighbors 25 '
+        '--umap_min_dist 0.2 '
         '--outfname {output} '
         '>& {log}'
 
