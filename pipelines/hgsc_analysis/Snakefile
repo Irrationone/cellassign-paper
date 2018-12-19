@@ -216,6 +216,32 @@ rule hgsc_unsupervised_all:
         '--outfname {output.unsupervised_all_assignments} '
         '>& {log}'
 
+# Unsupervised clustering of all cells, using a subset of genes (marker genes)
+rule hgsc_unsupervised_all_subset:
+    input:
+        hgsc_cellassign_annotated='{workdir}/sce_hgsc_celltype_annotated.rds'.format(workdir=config['workdir']),
+        marker_list_small=config['marker_lists']['small']['path'],
+    output:
+        unsupervised_all_subset_assignments='{outdir}/unsupervised_all_subset_assignments.tsv'.format(outdir=config['outdir']),
+    params:
+        name='hgsc-unsupervised-all-subset',
+        random_seed=config['cluster_random_seed'],
+        cluster_methods=config['cluster_settings']['hgsc_all_subset']['methods'],
+        cluster_use_method=config['cluster_settings']['hgsc_all_subset']['use_method'],
+    log:
+        '{logdir}/logs/hgsc_unsupervised_all_subset.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/hgsc_unsupervised_all_subset.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/unsupervised_cluster_sce.R '
+        '--sce {input.hgsc_cellassign_annotated} '
+        '--clustering_methods {params.cluster_methods} '
+        '--clustering_method_use {params.cluster_use_method} '
+        '--marker_list {input.marker_list_small} '
+        '--random_seed {params.random_seed} '
+        '--outfname {output.unsupervised_all_subset_assignments} '
+        '>& {log}'
+
 # Annotate HGSC SCE with assignments
 rule annotate_hgsc_final:
     input:
@@ -223,6 +249,7 @@ rule annotate_hgsc_final:
         cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
         unsupervised_epithelial_assignments='{outdir}/unsupervised_epithelial_assignments.tsv'.format(outdir=config['outdir']),
         unsupervised_all_assignments='{outdir}/unsupervised_all_assignments.tsv'.format(outdir=config['outdir']),
+        unsupervised_all_subset_assignments='{outdir}/unsupervised_all_subset_assignments.tsv'.format(outdir=config['outdir']),
     output:
         hgsc_annotated='{outdir}/sce_hgsc_annotated_final.rds'.format(outdir=config['outdir']),
     params:
@@ -237,6 +264,7 @@ rule annotate_hgsc_final:
         '--cyclone {input.cc_result} '
         '--unsupervised_epithelial {input.unsupervised_epithelial_assignments} '
         '--unsupervised_all {input.unsupervised_all_assignments} '
+        '--unsupervised_all_subset {input.unsupervised_all_subset_assignments} '
         '--outfname {output.hgsc_annotated} '
         '>& {log}'
 

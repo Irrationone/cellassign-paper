@@ -115,4 +115,9 @@ cluster_settings:
       - 'seurat_1.2'
       - 'SC3'
     use_method: 'seurat_0.8'
+  hgsc_all_subset:
+    methods:
+      - 'seurat_0.8'
+      - 'seurat_1.2'
+    use_method: 'seurat_0.8'
 
