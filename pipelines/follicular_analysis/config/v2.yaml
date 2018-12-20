@@ -1,7 +1,7 @@
 # Directories
-workdir: '/datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v3'
-outdir: '/datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3'
-logdir: '/datadrive/projects/cellassign-paper/results/logs/follicular_analysis/v3'
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v4'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/follicular_analysis/v4'
 
 # Random seeds
 cluster_random_seed: 19279
