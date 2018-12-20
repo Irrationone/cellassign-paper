@@ -11,7 +11,7 @@ rule all:
         de_res=expand('{outdir}/differential_expression/ReactomePA/malignant_timepoint/b_cells/{{patient_group}}.rds'.format(outdir=config['outdir']), patient_group=config['differential_expression_settings']['ReactomePA']['patient_groups']),
         de_tables_fgsea=expand('{outdir}/differential_expression/fgsea/timepoint/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['fgsea']['celltype_groups'], patient_group=config['differential_expression_settings']['fgsea']['patient_groups']),
         #follicular_scvis_train='{workdir}/sce_follicular_annotated_final_scvis_train.rds'.format(workdir=config['workdir']),
-        follicular_RLN_merged=ancient('{workdir}/sce_follicular_RLN_merged.rds'.format(workdir=config['workdir'])),
+        #follicular_RLN_merged=ancient('{workdir}/sce_follicular_RLN_merged.rds'.format(workdir=config['workdir'])),
         lk_assignments='{outdir}/lambda_kappa_assignments.rds'.format(outdir=config['outdir']),
         follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
 
