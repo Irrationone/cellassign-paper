@@ -28,6 +28,7 @@ rule all:
         shih_normal_markers_figure='{outdir}/supplemental_figures/shih_normal_markers.pdf'.format(outdir=config['outdir']),
         hgsc_malignant_cluster_de='{outdir}/supplemental_figures/hgsc_malignant_cluster_de.pdf'.format(outdir=config['outdir']),
         cellassign_hgsc_evaluation='{outdir}/supplemental_figures/cellassign_hgsc_evaluation.pdf'.format(outdir=config['outdir']),
+        cellassign_follicular_evaluation='{outdir}/supplemental_figures/cellassign_follicular_evaluation.pdf'.format(outdir=config['outdir']),
         ## Supplemental tables
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
@@ -479,6 +480,7 @@ rule cellassign_hgsc_evaluation:
     params:
         name='suppfigure-cellassign-hgsc-evaluation',
         dimreduce_type=config['plot_dimreduce_type'],
+        expr_threshold=config['winsorized_expression']['hgsc_evaluation'],
     log:
         '{logdir}/logs/cellassign_hgsc_evaluation.log'.format(logdir=config['logdir'])
     benchmark:
@@ -487,7 +489,29 @@ rule cellassign_hgsc_evaluation:
         'Rscript R/supplemental_figures/cellassign_hgsc_evaluation.R '
         '--sce {input.sce} '
         '--dimreduce_type {params.dimreduce_type} '
+        '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.cellassign_hgsc_evaluation} '
+        '>& {log}'
+
+rule cellassign_follicular_evaluation:
+    input:
+        sce=config['follicular_analysis_results']['sce_tcell_annotated'],
+    output:
+        cellassign_follicular_evaluation='{outdir}/supplemental_figures/cellassign_follicular_evaluation.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-cellassign-hgsc-evaluation',
+        dimreduce_type=config['plot_dimreduce_type'],
+        expr_threshold=config['winsorized_expression']['follicular_evaluation'],
+    log:
+        '{logdir}/logs/cellassign_follicular_evaluation.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/cellassign_follicular_evaluation.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/cellassign_follicular_evaluation.R '
+        '--sce {input.sce} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--winsorized_expression_threshold {params.expr_threshold} '
+        '--outfname {output.cellassign_follicular_evaluation} '
         '>& {log}'
     
 
