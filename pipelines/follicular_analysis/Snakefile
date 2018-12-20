@@ -4,7 +4,7 @@ singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.5"
 
 rule all:
     input:
-        follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
+        #follicular_cellassign_annotated='{workdir}/sce_follicular_celltype_annotated.rds'.format(workdir=config['workdir']),
         tcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_tcells.rds'.format(outdir=config['outdir']),
         bcells_annotated='{outdir}/sce_annotated_subset/sce_follicular_bcells.rds'.format(outdir=config['outdir']),
         de_tables_reactome=expand('{outdir}/differential_expression/ReactomePA/timepoint/{{celltype_group}}/{{patient_group}}.rds'.format(outdir=config['outdir']), celltype_group=config['differential_expression_settings']['ReactomePA']['celltype_groups'], patient_group=config['differential_expression_settings']['ReactomePA']['patient_groups']),
