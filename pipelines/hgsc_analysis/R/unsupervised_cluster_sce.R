@@ -13,6 +13,7 @@ library(SC3)
 
 library(scrna.utils)
 library(scrna.sceutils)
+library(cellassign)
 library(cellassign.utils)
 library(Seurat)
 library(argparse)
@@ -26,6 +27,10 @@ parser$add_argument('--clustering_methods', type = 'character', nargs ='+',
                     help="Clustering method(s) to run")
 parser$add_argument('--clustering_method_use', type = 'character', nargs ='+',
                     help="Clustering method to use as final annotations")
+parser$add_argument('--marker_gene_matrix', metavar='FILE', type = 'character',
+                    help="Path to a rho matrix", default = NULL)
+parser$add_argument('--marker_list', metavar='FILE', type = 'character',
+                    help="Path to a marker list yaml", default = NULL)
 parser$add_argument('--random_seed', type = 'integer',
                     help="Random seed to use", default = 19279)
 parser$add_argument('--conda_env', type = 'character',
@@ -41,6 +46,28 @@ sce <- readRDS(sce_path)
 Sys.setenv(PYTHONPATH='')
 
 reticulate::use_condaenv(args$conda_env, conda = "/home/rstudio/miniconda/bin/conda")
+
+# Process marker gene matrix
+if (is.null(args$marker_gene_matrix)) {
+  if (is.null(args$marker_list)) {
+    rho <- NULL
+  }
+  
+  marker_list <- read_yaml(args$marker_list)
+  rho <- marker_list_to_mat(marker_list, include_other = FALSE)
+} else {
+  rho <- read.table(args$marker_gene_matrix, 
+                    row.names = 1, 
+                    header = TRUE, 
+                    sep = "\t",
+                    stringsAsFactors = FALSE)
+}
+
+if (!is.null(rho)) {
+  sce <- sce[get_ensembl_id(rownames(rho), sce),]
+  
+  sce <- runPCA(sce, ncomponents = min(nrow(rho), 50), ntop = min(nrow(rho), 50))
+}
 
 # Subset on celltype
 if (!is.null(args$celltypes)) {
@@ -67,6 +94,7 @@ for (method in unlist(args$clustering_methods)) {
                          dimreduce_method = "PCA", 
                          clustering_method = method,
                          seurat_resolution = resolution)
+  colData(sce)[,paste0(method, "_cluster")] <- colData(sce)$cluster
 }
 
 cnames <- colnames(colData(sce))
@@ -74,7 +102,8 @@ cluster_cols <- cnames[str_detect(cnames, "_cluster$")]
 cluster_assignments <- colData(sce)[,c("sample_barcode", cluster_cols)]
 
 # Label final cluster
-final_method <- str_replace(args$clustering_method_use, "_[0-9\\.]+$", "")
+#final_method <- str_replace(args$clustering_method_use, "_[0-9\\.]+$", "")
+final_method <- args$clustering_method_use
 cluster_assignments[,"cluster"] <- colData(sce)[,paste0(final_method, "_cluster")]
 
 # Write outputs

@@ -89,14 +89,15 @@ timepoint_plot <- ggplot(patient_progression, aes(x=years, y=patient)) +
              aes(colour=event), size = 5) 
 
 # Plot of timepoint
-dr_timepoint <- plotReducedDim(sce, use_dimred = "UMAP", colour_by = "dataset", point_alpha = 0.1, add_ticks = FALSE)
+dr_timepoint <- plotReducedDim(sce, use_dimred = args$dimreduce_type, 
+                               colour_by = "dataset", point_alpha = 0.1, add_ticks = FALSE)
 dr_timepoint <- dr_timepoint + 
   guides(colour = guide_legend(title = "Sample", override.aes = list(alpha = 1,
                                                                      size = 2),
                                title.position = "top", title.hjust = 0.5),
          fill = FALSE) + 
-  xlab("UMAP-1") + 
-  ylab("UMAP-2") + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
@@ -111,7 +112,7 @@ dr_celltype <- plotReducedDim(sce %>%
                                 scater::mutate(celltype=factor(plyr::mapvalues(celltype, from = c("other"),
                                                                                     to = c("Unassigned")),
                                                                     levels = c(nonother_types, "Unassigned"))), 
-                              use_dimred = "UMAP",
+                              use_dimred = args$dimreduce_type,
                               colour_by = "celltype",
                               point_alpha = 0.1, 
                               add_ticks = FALSE)
@@ -120,8 +121,8 @@ dr_celltype <- dr_celltype +
                                                                                  size = 2),
                                title.position = "top", title.hjust = 0.5),
          fill = FALSE) + 
-  xlab("UMAP-1") + 
-  ylab("UMAP-2") + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
@@ -146,7 +147,7 @@ if (!is.null(args$winsorized_expression_threshold)) {
 
 marker_plots <- lapply(marker_genes, function(mgene) {
   p <- plotReducedDim(sce_tmp,
-                      use_dimred = "UMAP",
+                      use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
                       point_alpha = 0.2,
                       point_size = 0.5,
@@ -158,8 +159,8 @@ marker_plots <- lapply(marker_genes, function(mgene) {
   p <- p + 
     guides(fill = FALSE,
            colour = FALSE) + 
-    xlab("UMAP-1") + 
-    ylab("UMAP-2") + 
+    xlab(paste0(args$dimreduce_type, "-1")) + 
+    ylab(paste0(args$dimreduce_type, "-2")) + 
     theme_bw() + 
     theme_Publication() + 
     theme_nature() +

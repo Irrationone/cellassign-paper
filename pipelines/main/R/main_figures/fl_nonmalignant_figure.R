@@ -89,7 +89,7 @@ sce_scvis_merged <- sce_scvis_merged %>%
 
 # B cell dr figure
 dr_bcell <- plotReducedDim(sce_bcell, 
-                           use_dimred = "UMAP", 
+                           use_dimred = args$dimreduce_type, 
                            colour_by = "celltype_full",
                            point_alpha = 0.2, 
                            add_ticks = FALSE,
@@ -103,8 +103,8 @@ dr_bcell <- dr_bcell +
                                                                        size = 2), ncol = 2),
          fill = FALSE,
          shape = FALSE) + 
-  xlab("UMAP-1") + 
-  ylab("UMAP-2") + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
@@ -112,7 +112,7 @@ dr_bcell <- dr_bcell +
 
 
 dr_bcell_sample <- plotReducedDim(sce_bcell, 
-                                  use_dimred = "UMAP", 
+                                  use_dimred = args$dimreduce_type, 
                                   colour_by = "dataset",
                                   point_alpha = 0.2, 
                                   add_ticks = FALSE,
@@ -125,8 +125,8 @@ dr_bcell_sample <- dr_bcell_sample +
                                                                      size = 2), ncol = 2),
          fill = FALSE,
          shape = FALSE) + 
-  xlab("UMAP-1") + 
-  ylab("UMAP-2") + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
@@ -147,7 +147,7 @@ if (!is.null(args$winsorized_expression_threshold)) {
 
 kappa_lambda_plots <- lapply(kappa_lambda_markers, function(mgene) {
   p <- plotReducedDim(sce_bcell_tmp,
-                      use_dimred = "UMAP",
+                      use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_bcell_tmp),
                       point_alpha = 0.5,
                       point_size = 0.75,
@@ -159,8 +159,8 @@ kappa_lambda_plots <- lapply(kappa_lambda_markers, function(mgene) {
   p <- p + 
     guides(fill = FALSE,
            colour = FALSE) + 
-    xlab("UMAP-1") + 
-    ylab("UMAP-2") + 
+    xlab(paste0(args$dimreduce_type, "-1")) + 
+    ylab(paste0(args$dimreduce_type, "-2")) + 
     theme_bw() + 
     theme_Publication() + 
     theme_nature() +
@@ -199,7 +199,7 @@ scvis_plot <- scvis_plot +
 
 # T cell dr figure
 dr_tcell <- plotReducedDim(sce_tcell, 
-                           use_dimred = "UMAP", 
+                           use_dimred = args$dimreduce_type, 
                            colour_by = "celltype_full",
                            point_alpha = 0.4, 
                            add_ticks = FALSE,
@@ -211,15 +211,15 @@ dr_tcell <- dr_tcell +
   guides(colour = FALSE,
          fill = FALSE,
          shape = FALSE) + 
-  xlab("UMAP-1") + 
-  ylab("UMAP-2") + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
   scale_colour_manual(values = categorical_palettes$celltype)
 
 dr_tcell_sample <- plotReducedDim(sce_tcell, 
-                                  use_dimred = "UMAP", 
+                                  use_dimred = args$dimreduce_type, 
                                   colour_by = "dataset",
                                   point_alpha = 0.4, 
                                   add_ticks = FALSE,
@@ -231,8 +231,8 @@ dr_tcell_sample <- dr_tcell_sample +
   guides(colour = FALSE,
          fill = FALSE,
          shape = FALSE) + 
-  xlab("UMAP-1") + 
-  ylab("UMAP-2") + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 

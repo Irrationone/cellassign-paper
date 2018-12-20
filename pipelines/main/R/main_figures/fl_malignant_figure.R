@@ -33,6 +33,8 @@ parser$add_argument('--de_malignant_timepoint_dir', type='character',
                     help="DE results for malignant-timepoint interaction comparisons")
 parser$add_argument('--winsorized_expression_threshold', type='double',
                     help="Winsorized expression threshold", default = NULL)
+parser$add_argument('--dimreduce_type', type='character',
+                    help="Type of dimensionality reduction to plot", default = "UMAP")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for PDF plot")
 args <- parser$parse_args()
@@ -76,7 +78,7 @@ proliferation_plots <- lapply(patients, function(pat) {
   res <- lapply(proliferation_markers, function(mgene) {
     p <- plotReducedDim(sce_bcell_tmp %>% scater::filter(malignant_status_manual == "malignant",
                                                          patient == pat),
-                        use_dimred = "UMAP",
+                        use_dimred = args$dimreduce_type,
                         colour_by = cellassign.utils::get_ensembl_id(mgene, sce_bcell_tmp),
                         point_alpha = 0.5,
                         point_size = 0.75,
@@ -88,8 +90,8 @@ proliferation_plots <- lapply(patients, function(pat) {
     p <- p + 
       guides(fill = FALSE,
              colour = FALSE) + 
-      xlab("UMAP-1") + 
-      ylab("UMAP-2") + 
+      xlab(paste0(args$dimreduce_type, "-1")) + 
+      ylab(paste0(args$dimreduce_type, "-2")) + 
       theme_bw() + 
       theme_Publication() + 
       theme_nature() +
@@ -110,7 +112,7 @@ names(proliferation_plots) <- patients
 bcell_timepoint_plots <- lapply(patients, function(pat) {
   bcell_timepoint <- plotReducedDim(sce_bcell %>% scater::filter(malignant_status_manual == "malignant",
                                                                  patient == pat), 
-                                    use_dimred = "UMAP", 
+                                    use_dimred = args$dimreduce_type, 
                                     colour_by = "timepoint",
                                     point_alpha = 0.2, 
                                     add_ticks = FALSE,
@@ -123,8 +125,8 @@ bcell_timepoint_plots <- lapply(patients, function(pat) {
     guides(colour = FALSE,
            fill = FALSE,
            shape = FALSE) + 
-    xlab("UMAP-1") + 
-    ylab("UMAP-2") + 
+    xlab(paste0(args$dimreduce_type, "-1")) + 
+    ylab(paste0(args$dimreduce_type, "-2")) + 
     theme_bw() + 
     theme_Publication() + 
     theme_nature() + 

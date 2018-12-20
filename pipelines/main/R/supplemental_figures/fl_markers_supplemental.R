@@ -21,6 +21,8 @@ library(argparse)
 parser <- ArgumentParser(description = "FL supplemental marker expression plot")
 parser$add_argument('--sce', metavar='FILE', type='character',
                     help="Path to SingleCellExperiment RDS")
+parser$add_argument('--dimreduce_type', type='character',
+                    help="Type of dimensionality reduction to plot", default = "UMAP")
 parser$add_argument('--winsorized_expression_threshold', type='double',
                     help="Winsorized expression threshold", default = NULL)
 parser$add_argument('--cellassign_results', type = 'character', metavar = 'FILE',
@@ -51,7 +53,7 @@ if (!is.null(args$winsorized_expression_threshold)) {
 
 marker_plots <- lapply(marker_genes, function(mgene) {
   p <- plotReducedDim(sce_tmp,
-                      use_dimred = "UMAP",
+                      use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
                       point_alpha = 0.2,
                       point_size = 0.5,
@@ -63,8 +65,8 @@ marker_plots <- lapply(marker_genes, function(mgene) {
   p <- p + 
     guides(fill = FALSE,
            colour = FALSE) + 
-    xlab("UMAP-1") + 
-    ylab("UMAP-2") + 
+    xlab(paste0(args$dimreduce_type, "-1")) + 
+    ylab(paste0(args$dimreduce_type, "-2")) + 
     theme_bw() + 
     theme_Publication() + 
     theme_nature() +

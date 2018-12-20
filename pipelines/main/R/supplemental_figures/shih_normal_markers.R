@@ -51,7 +51,7 @@ if (!is.null(args$winsorized_expression_threshold)) {
 
 marker_plots <- lapply(marker_genes, function(mgene) {
   p <- plotReducedDim(sce_tmp,
-                      use_dimred = "TSNE",
+                      use_dimred = args$dimreduce_type,
                       colour_by = mgene,
                       point_alpha = 0.9,
                       point_size = 0.9,
@@ -63,8 +63,8 @@ marker_plots <- lapply(marker_genes, function(mgene) {
   p <- p + 
     guides(fill = FALSE,
            colour = FALSE) + 
-    xlab("TSNE-1") + 
-    ylab("TSNE-2") + 
+    xlab(paste0(args$dimreduce_type, "-1")) + 
+    ylab(paste0(args$dimreduce_type, "-2")) + 
     theme_bw() + 
     theme_Publication() + 
     theme_nature() +

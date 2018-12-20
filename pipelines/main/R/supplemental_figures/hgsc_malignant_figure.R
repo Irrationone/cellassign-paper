@@ -58,7 +58,7 @@ if (!is.null(args$hla_winsorized_expression_threshold)) {
 
 hla_marker_plots <- lapply(hla_marker_genes, function(mgene) {
   p <- plotReducedDim(sce_tmp,
-                      use_dimred = "TSNE",
+                      use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
                       point_alpha = 0.4,
                       point_size = 0.75,
@@ -70,8 +70,8 @@ hla_marker_plots <- lapply(hla_marker_genes, function(mgene) {
   p <- p + 
     guides(fill = FALSE,
            colour = FALSE) + 
-    xlab("TSNE-1") + 
-    ylab("TSNE-2") + 
+    xlab(paste0(args$dimreduce_type, "-1")) + 
+    ylab(paste0(args$dimreduce_type, "-2")) + 
     theme_bw() + 
     theme_Publication() + 
     theme_nature() +
@@ -213,7 +213,7 @@ if (!is.null(args$hypoxia_winsorized_expression_threshold)) {
 
 hypoxia_marker_plots <- lapply(hypoxia_marker_genes, function(mgene) {
   p <- plotReducedDim(sce_tmp,
-                      use_dimred = "TSNE",
+                      use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
                       point_alpha = 0.4,
                       point_size = 0.75,
@@ -225,8 +225,8 @@ hypoxia_marker_plots <- lapply(hypoxia_marker_genes, function(mgene) {
   p <- p + 
     guides(fill = FALSE,
            colour = FALSE) + 
-    xlab("TSNE-1") + 
-    ylab("TSNE-2") + 
+    xlab(paste0(args$dimreduce_type, "-1")) + 
+    ylab(paste0(args$dimreduce_type, "-2")) + 
     theme_bw() + 
     theme_Publication() + 
     theme_nature() +

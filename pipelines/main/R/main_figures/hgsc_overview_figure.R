@@ -48,12 +48,13 @@ de_epithelial_dir <- args$de_epithelial
 categorical_palettes <- cat_palettes()
 
 # Plot of timepoint
-dr_site <- plotReducedDim(sce, use_dimred = "TSNE", colour_by = "dataset", point_alpha = 0.4, add_ticks = FALSE)
+dr_site <- plotReducedDim(sce, use_dimred = args$dimreduce_type, 
+                          colour_by = "dataset", point_alpha = 0.4, add_ticks = FALSE)
 dr_site <- dr_site + 
   guides(colour = FALSE,
          fill = FALSE) + 
-  xlab("TSNE-1") + 
-  ylab("TSNE-2") + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
@@ -69,15 +70,15 @@ sce_celltype_remapped <- sce %>%
                                                  to = c("Unassigned")),
                                  levels = c(nonother_types, "Unassigned")))
 dr_celltype <- plotReducedDim(sce_celltype_remapped, 
-                              use_dimred = "TSNE",
+                              use_dimred = args$dimreduce_type,
                               colour_by = "celltype",
                               point_alpha = 0.4, 
                               add_ticks = FALSE)
 dr_celltype <- dr_celltype + 
   guides(colour = FALSE,
          fill = FALSE) + 
-  xlab("TSNE-1") + 
-  ylab("TSNE-2") + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
@@ -103,7 +104,7 @@ if (!is.null(args$winsorized_expression_threshold)) {
 
 marker_plots <- lapply(marker_genes, function(mgene) {
   p <- plotReducedDim(sce_tmp,
-                      use_dimred = "TSNE",
+                      use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
                       point_alpha = 0.2,
                       point_size = 0.5,
@@ -115,8 +116,8 @@ marker_plots <- lapply(marker_genes, function(mgene) {
   p <- p + 
     guides(fill = FALSE,
            colour = FALSE) + 
-    xlab("TSNE-1") + 
-    ylab("TSNE-2") + 
+    xlab(paste0(args$dimreduce_type, "-1")) + 
+    ylab(paste0(args$dimreduce_type, "-2")) + 
     theme_bw() + 
     theme_Publication() + 
     theme_nature() +
@@ -183,12 +184,13 @@ fgsea_site_pathway_plot <- ggplot(epithelial_site_fgsea_filtered %>%
 sce_epithelial <- sce %>%
   scater::filter(!is.na(epithelial_cluster))
 
-dr_epithelial_site <- plotReducedDim(sce_epithelial, use_dimred = "TSNE", colour_by = "dataset", point_alpha = 0.5, add_ticks = FALSE)
+dr_epithelial_site <- plotReducedDim(sce_epithelial, use_dimred = args$dimreduce_type, 
+                                     colour_by = "dataset", point_alpha = 0.5, add_ticks = FALSE)
 dr_epithelial_site <- dr_epithelial_site + 
   guides(colour = FALSE,
          fill = FALSE) + 
-  xlab("TSNE-1") + 
-  ylab("TSNE-2") + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
@@ -199,15 +201,15 @@ dr_epithelial_site$layers[[1]]$mapping$colour <- dr_epithelial_site$layers[[1]]$
 
 # Plot of cluster assignments
 dr_epithelial_cluster <- plotReducedDim(sce_epithelial,
-                                        use_dimred = "TSNE",
+                                        use_dimred = args$dimreduce_type,
                                         colour_by = "epithelial_cluster",
                                         point_alpha = 0.5, 
                                         add_ticks = FALSE)
 dr_epithelial_cluster <- dr_epithelial_cluster + 
   guides(colour = FALSE,
          fill = FALSE) + 
-  xlab("TSNE-1") + 
-  ylab("TSNE-2") + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
@@ -232,7 +234,7 @@ if (!is.null(args$epithelial_winsorized_expression_threshold)) {
 
 epithelial_marker_plots <- lapply(epithelial_marker_genes, function(mgene) {
   p <- plotReducedDim(sce_tmp,
-                      use_dimred = "TSNE",
+                      use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
                       point_alpha = 0.4,
                       point_size = 0.75,
@@ -244,8 +246,8 @@ epithelial_marker_plots <- lapply(epithelial_marker_genes, function(mgene) {
   p <- p + 
     guides(fill = FALSE,
            colour = FALSE) + 
-    xlab("TSNE-1") + 
-    ylab("TSNE-2") + 
+    xlab(paste0(args$dimreduce_type, "-1")) + 
+    ylab(paste0(args$dimreduce_type, "-2")) + 
     theme_bw() + 
     theme_Publication() + 
     theme_nature() +
