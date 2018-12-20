@@ -626,7 +626,7 @@ rule scvis_RLN_map:
     input:
         follicular_scvis_train='{workdir}/sce_follicular_annotated_final_scvis_train.rds'.format(workdir=config['workdir']),
         RLN_normalized='{workdir}/sce_RLN_normalized.rds'.format(workdir=config['workdir']),
-        scvis_output_dir=directory('{workdir}/scvis/train_follicular'.format(workdir=config['workdir'])),
+        scvis_output_dir='{workdir}/scvis/train_follicular'.format(workdir=config['workdir']),
     output:
         RLN_mapped='{workdir}/sce_RLN_mapped.rds'.format(workdir=config['workdir']),
         follicular_RLN_merged='{workdir}/sce_follicular_RLN_merged.rds'.format(workdir=config['workdir']),
