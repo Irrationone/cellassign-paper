@@ -264,6 +264,57 @@ rule follicular_unsupervised_b:
         '--outfname {output.unsupervised_b_assignments} '
         '>& {log}'
 
+
+# Unsupervised clustering of all cells
+rule follicular_unsupervised_all:
+    input:
+        follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
+    output:
+        unsupervised_all_assignments='{outdir}/unsupervised_all_assignments.tsv'.format(outdir=config['outdir']),
+    params:
+        name='follicular-unsupervised-all',
+        random_seed=config['cluster_random_seed'],
+        cluster_methods=config['cluster_settings']['follicular_all']['methods'],
+        cluster_use_method=config['cluster_settings']['follicular_all']['use_method'],
+    log:
+        '{logdir}/logs/follicular_unsupervised_all.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/follicular_unsupervised_all.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/unsupervised_cluster_sce.R '
+        '--sce {input.follicular_malignant_annotated} '
+        '--clustering_methods {params.cluster_methods} '
+        '--clustering_method_use {params.cluster_use_method} '
+        '--random_seed {params.random_seed} '
+        '--outfname {output.unsupervised_all_assignments} '
+        '>& {log}'
+
+# Unsupervised clustering of all cells, using a subset of genes (marker genes)
+rule follicular_unsupervised_all_subset:
+    input:
+        follicular_malignant_annotated='{workdir}/sce_follicular_malignant_annotated.rds'.format(workdir=config['workdir']),
+        marker_list_big=config['marker_lists']['big']['path'],
+    output:
+        unsupervised_all_subset_assignments='{outdir}/unsupervised_all_subset_assignments.tsv'.format(outdir=config['outdir']),
+    params:
+        name='follicular-unsupervised-all-subset',
+        random_seed=config['cluster_random_seed'],
+        cluster_methods=config['cluster_settings']['follicular_all_subset']['methods'],
+        cluster_use_method=config['cluster_settings']['follicular_all_subset']['use_method'],
+    log:
+        '{logdir}/logs/follicular_unsupervised_all_subset.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/follicular_unsupervised_all_subset.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/unsupervised_cluster_sce.R '
+        '--sce {input.follicular_malignant_annotated} '
+        '--clustering_methods {params.cluster_methods} '
+        '--clustering_method_use {params.cluster_use_method} '
+        '--marker_list {input.marker_list_big} '
+        '--random_seed {params.random_seed} '
+        '--outfname {output.unsupervised_all_subset_assignments} '
+        '>& {log}'
+
 # Annotate follicular SCE with assignments
 rule annotate_follicular_final:
     input:
@@ -271,6 +322,8 @@ rule annotate_follicular_final:
         unsupervised_t_assignments='{outdir}/unsupervised_t_assignments.tsv'.format(outdir=config['outdir']),
         unsupervised_malignant_assignments='{outdir}/unsupervised_malignant_assignments.tsv'.format(outdir=config['outdir']),
         unsupervised_b_assignments='{outdir}/unsupervised_b_assignments.tsv'.format(outdir=config['outdir']),
+        unsupervised_all_assignments='{outdir}/unsupervised_all_assignments.tsv'.format(outdir=config['outdir']),
+        unsupervised_all_subset_assignments='{outdir}/unsupervised_all_subset_assignments.tsv'.format(outdir=config['outdir']),
         cc_result='{outdir}/cyclone/cc_result.rds'.format(outdir=config['outdir']),
     output:
         follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
@@ -286,6 +339,8 @@ rule annotate_follicular_final:
         '--unsupervised_t {input.unsupervised_t_assignments} '
         '--unsupervised_malignant {input.unsupervised_malignant_assignments} '
         '--unsupervised_b {input.unsupervised_b_assignments} '
+        '--unsupervised_all {input.unsupervised_all_assignments} '
+        '--unsupervised_all_subset {input.unsupervised_all_subset_assignments} '
         '--cyclone {input.cc_result} '
         '--outfname {output.follicular_annotated} '
         '>& {log}'

@@ -101,6 +101,17 @@ cluster_settings:
     use_method: 'phenograph'
     celltypes:
       - B\ cells\ \(malignant\)
+  follicular_all:
+    methods:
+      - 'seurat_0.8'
+      - 'seurat_1.2'
+      - 'SC3'
+    use_method: 'seurat_0.8'
+  follicular_all_subset:
+    methods:
+      - 'seurat_0.8'
+      - 'seurat_1.2'
+    use_method: 'seurat_0.8'
 
 # Filtering thresholds
 filter_settings:
