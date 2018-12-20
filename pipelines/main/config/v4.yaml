@@ -1,0 +1,134 @@
+# Directories
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/main/v7'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/main/v7'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/main/v7'
+
+# Simulation results
+simulation_analysis_results:
+  deprob_result_dir: /datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob5
+  wrongmarker_result_dir: /datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers5
+  deprob_result_b_cd8_dir: /datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob6
+  wrongmarker_result_naivecd8_naivecd4_dir: /datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers4
+
+delta_deprobs:
+  - 0.15
+  - 0.45
+
+delta_deprobs_supp:
+  - 0.05
+  - 0.15
+  - 0.25
+  - 0.35
+
+deprob_methods:
+  - cellassign
+  - cellassign_shrinkage
+  - densitycut
+  - dynamicTreeCut
+  - phenograph
+  - SC3
+  - scmap
+  - seurat_0.4
+  - seurat_0.8
+  - seurat_1.2
+  - Zheng_cor
+
+eval_measures_to_report:
+  - accuracy
+  - micro_f1
+
+# Benchmarking results
+benchmarking_results:
+  timing_results: /datadrive/projects/cellassign-paper/results/outputs/benchmarking/v1/cellassign_times_summary.tsv
+
+# External analysis results
+external_analysis_results:
+  koh_annotated: /datadrive/projects/cellassign-paper/results/outputs/external/v1/koh/sce_annotated.rds
+  koh_rho: /datadrive/projects/cellassign-paper/results/scratch/external/v1/koh/cellassign_rho.tsv
+
+# Follicular settings
+follicular_analysis_settings:
+  marker_lists:
+    small: 
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_small.yaml'
+      include_other: TRUE
+    big: 
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_big_merged.yaml'
+      include_other: TRUE
+    lambdakappa:
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_lambda_kappa.yaml'
+      include_other: TRUE
+
+# Follicular analysis results
+follicular_analysis_results:
+  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_follicular_annotated_final.rds
+  sce_raw: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v3/sce_follicular.rds
+  sce_tcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_tcells.rds
+  sce_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_bcells.rds
+  sce_nonmalignant_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds
+  scvis_merged: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v3/sce_follicular_RLN_merged.rds
+  cellassign_specific_result: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/specific_assignments.rds
+  cellassign_lambda_kappa_result: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/lambda_kappa_assignments.rds
+  differential_expression: 
+    cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/timepoint/cytotoxic
+    timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/timepoint
+    malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/malignant_timepoint
+    timepoint_fgsea: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/fgsea/timepoint
+
+# HGSC settings
+hgsc_analysis_settings:
+  marker_lists:
+    small:
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/hgsc_small.yaml'
+      include_other: TRUE
+
+# HGSC analysis results
+hgsc_analysis_results:
+  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v2/sce_hgsc_annotated_final.rds
+  sce_raw: /datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v2/sce_hgsc.rds
+  differential_expression: 
+    site: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v2/differential_expression/ReactomePA/site
+    site_fgsea: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v2/differential_expression/fgsea/site
+    epithelial_fgsea: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v2/differential_expression/fgsea/epithelial_clusters
+
+# Shih analysis results
+shih_analysis_results:
+  sce_normalized: /datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v2/sce_shih_normal_normalized.rds
+
+# Dimensionality reduction type to plot
+plot_dimreduce_type: 'UMAP'
+
+# Follicular celltype labels
+follicular_celltype_labels:
+  tcell:
+    - 'Tfh'
+    - 'CD4\ T\ cells'
+    - 'Cytotoxic\ T\ cells'
+  bcell:
+    - 'B\ cells'
+    - 'B\ cells\ \(malignant\)'
+
+# Follicular metadata
+follicular_metadata:
+  patient_progression_file: "/datadrive/projects/cellassign-paper/metadata/patient_progression.tsv"
+
+# External data
+external:
+  azizi_s4: "/datadrive/projects/cellassign-paper/resources/external/azizi2018/Table_S4.xls"
+
+# Winsorized expression thresholds
+winsorized_expression:
+  markers: 3
+  lambda_kappa: 6
+  proliferation: 3
+  hgsc_markers: 4
+  hgsc_epithelial_cluster_markers: 3
+  hgsc_hla_markers: 8
+  hgsc_hypoxia_markers: 4
+  hgsc_supplemental_markers: 4
+  shih_normal_markers: 4
+
+# Supptable settings
+supptable_settings:
+  de:
+    padj_threshold: 0.05
