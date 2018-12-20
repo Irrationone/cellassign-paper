@@ -13,7 +13,7 @@ rule all:
         #follicular_scvis_train='{workdir}/sce_follicular_annotated_final_scvis_train.rds'.format(workdir=config['workdir']),
         #follicular_RLN_merged=ancient('{workdir}/sce_follicular_RLN_merged.rds'.format(workdir=config['workdir'])),
         #lk_assignments='{outdir}/lambda_kappa_assignments.rds'.format(outdir=config['outdir']),
-        #follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
+        follicular_annotated='{outdir}/sce_follicular_annotated_final.rds'.format(outdir=config['outdir']),
 
 
 # Create SingleCellExperiment
