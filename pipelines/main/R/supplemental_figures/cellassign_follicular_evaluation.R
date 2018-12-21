@@ -1,4 +1,4 @@
-# HGSC evaluation plots for CellAssign
+# Follicular evaluation plots for CellAssign
 
 library(tidyverse)
 library(tensorflow)
@@ -16,9 +16,9 @@ library(scrna.sceutils)
 library(cellassign.utils)
 library(argparse)
 
-parser <- ArgumentParser(description = "Create HGSC evaluation plot for CellAssign.")
+parser <- ArgumentParser(description = "Create follicular evaluation plot for CellAssign.")
 parser$add_argument('--sce', metavar='FILE', type='character',
-                    help="Annotated SCE of HGSC")
+                    help="Annotated SCE of follicular (subsetted for T cells, ideally)")
 parser$add_argument('--dimreduce_type', type='character',
                     help="Type of reduced dimension plot", choices = c("UMAP", "PCA", "TSNE"))
 parser$add_argument('--winsorized_expression_threshold', type='double',
@@ -57,55 +57,45 @@ legend_titles <- c("CellAssign",
                    "cluster",
                    "cluster")
 
-sc3_special_cluster <- "40"
-
 seurat_cluster_levels <- sort(unique(unlist(lapply(annotation_labels[3:length(annotation_labels)], function(x) as.character(unique(colData(sce)[,x]))))))
 seurat_cluster_palette <- iwanthue(length(seurat_cluster_levels))
 names(seurat_cluster_palette) <- seurat_cluster_levels
 
 sc3_cluster_levels <- as.character(sort(as.numeric(unique(unlist(lapply(annotation_labels[2], function(x) as.character(unique(colData(sce)[,x]))))))))
-sc3_cluster_palette <- c(viridisLite::viridis(n = length(sc3_cluster_levels)-1), "#D54E37")
-names(sc3_cluster_palette) <- c(setdiff(sc3_cluster_levels, sc3_special_cluster), sc3_special_cluster)
+sc3_cluster_palette <- iwanthue(length(sc3_cluster_levels))
+names(sc3_cluster_palette) <- sc3_cluster_levels
 
-palettes <- c(rep(list(categorical_palettes$hgsc_celltype),
+palettes <- c(rep(list(categorical_palettes$celltype),
                   1),
               list(sc3_cluster_palette),
               rep(list(seurat_cluster_palette),
                   4))
 
-hgsc_celltype_plots <- lapply(seq_along(annotation_labels), function(i) {
+follicular_celltype_plots <- lapply(seq_along(annotation_labels), function(i) {
   lab_col <- annotation_labels[i]
+  colData(sce)[,lab_col] <- factor(colData(sce)[,lab_col])
   
   p <- plotReducedDim(sce,
                       use_dimred = args$dimreduce_type,
                       colour_by = lab_col,
-                      point_alpha = 0.2, 
+                      point_alpha = 0.4, 
                       add_ticks = FALSE,
-                      point_size = 0.9)
-  p$layers[[1]]$aes_params$colour <- NULL
-  p$layers[[1]]$aes_params$shape <- 16
-  p$layers[[1]]$mapping$colour <- p$layers[[1]]$mapping$fill
-  
-  legend_nrow <- max(2, ceiling(length(unique(colData(sce)[,lab_col]))/8))
-  if (i == 1) {
-    legend_nrow <- 4
-  }
-  
+                      point_size = 2)
   p <- p + 
-    guides(fill = FALSE,
+    guides(colour = FALSE,
            shape = FALSE) + 
     xlab(paste0(args$dimreduce_type, "-1")) + 
     ylab(paste0(args$dimreduce_type, "-2")) + 
     theme_bw() + 
     theme_Publication() + 
     theme_nature() + 
-    guides(colour = guide_legend(title = legend_titles[i],
-                                 nrow = legend_nrow,
-                                 override.aes = list(alpha = 1, size = 2))) + 
+    guides(fill = guide_legend(title = legend_titles[i], 
+                               nrow = max(2, floor(length(unique(sce$lab_col))/7)),
+                               override.aes = list(alpha = 1, size = 2))) + 
     ggtitle(plot_titles[i])
   
   if (!is.na(palettes[[i]])) {
-    p <- p + scale_colour_manual(values = palettes[[i]])
+    p <- p + scale_fill_manual(values = palettes[[i]])
   }
   
   return(p)
@@ -114,7 +104,7 @@ hgsc_celltype_plots <- lapply(seq_along(annotation_labels), function(i) {
 ## Marker plots
 
 # Plots of marker gene expression
-marker_genes <- c("CD3D", "CD79A", "CD14")
+marker_genes <- c("CD8A", "ICOS", "CXCR5")
 exprs <- logcounts(sce)[cellassign.utils::get_ensembl_id(marker_genes, sce),]
 expr_limits <- c(min(exprs), max(exprs))
 
@@ -131,8 +121,8 @@ marker_plots <- lapply(marker_genes, function(mgene) {
   p <- plotReducedDim(sce_tmp,
                       use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
-                      point_alpha = 0.2,
-                      point_size = 0.9,
+                      point_alpha = 0.4,
+                      point_size = 1.5,
                       add_ticks = FALSE)
   p$layers[[1]]$aes_params$colour <- NULL
   p$layers[[1]]$aes_params$shape <- 16
@@ -167,14 +157,14 @@ marker_plot_group <- cowplot::plot_grid(plotlist = marker_plots,
                                         ncol = 3,
                                         nrow = 1)
 
-hgsc_celltype_group <- cowplot::plot_grid(plotlist = hgsc_celltype_plots,
-                                          labels = letters[(1:length(hgsc_celltype_plots))+1],
+follicular_celltype_group <- cowplot::plot_grid(plotlist = follicular_celltype_plots,
+                                          labels = letters[(1:length(follicular_celltype_plots))+1],
                                           nrow = 2,
                                           ncol = 3)
 
 final_plot <- cowplot::plot_grid(marker_plot_group,
                                  marker_legend,
-                                 hgsc_celltype_group,
+                                 follicular_celltype_group,
                                  labels = c('a', '', ''),
                                  nrow = 3,
                                  ncol = 1,
@@ -182,7 +172,7 @@ final_plot <- cowplot::plot_grid(marker_plot_group,
 
 
 # Plot final plot
-pdf(args$outfname, width = 12, height = 12, useDingbats = FALSE)
+pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

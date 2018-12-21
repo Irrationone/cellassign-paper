@@ -51,10 +51,10 @@ reticulate::use_condaenv(args$conda_env, conda = "/home/rstudio/miniconda/bin/co
 if (is.null(args$marker_gene_matrix)) {
   if (is.null(args$marker_list)) {
     rho <- NULL
+  } else {
+    marker_list <- read_yaml(args$marker_list)
+    rho <- marker_list_to_mat(marker_list, include_other = FALSE)
   }
-  
-  marker_list <- read_yaml(args$marker_list)
-  rho <- marker_list_to_mat(marker_list, include_other = FALSE)
 } else {
   rho <- read.table(args$marker_gene_matrix, 
                     row.names = 1, 

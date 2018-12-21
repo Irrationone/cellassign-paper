@@ -153,7 +153,7 @@ de_site_fgsea_res <- readRDS(Sys.glob(file.path(de_site_fgsea_dir, "epithelial",
 epithelial_site_fgsea_filtered <- de_site_fgsea_res$pathway %>%
   dplyr::filter(padj < 0.05)
 
-nes_values <- c(epithelial_site_fgsea_filtered$NES)
+nes_values <- c(epithelial_site_fgsea_filtered$NES) * (-1)
 nes_limits <- c(min(nes_values), max(nes_values))
 
 fgsea_size_values <- c(epithelial_site_fgsea_filtered$size)
