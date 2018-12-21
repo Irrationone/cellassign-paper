@@ -194,7 +194,8 @@ dr_epithelial_site <- dr_epithelial_site +
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
-  scale_colour_manual(values = categorical_palettes$hgsc_dataset)
+  scale_colour_manual(values = categorical_palettes$hgsc_dataset) + 
+  theme(plot.margin = unit(c(2, 5, 5, 5), "mm"))
 dr_epithelial_site$layers[[1]]$aes_params$colour <- NULL
 dr_epithelial_site$layers[[1]]$aes_params$shape <- 16
 dr_epithelial_site$layers[[1]]$mapping$colour <- dr_epithelial_site$layers[[1]]$mapping$fill
@@ -213,7 +214,8 @@ dr_epithelial_cluster <- dr_epithelial_cluster +
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
-  scale_colour_manual(values = categorical_palettes$hgsc_epithelial_cluster)
+  scale_colour_manual(values = categorical_palettes$hgsc_epithelial_cluster) + 
+  theme(plot.margin = unit(c(2, 5, 5, 5), "mm"))
 dr_epithelial_cluster$layers[[1]]$aes_params$colour <- NULL
 dr_epithelial_cluster$layers[[1]]$aes_params$shape <- 16
 dr_epithelial_cluster$layers[[1]]$mapping$colour <- dr_epithelial_cluster$layers[[1]]$mapping$fill
@@ -342,11 +344,12 @@ marker_gene_plots <- cowplot::plot_grid(plotlist = marker_plots, ncol = 4, label
 
 
 epithelial_plots <- cowplot::plot_grid(fgsea_site_pathway_plot,
-                                       dr_epithelial_site,
-                                       dr_epithelial_cluster,
-                                       ncol = 3,
-                                       labels = c('e', 'f', ''),
-                                       rel_widths = c(0.5, 0.25, 0.25))
+                                       cowplot::plot_grid(dr_epithelial_site,
+                                                          dr_epithelial_cluster,
+                                                          nrow = 2),
+                                       ncol = 2,
+                                       labels = c('e', 'f'),
+                                       rel_widths = c(0.5, 0.5))
 epithelial_plots_legend <- cowplot::plot_grid(fgsea_size_legend,
                                               fgsea_colour_legend,
                                               site_legend,

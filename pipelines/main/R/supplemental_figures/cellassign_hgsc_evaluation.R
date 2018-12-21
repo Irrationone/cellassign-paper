@@ -88,7 +88,7 @@ hgsc_celltype_plots <- lapply(seq_along(annotation_labels), function(i) {
   
   legend_nrow <- max(2, ceiling(length(unique(colData(sce)[,lab_col]))/8))
   if (i == 1) {
-    legend_nrow <- 4
+    legend_nrow <- 5
   }
   
   p <- p + 
