@@ -422,7 +422,7 @@ rule hgsc_markers_supplemental:
     shell:
         'Rscript R/supplemental_figures/hgsc_markers_supplemental.R '
         '--sce {input.sce} '
-        '--dimreduce_type TSNE '
+        '--dimreduce_type UMAP '
         '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.hgsc_markers_figure} '
         '>& {log}'
@@ -442,7 +442,7 @@ rule shih_normal_markers:
     shell:
         'Rscript R/supplemental_figures/shih_normal_markers.R '
         '--sce {input.sce} '
-        '--dimreduce_type TSNE '
+        '--dimreduce_type UMAP '
         '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.shih_normal_markers_figure} '
         '>& {log}'
