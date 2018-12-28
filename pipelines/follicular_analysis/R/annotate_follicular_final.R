@@ -23,6 +23,10 @@ parser$add_argument('--unsupervised_malignant', metavar='FILE', type='character'
                     help="Path to unsupervised malignant B assignments")
 parser$add_argument('--unsupervised_b', metavar='FILE', type='character',
                     help="Path to unsupervised nonmalignant B assignments")
+parser$add_argument('--unsupervised_all', metavar='FILE', type='character',
+                    help="Path to unsupervised all assignments")
+parser$add_argument('--unsupervised_all_subset', metavar='FILE', type='character',
+                    help="Path to unsupervised all assignments")
 parser$add_argument('--cyclone', metavar='FILE', type='character',
                     help="Path to cyclone results")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
@@ -36,6 +40,8 @@ sce <- readRDS(sce_path)
 t_assignments <- fread(args$unsupervised_t)
 malignant_assignments <- fread(args$unsupervised_malignant)
 b_assignments <- fread(args$unsupervised_b)
+all_assignments <- fread(args$unsupervised_all)
+all_subset_assignments <- fread(args$unsupervised_all_subset)
 cyclone_results <- readRDS(args$cyclone)
 
 # Add cell cycle information
@@ -58,6 +64,8 @@ rename_cols <- function(df, prefix = '') {
 t_renamed <- rename_cols(t_assignments, "t_")
 malignant_renamed <- rename_cols(malignant_assignments, prefix = "malignant_")
 b_renamed <- rename_cols(b_assignments, prefix = "b_")
+all_renamed <- rename_cols(all_assignments, prefix = "all_")
+all_subset_renamed <- rename_cols(all_subset_assignments, prefix = "all_subset_")
 
 # Add unsupervised clustering columns
 sce@colData <- sce@colData %>% 
@@ -65,6 +73,8 @@ sce@colData <- sce@colData %>%
   dplyr::left_join(t_renamed) %>%
   dplyr::left_join(malignant_renamed) %>%
   dplyr::left_join(b_renamed) %>% 
+  dplyr::left_join(all_renamed) %>%
+  dplyr::left_join(all_subset_renamed) %>%
   DataFrame(check.names = FALSE)
 
 # Save annotated SCE

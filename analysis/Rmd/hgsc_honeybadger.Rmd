@@ -92,3 +92,11 @@ hb$plotGexpProfile()
 hb$retestIdentifiedCnvs(retestBoundGenes = TRUE, retestBoundSnps = FALSE, verbose = FALSE)
 ```
 
+```{r}
+hb$results$`gene-based`
+```
+
+```{r}
+trees <- hb$visualizeResults(geneBased=TRUE, alleleBased=FALSE, details=TRUE, margins=c(25,15))
+```
+

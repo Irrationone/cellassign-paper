@@ -61,19 +61,19 @@ follicular_analysis_settings:
 
 # Follicular analysis results
 follicular_analysis_results:
-  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_follicular_annotated_final.rds
-  sce_raw: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v3/sce_follicular.rds
-  sce_tcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_tcells.rds
-  sce_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_bcells.rds
-  sce_nonmalignant_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds
-  scvis_merged: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v3/sce_follicular_RLN_merged.rds
-  cellassign_specific_result: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/specific_assignments.rds
-  cellassign_lambda_kappa_result: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/lambda_kappa_assignments.rds
+  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/sce_follicular_annotated_final.rds
+  sce_raw: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v4/sce_follicular.rds
+  sce_tcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/sce_annotated_subset/sce_follicular_tcells.rds
+  sce_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/sce_annotated_subset/sce_follicular_bcells.rds
+  sce_nonmalignant_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds
+  scvis_merged: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v4/sce_follicular_RLN_merged.rds
+  cellassign_specific_result: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/specific_assignments.rds
+  cellassign_lambda_kappa_result: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/lambda_kappa_assignments.rds
   differential_expression: 
-    cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/timepoint/cytotoxic
-    timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/timepoint
-    malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/ReactomePA/malignant_timepoint
-    timepoint_fgsea: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v3/differential_expression/fgsea/timepoint
+    cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/differential_expression/ReactomePA/timepoint/cytotoxic
+    timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/differential_expression/ReactomePA/timepoint
+    malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/differential_expression/ReactomePA/malignant_timepoint
+    timepoint_fgsea: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/differential_expression/fgsea/timepoint
 
 # HGSC settings
 hgsc_analysis_settings:
@@ -127,6 +127,8 @@ winsorized_expression:
   hgsc_hypoxia_markers: 4
   hgsc_supplemental_markers: 4
   shih_normal_markers: 4
+  hgsc_evaluation: 4
+  follicular_evaluation: 4
 
 # Supptable settings
 supptable_settings:
