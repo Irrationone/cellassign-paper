@@ -2,10 +2,10 @@
 
 FROM rocker/rstudio:3.5.0 as intermediate
 
-# docker build --no-cache -t scrna-analysis-external-3.5:latest -t scrna-analysis-external-3.5:v1.1 .
-# docker tag scrna-analysis-external-3.5:v1.1 alzhang/scrna-analysis-external-3.5:v1.1
+# docker build --no-cache -t scrna-analysis-external-3.5:latest -t scrna-analysis-external-3.5:v1.2 .
+# docker tag scrna-analysis-external-3.5:v1.2 alzhang/scrna-analysis-external-3.5:v1.2
 # docker tag scrna-analysis-external-3.5:latest alzhang/scrna-analysis-external-3.5:latest
-# docker push alzhang/scrna-analysis-external-3.5:v1.1
+# docker push alzhang/scrna-analysis-external-3.5:v1.2
 # docker push alzhang/scrna-analysis-external-3.5:latest
 
 # Install git
@@ -34,7 +34,8 @@ RUN mkdir /root/repositories && \
 
 # Use the dev version of cellassign
 RUN cd /root/repositories/cellassign && \
-    git checkout -b pre-bioc-version-nov-30
+    git fetch && \
+    git checkout pre-bioc-version-nov-30
 
 ## Build stage 2: Actually build the Docker image
 
