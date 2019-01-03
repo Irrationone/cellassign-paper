@@ -1,5 +1,3 @@
-# Naive CD4+ vs. naive CD8+
-
 script_file:
   class: File
   path: /root/cellassign-paper/pipelines/cellassign-sim-comparison/R/rmarkdown_wrapper.R
@@ -61,7 +59,7 @@ expr_percentiles:
 frac_geness:
   - 1
 max_geness:
-  - 5
+  - 20
 wrong_marker_proportions:
   - 0
   - 0.1
