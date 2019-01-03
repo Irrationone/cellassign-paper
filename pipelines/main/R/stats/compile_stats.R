@@ -40,6 +40,8 @@ parser$add_argument('--de_timepoint_fgsea_dir', type='character',
                     help="DE results for timepoint comparisons (using FGSEA and hallmark gene set)")
 parser$add_argument('--de_malignant_timepoint_dir', type='character',
                     help="DE results for malignant-timepoint interaction comparisons")
+parser$add_argument('--koh_annotated', metavar='FILE', type='character',
+                    help="Annotated SCE of Koh")
 parser$add_argument('--koh_rho', type='character', metavar='FILE',
                     help="Koh et al. rho matrix")
 parser$add_argument('--sce_hgsc', metavar='FILE', type='character',
@@ -74,6 +76,7 @@ de_malignant_timepoint_files <- Sys.glob(file.path(de_malignant_timepoint_dir, "
 
 koh_rho <- read.table(args$koh_rho, sep = "\t", header = TRUE, row.names = 1) %>%
   tibble::rownames_to_column(var = "Gene")
+koh_annotated_path <- args$koh_annotated
 
 # HGSC data
 
@@ -370,6 +373,42 @@ glycolysis_padj <- (de_cluster_epithelial_fgsea_res$pathway %>%
   signif(2) %>%
   max
 
+## Koh stats
+
+sce_koh <- readRDS(koh_annotated_path)
+categorical_palettes <- cat_palettes()
+factor_orderings <- factor_orders()
+
+evaluation_measures <- sce_koh@metadata$evaluation_measures %>%
+  dplyr::mutate(full_label=ifelse(is.na(gene_set),
+                                  as.character(clustering_method),
+                                  paste0(clustering_method, "_", gene_set)))
+
+koh_external_methods <- c("SC3_full",
+                          "seurat_0.8_full",
+                          "seurat_0.8_markers",
+                          "seurat_1.2_full",
+                          "seurat_1.2_markers")
+
+external_stats <- evaluation_measures %>%
+  dplyr::filter(full_label %in% koh_external_methods)
+
+koh_external_best_macrof1 <- external_stats$macro_f1 %>% max %>%
+  round(3)
+koh_external_best_accuracy <- external_stats$accuracy %>% max %>%
+  round(3)
+
+koh_cellassign_macrof1 <- evaluation_measures[evaluation_measures$clustering_method == "cellassign-shrinkage",]$macro_f1 %>%
+  round(3)
+koh_cellassign_accuracy <- evaluation_measures[evaluation_measures$clustering_method == "cellassign-shrinkage",]$accuracy %>%
+  round(3)
+
+sce_koh_aps_mps <- sce_koh %>%
+  scater::filter(celltype %in% c("APS", "MPS"))
+aps_mps_correct <- length(which(sce_koh_aps_mps$celltype == sce_koh_aps_mps$cellassign_cluster))
+aps_mps_total <- ncol(sce_koh_aps_mps)
+
+
 ## Stats
 
 stats <- list(
@@ -410,7 +449,13 @@ stats <- list(
   epithelialemtpval=epithelial_emt_padj,
   epithelialecadpval=epithelial_ecad_padj,
   epithelialclusterhypoxiapval=hypoxia_padj,
-  epithelialclusterapoptosisglycolysispval=max(glycolysis_padj, apoptosis_padj)
+  epithelialclusterapoptosisglycolysispval=max(glycolysis_padj, apoptosis_padj),
+  kohexternalbestfone=koh_external_best_macrof1,
+  kohexternalbestacc=koh_external_best_accuracy,
+  kohcellassignfone=koh_cellassign_macrof1,
+  kohcellassignacc=koh_cellassign_accuracy,
+  kohapsmpstotal=aps_mps_total,
+  kohapsmpscorrect=aps_mps_correct
 )
 
 # Write outputs
