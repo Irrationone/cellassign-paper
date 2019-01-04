@@ -67,15 +67,61 @@ de_plots <- lapply(elist, function(gs) {
                         dplyr::summarise(mean_value=mean(value, na.rm=TRUE)) %>%
                         dplyr::arrange(-mean_value))$clustering_method
   
-  marker_de_plot <- ggplot(eval_measures_markers_de_melted %>%
-                             dplyr::mutate(clustering_method=factor(clustering_method, levels = method_ordering)), 
+  df <- eval_measures_markers_de_melted %>%
+    dplyr::mutate(clustering_method=factor(clustering_method, levels = method_ordering))
+  
+  paired_pvals <- df %>%
+    plyr::ddply(plyr:::.(measure, de_prob), function(x) {
+      x_cast <- reshape2::dcast(x, 
+                                formula = seed ~ clustering_method, 
+                                value.var = "value")
+      clustering_methods <- df$clustering_method %>%
+        unique
+      cellassign_methods <- clustering_methods[str_detect(clustering_methods, "cellassign")]
+      other_methods <- setdiff(clustering_methods, cellassign_methods)
+      
+      pvals <- plyr::rbind.fill(lapply(cellassign_methods, function(m1) {
+        res <- plyr::rbind.fill(lapply(other_methods, function(m2) {
+          wilcox_res <- wilcox.test(x_cast[,m1], x_cast[,m2], paired = TRUE)
+          return(data.frame(method1=m1, method2=m2, p.value=wilcox_res$p.value))
+        }))
+        return(res)
+      }))
+      return(pvals)
+    })
+  
+  paired_pvals <- paired_pvals %>%
+    dplyr::mutate(p.adjust = p.adjust(paired_pvals$p.value, method = 'fdr'),
+                  symbol=c("***", "**", "*", "")[.bincode(p.adjust, c(0, 1e-3, 1e-2, 0.05, 1))])
+  
+  df_extreme_vals <- df %>%
+    dplyr::group_by(de_prob, clustering_method, measure) %>% 
+    dplyr::summarise(max_val=max(value, na.rm=TRUE))
+  
+  paired_pvals_cast <- paired_pvals %>%
+    reshape2::dcast(formula = measure + de_prob + method2 ~ method1, 
+                    value.var = "symbol", 
+                    fun.aggregate = function(x) x[1]) %>%
+    dplyr::rename(clustering_method=method2) %>%
+    dplyr::left_join(df_extreme_vals)
+  
+  marker_de_plot <- ggplot(df, 
                            aes(x = clustering_method, y = value, fill = clustering_method)) + 
-    geom_boxplot(outlier.size = -1) + theme_bw() + theme_Publication() + 
+    geom_boxplot(outlier.size = 0.4) + theme_bw() + theme_Publication() + 
     theme_nature() + stripped_theme() + facet_grid(measure~de_prob, 
                                                    scales = "free") + 
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.88)) + 
     xlab("Method") + ylab("Score") + 
-    guides(fill = FALSE) 
+    guides(fill = FALSE) + 
+    geom_text(data = paired_pvals_cast,
+              aes(label=cellassign, x=clustering_method, y=-0.15),
+              colour = clust_methods_palette["cellassign"]) + 
+    geom_text(data = paired_pvals_cast,
+              aes(label=cellassign_shrinkage, x=clustering_method, y=-0.22),
+              colour = clust_methods_palette["cellassign_shrinkage"]) + 
+    coord_cartesian(ylim = c(0, 1), clip = 'off') + 
+    theme(panel.spacing.y = unit(2, "lines"))
+  
   return(marker_de_plot)
 })
 
@@ -94,6 +140,14 @@ de_plot_legend <- cellassign.utils::ggsimplelegend(names(clust_methods_palette),
                                                    colour_mapping = unname(clust_methods_palette),
                                                    legend_title = "Method", legend_rows = 2, fontsize = 7)
 de_plot_legend <- cellassign.utils::extract_legend(de_plot_legend)
+
+whitespace_width <- 0.3
+rel_width <- 1 - whitespace_width
+texts <- paste(c("p<0.001", "p<0.01", "p<0.05"), c("***", "**", "*"), sep = ":")
+significance_legend <- gridExtra::arrangeGrob(grobs = lapply(texts, function(x) grid::textGrob(x, gp = grid::gpar(fontsize = 8))), layout_matrix = rbind(c(NA, 1:3, NA)),
+                                              widths = c(whitespace_width, rep(rel_width/3, 3), whitespace_width))
+
+
 
 # Delta plots
 
@@ -134,7 +188,12 @@ delta_plot_legend <- cellassign.utils::ggsimplelegend(unique(delta_table$cluster
 delta_plot_legend <- cellassign.utils::extract_legend(delta_plot_legend)
 
 # Final plot
-de_plots_labeled <- cowplot::plot_grid(de_plot_full, de_plot_markers, de_plot_legend,
+legend_row <- cowplot::plot_grid(de_plot_legend,
+                                 significance_legend,
+                                 ncol = 2, 
+                                 rel_widths = c(0.67, 0.33))
+
+de_plots_labeled <- cowplot::plot_grid(de_plot_full, de_plot_markers, legend_row,
                                        labels = c('a', 'b', ''),
                                        ncol = 1,
                                        nrow = 3,
@@ -151,11 +210,11 @@ final_plot <- cowplot::plot_grid(de_plots_labeled,
                                  labels = c('', ''), 
                                  ncol = 1, 
                                  nrow = 3,
-                                 rel_heights = c(0.67, 0.33, 0.05))
+                                 rel_heights = c(0.75, 0.25, 0.05))
 
 
 # Plot final plot
-pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
+pdf(args$outfname, width = 10, height = 13, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 
