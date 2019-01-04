@@ -9,6 +9,7 @@ simulation_analysis_results:
   wrongmarker_result_dir: /datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers5
   deprob_result_b_cd8_dir: /datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob6
   wrongmarker_result_naivecd8_naivecd4_dir: /datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers4
+  wrongmarker_result_naivecd8_naivecd4_20marker_dir: /datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers6
 
 delta_deprobs:
   - 0.15
