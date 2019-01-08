@@ -26,6 +26,7 @@ rule all:
         fl_malignant_timepoint_pathway_downregulation_plot='{outdir}/supplemental_figures/fl_malignant_timepoint_pathway_downregulation.pdf'.format(outdir=config['outdir']),
         hgsc_markers_figure='{outdir}/supplemental_figures/hgsc_markers_supplemental.pdf'.format(outdir=config['outdir']),
         shih_normal_markers_figure='{outdir}/supplemental_figures/shih_normal_markers.pdf'.format(outdir=config['outdir']),
+        hgsc_hla='{outdir}/supplemental_figures/hgsc_hla.pdf'.format(outdir=config['outdir']),
         hgsc_malignant_cluster_de='{outdir}/supplemental_figures/hgsc_malignant_cluster_de.pdf'.format(outdir=config['outdir']),
         cellassign_hgsc_evaluation='{outdir}/supplemental_figures/cellassign_hgsc_evaluation.pdf'.format(outdir=config['outdir']),
         cellassign_follicular_evaluation='{outdir}/supplemental_figures/cellassign_follicular_evaluation.pdf'.format(outdir=config['outdir']),
@@ -447,6 +448,27 @@ rule shih_normal_markers:
         '--outfname {output.shih_normal_markers_figure} '
         '>& {log}'
 
+rule hgsc_hla:
+    input:
+        sce=config['hgsc_analysis_results']['sce_annotated'],
+    output:
+        hgsc_hla='{outdir}/supplemental_figures/hgsc_hla.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-hgsc-hla',
+        dimreduce_type=config['plot_dimreduce_type'],
+        hla_expr_threshold=config['winsorized_expression']['hgsc_hla_markers'],
+    log:
+        '{logdir}/logs/hgsc_hla.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/hgsc_hla.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/hgsc_hla_figure.R '
+        '--sce {input.sce} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--hla_winsorized_expression_threshold {params.hla_expr_threshold} '
+        '--outfname {output.hgsc_hla} '
+        '>& {log}'
+
 rule hgsc_malignant_cluster_de:
     input:
         sce=config['hgsc_analysis_results']['sce_annotated'],
@@ -456,7 +478,6 @@ rule hgsc_malignant_cluster_de:
     params:
         name='suppfigure-hgsc-malignant-cluster-de',
         dimreduce_type=config['plot_dimreduce_type'],
-        hla_expr_threshold=config['winsorized_expression']['hgsc_hla_markers'],
         hypoxia_expr_threshold=config['winsorized_expression']['hgsc_hypoxia_markers'],
     log:
         '{logdir}/logs/hgsc_malignant_cluster_de.log'.format(logdir=config['logdir'])
@@ -466,7 +487,6 @@ rule hgsc_malignant_cluster_de:
         'Rscript R/supplemental_figures/hgsc_malignant_figure.R '
         '--sce {input.sce} '
         '--dimreduce_type {params.dimreduce_type} '
-        '--hla_winsorized_expression_threshold {params.hla_expr_threshold} '
         '--hypoxia_winsorized_expression_threshold {params.hypoxia_expr_threshold} '
         '--de_epithelial {input.de_site_epithelial} '
         '--outfname {output.hgsc_malignant_cluster_de} '
