@@ -23,8 +23,6 @@ parser$add_argument('--de_epithelial', metavar='DIR', type='character',
                     help="Directory to DE epithelial clusters results")
 parser$add_argument('--dimreduce_type', type='character',
                     help="Type of dimensionality reduction to plot", default = "UMAP")
-parser$add_argument('--hla_winsorized_expression_threshold', type='double',
-                    help="HLA winsorized expression threshold", default = NULL)
 parser$add_argument('--hypoxia_winsorized_expression_threshold', type='double',
                     help="Hypoxia winsorized expression threshold", default = NULL)
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
@@ -40,47 +38,6 @@ gradient_colours <- scrna_expression_gradient()
 
 sce_epithelial <- sce %>%
   scater::filter(!is.na(epithelial_cluster))
-
-
-# HLA marker plots
-
-hla_marker_genes <- c("HLA-A", "HLA-B", "HLA-C")
-
-exprs <- logcounts(sce)[cellassign.utils::get_ensembl_id(hla_marker_genes, sce),]
-hla_expr_limits <- c(min(exprs), max(exprs))
-
-sce_tmp <- sce
-
-if (!is.null(args$hla_winsorized_expression_threshold)) {
-  logcounts(sce_tmp) <- pmin(logcounts(sce_tmp), args$hla_winsorized_expression_threshold)
-  hla_expr_limits[2] <- min(hla_expr_limits[2], args$hla_winsorized_expression_threshold)
-}
-
-hla_marker_plots <- lapply(hla_marker_genes, function(mgene) {
-  p <- plotReducedDim(sce_tmp,
-                      use_dimred = args$dimreduce_type,
-                      colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
-                      point_alpha = 0.4,
-                      point_size = 0.75,
-                      add_ticks = FALSE)
-  p$layers[[1]]$aes_params$colour <- NULL
-  p$layers[[1]]$aes_params$shape <- 16
-  p$layers[[1]]$mapping$colour <- p$layers[[1]]$mapping$fill
-  
-  p <- p + 
-    guides(fill = FALSE,
-           colour = FALSE) + 
-    xlab(paste0(args$dimreduce_type, "-1")) + 
-    ylab(paste0(args$dimreduce_type, "-2")) + 
-    theme_bw() + 
-    theme_Publication() + 
-    theme_nature() +
-    scale_colour_gradientn(colours = gradient_colours, 
-                           limits = hla_expr_limits) + 
-    ggtitle(mgene)
-  return(p)
-})
-names(hla_marker_plots) <- hla_marker_genes
 
 # FGSEA plots
 
@@ -250,13 +207,6 @@ epithelial_cluster_legend <- cellassign.utils::extract_legend(epithelial_cluster
 
 ## Expression values
 
-hla_marker_legend <- cellassign.utils::ggsimplelegend(hla_expr_limits,
-                                                  colour_mapping = gradient_colours,
-                                                  legend_title = "Log normalized counts",
-                                                  type = "continuous") + 
-  theme(legend.key.width = unit(2, "lines"))
-hla_marker_legend <- cellassign.utils::extract_legend(hla_marker_legend)
-
 hypoxia_marker_legend <- cellassign.utils::ggsimplelegend(hypoxia_expr_limits,
                                                           colour_mapping = gradient_colours,
                                                           legend_title = "Log normalized counts",
@@ -300,13 +250,13 @@ hla_bottomrow <- cowplot::plot_grid(
   fgsea_clust_31_plot,
   hla_volcano_plot,
   nrow = 1,
-  labels = c('b', 'c'))
+  labels = c('a', 'b'))
 
 fgsea_toprow <- cowplot::plot_grid(
   fgsea_clust_20_plot,
   fgsea_clust_24_plot,
   nrow = 1,
-  labels = c('d', 'e')
+  labels = c('c', 'd')
 )
 
 legendrow <- cowplot::plot_grid(
@@ -316,36 +266,24 @@ legendrow <- cowplot::plot_grid(
   nrow = 1
 )
 
-hla_markerrow <- cowplot::plot_grid(
-  plotlist = hla_marker_plots,
-  nrow = 1, 
-  labels = c('a', '', '')
-)
-
 hypoxia_markerrow <- cowplot::plot_grid(
   plotlist = hypoxia_marker_plots,
   nrow = 1,
-  labels = c('f', '', '', '')
+  labels = c('e', '', '', '')
 )
 
-## TODO: Add a row with all the hypoxia markers
-## ADD LEGENDS FOR CELLTYPE AND TAKE OUT THE SIGNIFICANCE LEGEND 
-## AND ADD THEM IN BETWEEN B+C and D+E
-
-final_plot <- cowplot::plot_grid(hla_markerrow,
-                                 hla_marker_legend,
-                                 hla_bottomrow,
+final_plot <- cowplot::plot_grid(hla_bottomrow,
                                  legendrow,
                                  fgsea_toprow,
                                  hypoxia_markerrow,
                                  hypoxia_marker_legend,
-                                 nrow = 7,
-                                 rel_heights = c(0.66, 0.1, 0.8, 0.1, 1, 0.66, 0.1))
+                                 nrow = 5,
+                                 rel_heights = c(0.8, 0.1, 1, 0.66, 0.1))
 
 
 
 # Plot to output file
-pdf(args$outfname, width = 10, height = 14, useDingbats = FALSE)
+pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 
