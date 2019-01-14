@@ -1,7 +1,7 @@
 # Directories
-workdir: '/datadrive/projects/cellassign-paper/results/scratch/main/v8'
-outdir: '/datadrive/projects/cellassign-paper/results/outputs/main/v8'
-logdir: '/datadrive/projects/cellassign-paper/results/logs/main/v8'
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/main/v9'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/main/v9'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/main/v9'
 
 # Simulation results
 simulation_analysis_results:
