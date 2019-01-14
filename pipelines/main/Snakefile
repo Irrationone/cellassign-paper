@@ -1,7 +1,7 @@
 
 configfile: 'config/v4.yaml'
 
-singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.10"
+singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.11"
 
 rule all:
     input:

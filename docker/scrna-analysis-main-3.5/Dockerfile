@@ -2,10 +2,10 @@
 
 FROM rocker/rstudio:3.5.0 as intermediate
 
-# docker build --no-cache -t scrna-analysis-main-3.5:latest -t scrna-analysis-main-3.5:v1.10 .
-# docker tag scrna-analysis-main-3.5:v1.10 alzhang/scrna-analysis-main-3.5:v1.10
+# docker build --no-cache -t scrna-analysis-main-3.5:latest -t scrna-analysis-main-3.5:v1.11 .
+# docker tag scrna-analysis-main-3.5:v1.11 alzhang/scrna-analysis-main-3.5:v1.11
 # docker tag scrna-analysis-main-3.5:latest alzhang/scrna-analysis-main-3.5:latest
-# docker push alzhang/scrna-analysis-main-3.5:v1.10
+# docker push alzhang/scrna-analysis-main-3.5:v1.11
 # docker push alzhang/scrna-analysis-main-3.5:latest
 
 # Install git
@@ -85,3 +85,5 @@ RUN Rscript -e "install.packages('lmerTest',dependencies=TRUE)" && \
 
 RUN echo 'BiocManager::install(c("ReactomePA"), update = FALSE)' >> /opt/packages.r && \
     Rscript /opt/packages.r
+
+RUN Rscript -e "devtools::install_github('VPetukhov/ggrastr')"
