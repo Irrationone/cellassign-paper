@@ -1,0 +1,68 @@
+B cells:
+  - VIM
+  - MS4A1
+  - CD79A
+  - PTPRC
+  - CD19
+  - CD24
+T cells:
+  - VIM
+  - CD2
+  - CD3D
+  - CD3E
+  - CD3G
+  - CD28
+  - CD4
+  - PTPRC
+Cytotoxic T cells:
+  - VIM
+  - CD2
+  - CD3D
+  - CD3E
+  - CD3G
+  - CD28
+  - CD8A
+  - GZMA
+  - PRF1
+  - NKG7
+  - PTPRC
+Monocyte/Macrophage:
+  - VIM
+  - CD14
+  - FCGR3A
+  - CD33
+  - ITGAX
+  - ITGAM
+  - CD4
+  - PTPRC
+  - LYZ
+Epithelial cells:
+  - EPCAM
+  - CDH1
+  - CLDN3
+  - CLDN4
+Myofibroblast:
+  - VIM
+  - ACTA2
+  - COL1A1
+  - COL3A1
+  - SERPINH1
+Vascular smooth muscle cells:
+  - VIM
+  - ACTA2
+  - MYH11
+  - PLN
+  - MYLK
+  - MCAM
+  - COL1A1
+  - COL3A1
+  - SERPINH1
+Endothelial cells:
+  - VIM
+  - EMCN
+  - CLEC14A
+  - CDH5
+  - PECAM1
+  - VWF
+  - MCAM
+  - SERPINH1
