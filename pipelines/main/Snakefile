@@ -662,6 +662,7 @@ rule gene_enrichment_table:
 rule compile_stats:
     input:
         sce=config['follicular_analysis_results']['sce_annotated'],
+        sce_tcell=config['follicular_analysis_results']['sce_tcell_annotated'],
         sce_bcell=config['follicular_analysis_results']['sce_bcell_annotated'],
         sce_raw=config['follicular_analysis_results']['sce_raw'],
         patient_events=config['follicular_metadata']['patient_progression_file'],
@@ -683,6 +684,7 @@ rule compile_stats:
     params:
         name='compile-stats',
         delta_deprobs=config['delta_deprobs'],
+        follicular_tcell_labels=config['follicular_celltype_labels']['tcell'],
     log:
         '{logdir}/logs/compile_stats.log'.format(logdir=config['logdir'])
     benchmark:
@@ -691,7 +693,9 @@ rule compile_stats:
         'Rscript R/stats/compile_stats.R '
         '--sce_follicular {input.sce} '
         '--sce_follicular_bcells {input.sce_bcell} '
+        '--sce_follicular_tcells {input.sce_tcell} '
         '--sce_follicular_raw {input.sce_raw} '
+        '--follicular_tcell_labels {params.follicular_tcell_labels} '
         '--patient_progression {input.patient_events} '
         '--deprob_result_dir {input.deprob_result_dir_naivecd8_naivecd4} '
         '--delta_deprobs {params.delta_deprobs} '
