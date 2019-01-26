@@ -10,6 +10,7 @@ library(scran)
 library(cowplot)
 library(ggrepel)
 library(scales)
+library(ggrastr)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -132,8 +133,15 @@ marker_plots <- lapply(marker_genes, function(mgene) {
 nonother_types <- sort(setdiff(unique(sce$celltype), "other"))
 coldat <- colData(sce_celltype_remapped) %>%
   as.data.frame
+cell_counts <- coldat %>%
+  dplyr::group_by(patient, site) %>%
+  dplyr::summarise(cell_count=n()) %>%
+  dplyr::ungroup()
+coldat <- coldat %>%
+  dplyr::left_join(cell_counts) %>%
+  dplyr::mutate(dataset_label=paste0(dataset, "\nn=", cell_count))
 
-celltype_proportion_plot <- ggplot(coldat, aes(x=dataset)) + 
+celltype_proportion_plot <- ggplot(coldat, aes(x=dataset_label)) + 
   geom_bar(aes(fill=celltype), position = "fill") + 
   theme_bw() + 
   theme_Publication() + 
@@ -349,7 +357,7 @@ epithelial_plots <- cowplot::plot_grid(fgsea_site_pathway_plot,
                                                           nrow = 2),
                                        ncol = 2,
                                        labels = c('e', 'f'),
-                                       rel_widths = c(0.5, 0.5))
+                                       rel_widths = c(0.65, 0.35))
 epithelial_plots_legend <- cowplot::plot_grid(fgsea_size_legend,
                                               fgsea_colour_legend,
                                               site_legend,
@@ -371,7 +379,7 @@ final_plot <- cowplot::plot_grid(dr_plots,
                                  labels = c('', '', ''), 
                                  ncol = 1, 
                                  nrow = 8,
-                                 rel_heights = c(0.7, 0.1, 0.5, 0.1, 0.7, 0.1, 0.5, 0.1))
+                                 rel_heights = c(0.7, 0.1, 0.5, 0.1, 0.7, 0.1, 0.42, 0.1))
 
 # Plot to output file
 pdf(args$outfname, width = 10, height = 14, useDingbats = FALSE)

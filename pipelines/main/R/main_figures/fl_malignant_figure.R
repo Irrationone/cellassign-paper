@@ -12,6 +12,7 @@ library(pheatmap)
 library(Matrix)
 library(org.Hs.eg.db)
 library(ReactomePA)
+library(ggrastr)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -170,9 +171,18 @@ cycling_plot_results <- lapply(patients, function(pat) {
     unique %>%
     setdiff(removed_cell_types)
   
+  timepoint_cell_counts <- cycling_summary_patient %>%
+    dplyr::group_by(patient, timepoint) %>%
+    dplyr::summarise(all_cell_count=sum(total_count)) %>%
+    dplyr::ungroup()
+  
+  cycling_summary_patient <- cycling_summary_patient %>%
+    dplyr::left_join(timepoint_cell_counts) %>%
+    dplyr::mutate(timepoint_label=paste0(timepoint, "\nn=", all_cell_count))
+  
   cycling_plot <- ggplot(cycling_summary_patient %>%
                            dplyr::filter(!celltype_full %in% removed_cell_types),
-                         aes(x=timepoint, y=cycling_prop, colour=celltype_full)) +
+                         aes(x=timepoint_label, y=cycling_prop, colour=celltype_full)) +
     geom_point(aes(size=total_prop)) +
     geom_line(aes(group=celltype_full)) + 
     theme_bw() + 

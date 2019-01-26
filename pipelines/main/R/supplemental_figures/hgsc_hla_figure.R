@@ -10,6 +10,7 @@ library(scran)
 library(cowplot)
 library(ggrepel)
 library(scales)
+library(ggrastr)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -110,7 +111,8 @@ hla_expression_df_filtered <- hla_expression_df_filtered %>%
 # }), c("hla_gene", "comparison", "p.value"))
 
 hla_group_boxplots <- ggplot(hla_expression_df_filtered, aes(x=group, y=expression)) + 
-  geom_boxplot(aes(fill=celltype)) + 
+  geom_boxplot(aes(fill=celltype), outlier.size = -1) + 
+  geom_jitter(position = position_jitter(width = 0.2, height = 0), alpha = 0.4, size = 1) +
   theme_bw() + 
   theme_Publication() +
   theme_nature() + 

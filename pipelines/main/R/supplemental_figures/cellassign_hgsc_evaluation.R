@@ -10,6 +10,7 @@ library(scran)
 library(cowplot)
 library(pheatmap)
 library(Matrix)
+library(ggrastr)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -178,7 +179,7 @@ final_plot <- cowplot::plot_grid(marker_plot_group,
                                  labels = c('a', '', ''),
                                  nrow = 3,
                                  ncol = 1,
-                                 rel_heights = c(0.5, 0.1, 1))
+                                 rel_heights = c(0.5, 0.1, 1.1))
 
 
 # Plot final plot

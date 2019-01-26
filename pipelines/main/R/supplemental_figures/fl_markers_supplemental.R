@@ -12,6 +12,7 @@ library(ggrepel)
 library(pheatmap)
 library(grid)
 library(ggplotify)
+library(ggrastr)
 
 library(scrna.utils)
 library(scrna.sceutils)

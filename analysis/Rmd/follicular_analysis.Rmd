@@ -51,7 +51,7 @@ library(lmerTest)
 Data for 5 pre- and post-treatment pairs:
 
 Transformed FL:
-=
+
 * FL1004
 * FL1012
 * FL1018

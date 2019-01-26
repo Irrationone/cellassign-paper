@@ -10,6 +10,7 @@ library(scran)
 library(cowplot)
 library(pheatmap)
 library(Matrix)
+library(ggrastr)
 
 library(scrna.utils)
 library(scrna.sceutils)

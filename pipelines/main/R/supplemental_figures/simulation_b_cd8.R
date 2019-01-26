@@ -107,7 +107,9 @@ de_plots <- lapply(elist, function(gs) {
   
   marker_de_plot <- ggplot(df, 
                            aes(x = clustering_method, y = value, fill = clustering_method)) + 
-    geom_boxplot(outlier.size = 0.4) + theme_bw() + theme_Publication() + 
+    geom_boxplot(outlier.size = -1) + 
+    geom_jitter(position = position_jitter(width = 0.2, height = 0), alpha = 0.4, size = 1) + 
+    theme_bw() + theme_Publication() + 
     theme_nature() + stripped_theme() + facet_grid(measure~de_prob, 
                                                    scales = "free") + 
     theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.88)) + 

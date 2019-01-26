@@ -37,7 +37,8 @@ timing_df_ncells <- timing_df %>%
                 num_genes == 1e4)
 
 cell_timing_plot <- ggplot(timing_df_ncells, aes(x=factor(num_cells), y = time, fill=factor(max_genes))) + 
-  geom_boxplot() + 
+  geom_boxplot(outlier.size = -1) + 
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2, jitter.height = 0), alpha = 0.4, size = 1) +
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 
@@ -51,7 +52,8 @@ timing_df_ngroups <- timing_df %>%
                 num_genes == 1e4)
 
 group_timing_plot <- ggplot(timing_df_ngroups, aes(x=factor(num_groups), y = time, fill=factor(max_genes))) + 
-  geom_boxplot(width = 0.5) + 
+  geom_boxplot(width = 0.5, outlier.size = -1) + 
+  geom_jitter(position = position_jitterdodge(dodge.width = 0.5, jitter.width = 0.1, jitter.height = 0), alpha = 0.4, size = 1) +
   theme_bw() + 
   theme_Publication() + 
   theme_nature() + 

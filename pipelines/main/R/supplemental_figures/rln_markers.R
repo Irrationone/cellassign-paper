@@ -9,6 +9,7 @@ library(methods)
 library(scran)
 library(cowplot)
 library(ggrepel)
+library(ggrastr)
 
 library(scrna.utils)
 library(scrna.sceutils)

@@ -22,8 +22,12 @@ parser$add_argument('--sce_follicular', metavar='FILE', type='character',
                     help="Path to SingleCellExperiment RDS for FL")
 parser$add_argument('--sce_follicular_bcells', metavar='FILE', type='character',
                     help="Path to SingleCellExperiment RDS for FL")
+parser$add_argument('--sce_follicular_tcells', metavar='FILE', type='character',
+                    help="Path to SingleCellExperiment RDS for FL")
 parser$add_argument('--sce_follicular_raw', metavar='FILE', type='character',
                     help="Path to raw SingleCellExperiment RDS")
+parser$add_argument('--follicular_tcell_labels', nargs='+',
+                    type='character', help='Follicular T cell types')
 parser$add_argument('--patient_progression', metavar='FILE', type='character',
                     help="Patient events")
 parser$add_argument('--deprob_result_dir', metavar='DIR', type='character',
@@ -65,6 +69,16 @@ sce_follicular_b <- readRDS(args$sce_follicular_bcells)
 deprob_result_dir <- args$deprob_result_dir
 delta_deprobs <- unlist(args$delta_deprobs)
 cellassign_lambda_kappa_results <- readRDS(args$cellassign_lambda_kappa)
+
+sce_follicular_tcell <- readRDS(args$sce_follicular_tcell)
+follicular_tcell_labels <- unlist(args$follicular_tcell_labels)
+sce_follicular_tcell <- sce_follicular_tcell %>%
+  scater::filter(celltype_full %in% c(follicular_tcell_labels, "other")) %>%
+  scater::mutate(celltype_full=factor(plyr::mapvalues(celltype_full,
+                                                      "other",
+                                                      "Unassigned")))
+sce_follicular_cytotoxic <- sce_follicular_tcell %>%
+  scater::filter(celltype_full %in% c("Cytotoxic T cells"))
 
 de_timepoint_dir <- args$de_timepoint_dir
 de_timepoint_fgsea_dir <- args$de_timepoint_fgsea_dir
@@ -134,6 +148,13 @@ malignant_marker_pvals <- lapply(de_malignant_timepoint_files, function(f) {
   return(pvals)
 })
 max_malignant_pval <- signif(max(unlist(malignant_marker_pvals)), 2)
+malignant_marker_lfcs <- lapply(de_malignant_timepoint_files, function(f) {
+  de_res <- readRDS(f)
+  pvals <- (de_res$malignant$gene %>% 
+              dplyr::filter(Symbol %in% malignant_markers))$logFC
+  return(pvals)
+})
+min_malignant_lfc <- signif(min(unlist(malignant_marker_lfcs)), 2)
 
 ## Cell proportions
 
@@ -214,15 +235,23 @@ names(fgsea_res) <- tools::file_path_sans_ext(basename(de_timepoint_fgsea_files)
 
 fl1018_prolif_replicative_pvals <- max((fgsea_res$FL1018$pathway %>%
                                           dplyr::filter(pathway %in% 
-                                                          c("HALLMARK_MYC_TARGETS_V1",
-                                                            "HALLMARK_MYC_TARGETS_V2",
-                                                            "HALLMARK_E2F_TARGETS",
+                                                          c("HALLMARK_E2F_TARGETS",
                                                             "HALLMARK_G2M_CHECKPOINT")))$padj %>%
+                                         signif(2))
+
+fl1018_prolif_replicative_nes <- min((fgsea_res$FL1018$pathway %>%
+                                          dplyr::filter(pathway %in% 
+                                                          c("HALLMARK_E2F_TARGETS",
+                                                            "HALLMARK_G2M_CHECKPOINT")))$NES %>%
                                          signif(2))
 
 fl2001_mitotic_spindle_padj <- (fgsea_res$FL2001$pathway %>%
   dplyr::filter(str_detect(pathway, "MITOTIC_SPINDLE")))$padj %>%
   signif(2)
+
+fl2001_mitotic_spindle_nes <- (fgsea_res$FL2001$pathway %>%
+                                  dplyr::filter(str_detect(pathway, "MITOTIC_SPINDLE")))$NES %>%
+  signif(3)
 
 fl2001_myc_vone_padj <- (fgsea_res$FL2001$pathway %>%
                            dplyr::filter(str_detect(pathway, "MYC_TARGETS_V1")))$padj %>%
@@ -312,6 +341,11 @@ fl1018_hla_timepoint_maxpval <- (fl1018_malignant$gene %>%
   max %>%
   signif(2)
 
+fl1018_hla_timepoint_minlfc <- (fl1018_malignant$gene %>%
+                                   dplyr::filter(Symbol %in% hla_genes))$logFC %>%
+  max %>%
+  signif(2)
+
 ## HGSC
 
 remap_hgsc_names <- function(x) {
@@ -346,8 +380,16 @@ epithelial_emt_padj <- (de_site_epithelial_fgsea_res$pathway %>%
   dplyr::filter(str_detect(pathway, "MESENCHYMAL")))$padj %>%
   signif(2)
 
+epithelial_emt_nes <- ((de_site_epithelial_fgsea_res$pathway %>%
+                          dplyr::filter(str_detect(pathway, "MESENCHYMAL")))$NES * -1) %>%
+  signif(3)
+
 epithelial_ecad_padj <- (de_site_epithelial_fgsea_res$gene %>%
                            dplyr::filter(Symbol == "CDH1"))$FDR[1] %>%
+  signif(2)
+
+epithelial_ecad_lfc <- (de_site_epithelial_fgsea_res$gene %>%
+                           dplyr::filter(Symbol == "CDH1"))$logFC.Right.ovary[1] %>%
   signif(2)
 
 de_cluster_epithelial_fgsea_res <- readRDS(Sys.glob(file.path(de_epithelial_dir, "*.rds")))
@@ -358,6 +400,13 @@ hypoxia_padj <- (de_cluster_epithelial_fgsea_res$pathway %>%
                 clust2 %in% c("0", "4")))$padj %>%
   signif(2) %>%
   max
+
+hypoxia_nes <- (de_cluster_epithelial_fgsea_res$pathway %>%
+                   dplyr::filter(str_detect(pathway, "HYPOXIA"),
+                                 clust1 == "2",
+                                 clust2 %in% c("0", "4")))$NES %>%
+  signif(3) %>%
+  min
 
 apoptosis_padj <- (de_cluster_epithelial_fgsea_res$pathway %>%
                      dplyr::filter(str_detect(pathway, "APOPTOSIS"),
@@ -409,6 +458,18 @@ aps_mps_correct <- length(which(sce_koh_aps_mps$celltype == sce_koh_aps_mps$cell
 aps_mps_total <- ncol(sce_koh_aps_mps)
 
 
+## Follicular cytotoxic cell numbers
+
+cytotoxic_cell_counts <- table(sce_follicular_cytotoxic$dataset)
+
+## Follicular malignant/nonmalignant B numbers
+
+sce_follicular_b_filtered <- sce_follicular_b %>%
+  scater::filter(celltype_full %in% c("B cells", "B cells (malignant)"))
+
+malignant_counts <- table((sce_follicular_b_filtered %>% scater::filter(celltype_full == "B cells (malignant)"))$dataset)
+nonmalignant_counts <- table((sce_follicular_b_filtered %>% scater::filter(celltype_full == "B cells"))$dataset)
+
 ## Stats
 
 stats <- list(
@@ -426,6 +487,7 @@ stats <- list(
   lkNonOtherPatient=lk_nonother_patient,
   lkKappaPctPatient=lk_kappa_pct_patient,
   maxMalignantPval=max_malignant_pval,
+  negminmalignantlfc=-1*min_malignant_lfc,
   fl1018MalignantVar=fl1018_malignant_timepoint_var,
   fl2001MalignantVar=fl2001_malignant_timepoint_var,
   T1NonMalignantB=T1_nonmalignant_b_pct,
@@ -436,8 +498,11 @@ stats <- list(
   maxHLAMalignantPval=max_hla_malignant_pval,
   fl1018classoneMHCp=fl1018_class1_MHC_p,
   fl1018maxHLAtimepointPval=fl1018_hla_timepoint_maxpval,
+  fl1018minhlatimepointlfc=fl1018_hla_timepoint_minlfc,
   fl2001mitoticspindlePval=fl2001_mitotic_spindle_padj,
+  fl2001mitoticspindlenes=fl2001_mitotic_spindle_nes,
   fl1018prolifreplicativepvals=fl1018_prolif_replicative_pvals,
+  fl1018prolifreplicativenes=fl1018_prolif_replicative_nes,
   fl2001myconepval=fl2001_myc_vone_padj,
   fl2001etwofgtwompadj=fl2001_etwof_gtwom_padj,
   hgscTotalCellCount=hgsc_total_cell_count,
@@ -447,15 +512,21 @@ stats <- list(
   hgscImmunePrevalence=as.list(immune_prevalence),
   myeloidImmuneProp=as.list(myeloid_immune_prop),
   epithelialemtpval=epithelial_emt_padj,
+  epithelialemtnes=epithelial_emt_nes,
   epithelialecadpval=epithelial_ecad_padj,
+  epithelialecadlfc=epithelial_ecad_lfc,
   epithelialclusterhypoxiapval=hypoxia_padj,
+  epithelialclusterhypoxianes=hypoxia_nes,
   epithelialclusterapoptosisglycolysispval=max(glycolysis_padj, apoptosis_padj),
   kohexternalbestfone=koh_external_best_macrof1,
   kohexternalbestacc=koh_external_best_accuracy,
   kohcellassignfone=koh_cellassign_macrof1,
   kohcellassignacc=koh_cellassign_accuracy,
   kohapsmpstotal=aps_mps_total,
-  kohapsmpscorrect=aps_mps_correct
+  kohapsmpscorrect=aps_mps_correct,
+  flcytotoxiccellcounts=cytotoxic_cell_counts,
+  flmalignanttimepointcounts=malignant_counts,
+  flnonmalignanttimepointcounts=nonmalignant_counts
 )
 
 # Write outputs

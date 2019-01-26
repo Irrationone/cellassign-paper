@@ -10,6 +10,7 @@ library(scran)
 library(cowplot)
 library(pheatmap)
 library(Matrix)
+library(ggrastr)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -111,6 +112,8 @@ dr_bcell <- dr_bcell +
   scale_colour_manual(values = categorical_palettes$celltype)
 
 
+
+
 dr_bcell_sample <- plotReducedDim(sce_bcell, 
                                   use_dimred = args$dimreduce_type, 
                                   colour_by = "dataset",
@@ -131,6 +134,7 @@ dr_bcell_sample <- dr_bcell_sample +
   theme_Publication() + 
   theme_nature() + 
   scale_colour_manual(values = categorical_palettes$dataset)
+
 
 # B cell marker figures
 
@@ -167,7 +171,7 @@ kappa_lambda_plots <- lapply(kappa_lambda_markers, function(mgene) {
     scale_fill_gradientn(colours = gradient_colours, 
                          limits = expr_limits) + 
     scale_colour_gradientn(colours = gradient_colours, 
-                         limits = expr_limits) + 
+                           limits = expr_limits) + 
     ggtitle(mgene)
   return(p)
 })
@@ -238,6 +242,7 @@ dr_tcell_sample <- dr_tcell_sample +
   theme_nature() + 
   scale_colour_manual(values = categorical_palettes$dataset)
 
+
 # T and B cell subtype proportions
 tcell_proportions_raw <- compute_celltype_proportions(sce_tcell, celltype_col = "celltype_full", suffix = "")
 bcell_proportions_raw <- compute_celltype_proportions(sce_bcell %>% 
@@ -266,7 +271,8 @@ bcell_proportions <- bcell_proportions_raw %>%
 
 legend_limits <- round(c(0, max(c(tcell_proportions$proportion, bcell_proportions$proportion))), 1)
 
-plot_proportions <- function(props, heatmap_heat_colours, 
+plot_proportions <- function(props, sce,
+                             heatmap_heat_colours, 
                              legend_limits = NULL,
                              write_proportions = TRUE,
                              n_sig_dec_digits = 2,
@@ -305,7 +311,17 @@ plot_proportions <- function(props, heatmap_heat_colours,
         geom_text(aes(label=sapply(proportion, function(x) format(x, digits = n_sig_dec_digits, nsmall = n_sig_dec_digits))))
     }
   } else if (plot_type == "lineplot") {
-    p <- ggplot(props, aes(x=timepoint, y=proportion, colour=celltype_full)) + 
+    cell_counts <- colData(sce) %>%
+      as.data.frame %>%
+      dplyr::group_by(patient, timepoint) %>%
+      dplyr::summarise(count=n()) %>%
+      dplyr::ungroup()
+    
+    props <- props %>%
+      dplyr::left_join(cell_counts) %>%
+      dplyr::mutate(timepoint_label = paste0(timepoint, "\nn=", count))
+    
+    p <- ggplot(props, aes(x=timepoint_label, y=proportion, colour=celltype_full)) + 
       geom_point() + 
       geom_line(aes(group=celltype_full)) +
       theme_bw() + 
@@ -324,7 +340,7 @@ plot_proportions <- function(props, heatmap_heat_colours,
     }
     
     p <- p + 
-      facet_wrap(~ patient, nrow = 1) + 
+      facet_wrap(~ patient, nrow = 1, scales = "free_x") + 
       stripped_theme(strip_face = "bold")
     
   }
@@ -333,6 +349,7 @@ plot_proportions <- function(props, heatmap_heat_colours,
 }
 
 tcell_proportion_plot <- plot_proportions(tcell_proportions, 
+                                          sce_tcell,
                                           plot_type = "lineplot", 
                                           celltype_palette = categorical_palettes$celltype,
                                           legend = FALSE)
@@ -343,6 +360,7 @@ names(b_palette) <- names(b_palette) %>%
                   to = c("nonmalignant", "malignant"))
 
 bcell_proportion_plot <- plot_proportions(bcell_proportions, 
+                                          sce_bcell,
                                           plot_type = "lineplot", 
                                           celltype_palette = b_palette,
                                           legend = TRUE)

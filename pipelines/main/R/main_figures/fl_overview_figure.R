@@ -9,6 +9,7 @@ library(methods)
 library(scran)
 library(cowplot)
 library(ggrepel)
+library(ggrastr)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -110,8 +111,8 @@ dr_timepoint$layers[[1]]$mapping$colour <- dr_timepoint$layers[[1]]$mapping$fill
 nonother_types <- sort(setdiff(unique(sce$celltype), "other"))
 dr_celltype <- plotReducedDim(sce %>%
                                 scater::mutate(celltype=factor(plyr::mapvalues(celltype, from = c("other"),
-                                                                                    to = c("Unassigned")),
-                                                                    levels = c(nonother_types, "Unassigned"))), 
+                                                                               to = c("Unassigned")),
+                                                               levels = c(nonother_types, "Unassigned"))), 
                               use_dimred = args$dimreduce_type,
                               colour_by = "celltype",
                               point_alpha = 0.1, 

@@ -10,6 +10,7 @@ library(scran)
 library(cowplot)
 library(ggrepel)
 library(scales)
+library(ggrastr)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -107,7 +108,7 @@ final_plot <- cowplot::plot_grid(celltype_marker_plots_combined,
 
 
 # Plot to output file
-pdf(args$outfname, width = 10, height = 7, useDingbats = FALSE)
+pdf(args$outfname, width = 10, height = 8, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 
