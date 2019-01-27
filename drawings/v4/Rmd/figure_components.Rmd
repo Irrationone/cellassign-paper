@@ -193,6 +193,20 @@ dev.off()
 ```
 
 ```{r}
+library(RColorBrewer)
+
+pheat_pal <- colorRampPalette(rev(brewer.pal(n = 7, 
+    name = "RdYlBu")))(100)
+
+prob_legend <- cellassign.utils::extract_legend(cellassign.utils::ggsimplelegend(vars = c(0, 1), colour_mapping = pheat_pal, legend_title = "Probability of cell type assignment", type = "continuous") + 
+  theme(legend.key.width = unit(2, "lines")) + scale_fill_gradientn(colours = pheat_pal, limits = c(0,1), breaks = c(0,1)))
+
+pdf("/datadrive/projects/cellassign-paper/drawings/v4/components/probs_legend.pdf", width = 6, height = 2, onefile = FALSE)
+grid.draw(prob_legend)
+dev.off()
+```
+
+```{r}
 example_marker_list <- list(
   'T cell'=c('CD2', 'CD3', 'CD45'),
   'B cell'=c('CD19', 'CD20', 'CD79A', 'CD45'),
