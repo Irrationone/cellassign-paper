@@ -9,7 +9,7 @@ The pipelines under `pipelines/` can be run using [snakemake](https://snakemake.
 
 Config files for each pipeline (`pipelines/*/config/*.yaml`) must be updated with correct data paths for pipelines to run. 
 
-Additional dependencies:
+Additional dependencies for simulation and model fitting pipelines:
 
 * pymc3 3.5
 * python 3.6.6
