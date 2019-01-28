@@ -1,11 +1,15 @@
+# Pipeline directories
 workdir: /datadrive/projects/cellassign-paper/results/scratch/external/v1
 outdir: /datadrive/projects/cellassign-paper/results/outputs/external/v1
 logdir: /datadrive/projects/cellassign-paper/results/logs/external/v1
 
+# Obtained from Koh et al. (2016) supplementary files
 koh_data:
   bulkrna_de: /datadrive/data/external/scrna/koh/SD_bulkRNA_DE_annotated.csv
 
+# Analysis parameters
 koh_analysis:
+  # Cell types to consider
   celltypes:
     - hESC
     - APS
@@ -15,6 +19,7 @@ koh_analysis:
     - Sclrtm
     - D5CntrlDrmmtm
     - D2LtM
+  # Clustering methods to use
   clustering_methods:
     - seurat_0.4
     - seurat_0.8
