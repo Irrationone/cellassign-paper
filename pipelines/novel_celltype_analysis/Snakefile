@@ -5,7 +5,7 @@ singularity: "docker://aalzhang/spectrum-master-rstudio:v1.0"
 rule all:
     input:
         expand(
-            normalized='{workdir}/sce_normalized/{{dataset}}.rds'.format(workdir=config['workdir']),
+            '{workdir}/sce_normalized/{{dataset}}.rds'.format(workdir=config['workdir']),
             dataset=config['datasets']
         )
 
