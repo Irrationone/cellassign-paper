@@ -1,0 +1,34 @@
+# Pipeline directories
+workdir: /datadrive/projects/cellassign-paper/results/scratch/novel_celltype_analysis/v1
+outdir: /datadrive/projects/cellassign-paper/results/outputs/novel_celltype_analysis/v1
+logdir: /datadrive/projects/cellassign-paper/results/logs/novel_celltype_analysis/v1
+
+datasets:
+  mcparland_liver: /datadrive/data/external/scrna/mcparland2018/human_liver.rds
+
+preprocessing:
+  mcparland_liver:
+    max_mito: 100
+    max_ribo: 100
+
+
+cellassign:
+  liver_alldata_allmarkers:
+    data: mcparland_liver
+    marker_list: # PATH TO MAT
+    include_other: TRUE
+  liver_3data_3markers:
+    data: mcparland_liver
+    marker_list: # PATH TO MARKER MAT
+    include_other: FALSE
+  liver_3data_allmarkers:
+    data: mcparland_liver
+    marker_list: # PATH TO MAT
+    include_other: TRUE
+  liver_alldata_3markers:
+    data: mcparland_liver
+    marker_list: # PATH TO MAT
+    include_other: TRUE
+  
+
+
