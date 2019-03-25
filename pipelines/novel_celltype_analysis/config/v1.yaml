@@ -8,8 +8,11 @@ datasets:
 
 preprocessing:
   mcparland_liver:
+    nmads: Inf
     max_mito: 100
     max_ribo: 100
+    umap_neighbors: 15
+    umap_min_dist: 0.1
 
 
 cellassign:
