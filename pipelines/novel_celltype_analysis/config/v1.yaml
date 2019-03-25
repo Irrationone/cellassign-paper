@@ -16,22 +16,35 @@ preprocessing:
 
 
 cellassign:
-  liver_alldata_allmarkers:
-    data: mcparland_liver
-    marker_list: # PATH TO MAT
-    include_other: TRUE
-  liver_3data_3markers:
-    data: mcparland_liver
-    marker_list: # PATH TO MARKER MAT
-    include_other: FALSE
-  liver_3data_allmarkers:
-    data: mcparland_liver
-    marker_list: # PATH TO MAT
-    include_other: TRUE
-  liver_alldata_3markers:
-    data: mcparland_liver
-    marker_list: # PATH TO MAT
-    include_other: TRUE
+  mcparland_liver:
+    liver_alldata_allmarkers:
+      marker_list: # PATH TO MA[T
+      include_other: TRUE
+      num_runs: 1
+      B: 20
+      design_formula: ~\ patient
+      extra_opts: --shrinkage TRUE
+    liver_3data_3markers:
+      marker_list: # PATH TO MARKER MAT
+      include_other: FALSE
+      num_runs: 1
+      B: 20
+      design_formula: ~\ patient
+      extra_opts: --shrinkage TRUE
+    liver_3data_allmarkers:
+      marker_list: # PATH TO MAT
+      include_other: TRUE
+      num_runs: 1
+      B: 20
+      design_formula: ~\ patient
+      extra_opts: --shrinkage TRUE
+    liver_alldata_3markers:
+      marker_list: # PATH TO MAT
+      include_other: TRUE
+      num_runs: 1
+      B: 20
+      design_formula: ~\ patient
+      extra_opts: --shrinkage TRUE
   
 
 

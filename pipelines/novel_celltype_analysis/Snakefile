@@ -27,11 +27,41 @@ rule preprocess_sce:
     benchmark:
         '{logdir}/benchmarks/preprocess_sce/{{dataset}}.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/preprocess_sce.R '
+        'Rscript R/preprocess.R '
         '--sce {input.raw} '
         '--mito_thres {params.mito_thres} '
         '--ribo_thres {params.ribo_thres} '
         '--umap_neighbors {params.umap_neighbors} '
         '--umap_min_dist {params.umap_min_dist} '
         '--outfname {output.normalized} '
+        '>& {log}'
+
+rule cellassign_sce:
+    input:
+        normalized='{workdir}/sce_normalized/{{dataset}}.rds'.format(workdir=config['workdir']),
+        marker_list=lambda wildcards: config['cellassign'][wildcards.dataset][wildcards.fit]['marker_list'],
+    output:
+        fit='{outdir}/cellassign/{{dataset}}/{{fit}}.rds'.format(outdir=config['outdir']),
+    params:
+        name='cellassign-{dataset}-{fit}',
+        include_other=lambda wildcards: config['cellassign'][wildcards.dataset][wildcards.fit]['include_other'],
+        num_runs=lambda wildcards: config['cellassign'][wildcards.dataset][wildcards.fit]['num_runs'],
+        B=lambda wildcards: config['cellassign'][wildcards.dataset][wildcards.fit]['B'],
+        formula=lambda wildcards: config['cellassign'][wildcards.dataset][wildcards.fit]['design_formula'],
+        extra_opts=lambda wildcards: config['cellassign'][wildcards.dataset][wildcards.fit]['extra_opts'],
+    threads: 15
+    log:
+        '{logdir}/logs/cellassign/{{dataset}}/{{fit}}.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/cellassign/{{dataset}}/{{fit}}.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/cellassign_sce.R '
+        '--sce {input.normalized} '
+        '--marker_list {input.marker_list} '
+        '--include_other {params.include_other} '
+        '--num_runs {params.num_runs} '
+        '--rbf_pieces {params.B} '
+        '--design_formula {params.formula} '
+        '{params.extra_opts} '
+        '--outfname {output.fit} '
         '>& {log}'
