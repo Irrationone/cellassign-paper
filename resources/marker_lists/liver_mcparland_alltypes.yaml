@@ -1,0 +1,66 @@
+Cholangiocytes:
+  - KRT19
+  - EPCAM
+  - FXYD2
+  - CLDN4
+  - CLDN10
+  - SOX9
+  - MMP7
+  - CXCL1
+  - CFTR
+  - TFF2
+  - KRT7
+  - CD24
+Mature B cells:
+  - MS4A1
+  - LTB
+  - CD52
+  - IGHD
+Hepatocytes:
+  - ALB
+  - HAMP
+  - ARG1
+  - PCK1
+  - AFP
+  - BCHE
+LSECs:
+  - CALCRL
+  - CD32B
+  - VWF
+Hepatic Stellate Cells:
+  - ACTA2
+  - COL1A1
+  - TAGLN
+  - COL1A2
+  - COL3A1
+  - SPARC
+  - RBP1
+  - DCN
+  - MYL9
+Macrophages:
+  - CD68
+  - MARCO
+ab T cells:
+  - CD2
+  - CD3D
+  - TRAC
+  - IL32
+  - CD3E
+gd T cells:
+  - NKG7
+  - FCGR3A
+  - HOPX
+  - GNLY
+NK cells:
+  - GZMK
+  - KLRF1
+  - CCL3
+  - CMC1
+Plasma cells:
+  - CD27
+  - IGHG1
+Erythroid cells:
+  - HBB
+  - SLC25A37
+  - CA1
+  - ALAS2

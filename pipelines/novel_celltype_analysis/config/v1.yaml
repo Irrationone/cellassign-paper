@@ -18,33 +18,51 @@ preprocessing:
 cellassign:
   mcparland_liver:
     liver_alldata_allmarkers:
-      marker_list: # PATH TO MA[T
+      marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
       include_other: TRUE
       num_runs: 1
       B: 20
       design_formula: ~\ patient
       extra_opts: --shrinkage TRUE
+      celltypes: all
+    liver_alldata_allmarkers_fixed:
+      marker_list: ../../resources/marker_lists/liver_mcparland_alltypes_fixed.yaml
+      include_other: TRUE
+      num_runs: 1
+      B: 20
+      design_formula: ~\ patient
+      extra_opts: --shrinkage TRUE
+      celltypes: all
     liver_3data_3markers:
-      marker_list: # PATH TO MARKER MAT
+      marker_list: ../../resources/marker_lists/liver_mcparland_3types.yaml
       include_other: FALSE
       num_runs: 1
       B: 20
       design_formula: ~\ patient
       extra_opts: --shrinkage TRUE
+      celltypes: 
+        - Cholangiocytes
+        - Mature\ B\ cells
+        - Hepatocytes
     liver_3data_allmarkers:
-      marker_list: # PATH TO MAT
+      marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
       include_other: TRUE
       num_runs: 1
       B: 20
       design_formula: ~\ patient
       extra_opts: --shrinkage TRUE
+      celltypes:
+        - Cholangiocytes
+        - Mature\ B\ cells
+        - Hepatocytes
     liver_alldata_3markers:
-      marker_list: # PATH TO MAT
+      marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
       include_other: TRUE
       num_runs: 1
       B: 20
       design_formula: ~\ patient
       extra_opts: --shrinkage TRUE
+      celltypes: all
   
 
 

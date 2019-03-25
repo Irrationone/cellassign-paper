@@ -49,7 +49,7 @@ rule cellassign_sce:
         B=lambda wildcards: config['cellassign'][wildcards.dataset][wildcards.fit]['B'],
         formula=lambda wildcards: config['cellassign'][wildcards.dataset][wildcards.fit]['design_formula'],
         extra_opts=lambda wildcards: config['cellassign'][wildcards.dataset][wildcards.fit]['extra_opts'],
-    threads: 15
+    threads: 20
     log:
         '{logdir}/logs/cellassign/{{dataset}}/{{fit}}.log'.format(logdir=config['logdir'])
     benchmark:
