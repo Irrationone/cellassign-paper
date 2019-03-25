@@ -10,7 +10,7 @@ rule all:
         ),
         ['{outdir}/cellassign/{{dataset}}/{{fit}}.rds'.format(
             outdir=config['outdir'], dataset=d, fit=f
-        ) for f in config['cellassign'][d] for d in config['datasets']],
+        ) for d,f in (d,config['cellassign'][d]) for d in config['datasets']],
 
 
 # Filter and normalize SingleCellExperiment
