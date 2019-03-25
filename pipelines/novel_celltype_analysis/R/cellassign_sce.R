@@ -30,16 +30,25 @@ parser$add_argument('--rbf_pieces', type = 'integer',
                     help="Number of pieces to fit (RBF)", default = 20)
 parser$add_argument('--min_delta', type = 'double',
                     help="Minimum delta value", default = 2)
-parser$add_argument('--delta_prior', action = 'store_true',
+parser$add_argument('--shrinkage', action = 'store_true',
                     help="Use delta shrinkage prior")
 parser$add_argument('--conda_env', type = 'character',
                     help="Name of conda environment with tensorflow", default = "r-tensorflow")
+parser$add_argument('--design_formula', type = 'character',
+                    help="Design matrix formula, or 'none' for none", default = "none")
+parser$add_argument('--celltypes', type = 'character',
+                    help="Celltypes to subset", default = "all")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for cell cycle assignments.")
 args <- parser$parse_args()
 
 sce_path <- args$sce
 sce <- readRDS(sce_path)
+
+if (args$celltypes != "all") {
+  sce <- sce %>%
+    scater::filter(celltype %in% args$celltypes)
+}
 
 # Attempt to snakemake's default
 Sys.setenv(PYTHONPATH='')
@@ -63,28 +72,34 @@ if (is.null(args$marker_gene_matrix)) {
 }
 
 rho <- as.matrix(rho)
+rho <- rho[intersect(rownames(rho), rowData(sce)$Symbol),]
 s <- sizeFactors(sce)
 
 sce_markers <- sce[get_ensembl_id(rownames(rho), sce),]
 rownames(sce_markers) <- rownames(rho)
 counts(sce_markers) <- as.matrix(counts(sce_markers))
 
-if (length(unique(sce_markers$patient)) > 1) {
-  design <- model.matrix(~ patient, data = colData(sce_markers))
+# Create design matrix
+if (args$design_formula != "none") {
+  dat <- colData(sce_markers) %>% 
+    as.data.frame
+  design <- model.matrix(as.formula(args$design_formula), data = dat)
 } else {
   design <- NULL
 }
 
-cellassign_res <- cellassign_em(exprs_obj = sce_markers, 
-                                s = s, 
-                                marker_gene_info = rho, 
-                                X = design,
-                                B = args$rbf_pieces, 
-                                shrinkage = args$delta_prior,  
-                                verbose = FALSE, 
-                                rel_tol_em = 1e-5, 
-                                num_runs = args$num_runs, 
-                                min_delta = args$min_delta)
+print(head(design))
+
+cellassign_res <- cellassign(exprs_obj = sce_markers, 
+                             s = s, 
+                             marker_gene_info = rho, 
+                             X = design,
+                             B = args$rbf_pieces, 
+                             shrinkage = args$shrinkage,  
+                             verbose = FALSE, 
+                             rel_tol_em = 1e-5, 
+                             num_runs = args$num_runs, 
+                             min_delta = args$min_delta)
 
 # Write outputs
 saveRDS(cellassign_res, file = args$outfname)

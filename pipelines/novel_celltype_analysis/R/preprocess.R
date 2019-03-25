@@ -32,6 +32,16 @@ args <- parser$parse_args()
 sce_path <- args$sce
 sce <- readRDS(sce_path)
 
+# Get ensembl gene IDs of mitochondrial and ribosomal genes
+mito_genes <- as.character(rowData(sce)$Symbol[str_detect(rowData(sce)$Symbol, "^MT\\-") & !is.na(rowData(sce)$Symbol)]) %>% 
+  get_ensembl_id(sce)
+
+ribo_genes <- as.character(rowData(sce)$Symbol[str_detect(rowData(sce)$Symbol, "^RP(L|S)") & !is.na(rowData(sce)$Symbol)]) %>%
+  get_ensembl_id(sce)
+
+sce <- calculateQCMetrics(sce, exprs_values = "counts", feature_controls =
+                            list(mitochondrial=mito_genes, ribosomal=ribo_genes))
+
 sce_filtered <- filter_cells(sce, nmads = args$nmads, type = "lower", 
                              log = TRUE, max_mito = args$mito_thres, max_ribo = args$ribo_thres)
 
