@@ -6,7 +6,7 @@ rule all:
     input:
         expand(
             normalized='{workdir}/sce_normalized/{{dataset}}.rds'.format(workdir=config['workdir']),
-            dataset=config['dataset']
+            dataset=config['datasets']
         )
 
 
