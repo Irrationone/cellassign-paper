@@ -7,7 +7,10 @@ rule all:
         expand(
             '{workdir}/sce_normalized/{{dataset}}.rds'.format(workdir=config['workdir']),
             dataset=config['datasets']
-        )
+        ),
+        ['{outdir}/cellassign/{{dataset}}/{{fit}}.rds'.format(
+            outdir=config['outdir'], dataset=d, fit=f
+        ) for f in config['cellassign'][d] for d in config['datasets']],
 
 
 # Filter and normalize SingleCellExperiment
