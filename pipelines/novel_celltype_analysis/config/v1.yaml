@@ -5,9 +5,37 @@ logdir: /datadrive/projects/cellassign-paper/results/logs/novel_celltype_analysi
 
 datasets:
   mcparland_liver: /datadrive/data/external/scrna/mcparland2018/human_liver.rds
+  tian_3_10x: /datadrive/data/external/scrna/tian2018_qc/sce_sc_10x_qc.rds
+  tian_3_CELseq2: /datadrive/data/external/scrna/tian2018_qc/sce_sc_CELseq2_qc.rds
+  tian_3_Dropseq: /datadrive/data/external/scrna/tian2018_qc/sce_sc_Dropseq_qc.rds
+  tian_mixture3: /datadrive/data/external/scrna/tian2018_qc/sce_SC3_qc.rds
 
 preprocessing:
   mcparland_liver:
+    nmads: Inf
+    max_mito: 100
+    max_ribo: 100
+    umap_neighbors: 15
+    umap_min_dist: 0.1
+  tian_3_10x:
+    nmads: Inf
+    max_mito: 100
+    max_ribo: 100
+    umap_neighbors: 15
+    umap_min_dist: 0.1
+  tian_3_CELseq2:
+    nmads: Inf
+    max_mito: 100
+    max_ribo: 100
+    umap_neighbors: 15
+    umap_min_dist: 0.1
+  tian_3_Dropseq:
+    nmads: Inf
+    max_mito: 100
+    max_ribo: 100
+    umap_neighbors: 15
+    umap_min_dist: 0.1
+  tian_mixture3:
     nmads: Inf
     max_mito: 100
     max_ribo: 100
