@@ -31,6 +31,7 @@ intermediates/
 .ExperimentHub/
 analysis/jupyter/modeling_differential_expression_testing.ipynb
 .snakemake_timestamp
+analysis/Rmd/private/
 
 ## Allow
 !sce_t4k_params.rds
