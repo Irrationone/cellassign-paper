@@ -26,7 +26,7 @@ cellassign:
       extra_opts: --shrinkage TRUE
       celltypes: all
     liver_alldata_allmarkers_fixed:
-      marker_list: ../../resources/marker_lists/liver_mcparland_alltypes_fixed.yaml
+      marker_list: ../../resources/marker_lists/liver_mcparland_alltypes_revised.yaml
       include_other: TRUE
       num_runs: 1
       B: 20
