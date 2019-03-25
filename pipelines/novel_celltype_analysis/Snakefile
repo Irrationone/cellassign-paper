@@ -28,10 +28,10 @@ rule preprocess_sce:
         '{logdir}/benchmarks/preprocess_sce/{{dataset}}.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/preprocess_sce.R '
-        '--sce {input.hgsc_raw} '
+        '--sce {input.raw} '
         '--mito_thres {params.mito_thres} '
         '--ribo_thres {params.ribo_thres} '
         '--umap_neighbors {params.umap_neighbors} '
         '--umap_min_dist {params.umap_min_dist} '
-        '--outfname {output} '
+        '--outfname {output.normalized} '
         '>& {log}'
