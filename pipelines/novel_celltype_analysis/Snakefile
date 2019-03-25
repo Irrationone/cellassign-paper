@@ -5,11 +5,12 @@ singularity: "docker://alzhang/spectrum-master-rstudio:v1.0"
 def get_cellassign_outputs():
     files = []
     for d in config['datasets']:
-        for f in config['cellassign'][d]:
-            x = '{outdir}/cellassign/{dataset}/{fit}.rds'.format(
-                outdir=config['outdir'], dataset=d, fit=f
-            )
-            files.append(x)
+        if d in config['cellassign'].keys():
+            for f in config['cellassign'][d]:
+                x = '{outdir}/cellassign/{dataset}/{fit}.rds'.format(
+                    outdir=config['outdir'], dataset=d, fit=f
+                )
+                files.append(x)
     return(files)
 
 rule all:
