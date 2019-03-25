@@ -9,7 +9,7 @@ def get_cellassign_outputs():
             x = '{outdir}/cellassign/{dataset}/{fit}.rds'.format(
                 outdir=config['outdir'], dataset=d, fit=f
             )
-            files += x
+            files.append(x)
     return(files)
 
 rule all:
