@@ -18,10 +18,10 @@ rule preprocess_sce:
         normalized='{workdir}/sce_normalized/{{dataset}}.rds'.format(workdir=config['workdir']),
     params:
         name='preprocess-sce-{dataset}',
-        mito_thres=config['preprocessing'][wildcards.dataset]['max_mito'],
-        ribo_thres=config['preprocessing'][wildcards.dataset]['max_ribo'],
-        umap_neighbors=config['preprocessing'][wildcards.dataset]['umap_neighbors'],
-        umap_min_dist=config['preprocessing'][wildcards.dataset]['umap_min_dist'],
+        mito_thres=lambda wildcards: config['preprocessing'][wildcards.dataset]['max_mito'],
+        ribo_thres=lambda wildcards: config['preprocessing'][wildcards.dataset]['max_ribo'],
+        umap_neighbors=lambda wildcards: config['preprocessing'][wildcards.dataset]['umap_neighbors'],
+        umap_min_dist=lambda wildcards: config['preprocessing'][wildcards.dataset]['umap_min_dist'],
     log:
         '{logdir}/logs/preprocess_sce/{{dataset}}.log'.format(logdir=config['logdir'])
     benchmark:
