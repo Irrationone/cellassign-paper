@@ -19,6 +19,7 @@ Mature B cells:
   - CD79A # Added
   - PTPRC # Added
   - IGKC # Added
+  - CD19 # Added
 Hepatocytes:
   - ALB
   - HAMP
@@ -28,8 +29,10 @@ Hepatocytes:
   - BCHE
 LSECs:
   - CALCRL
-  - CD32B
+  #- CD32B # Nonexistant in the gene matrix
   - VWF
+  - PECAM1 # Added
+  - CLEC14A # Added
 Hepatic Stellate Cells:
   - ACTA2
   - COL1A1
@@ -71,9 +74,8 @@ NK cells:
   - PTPRC # Added
 Plasma cells:
   - CD27
-  - IGHG1
+  # - IGHG1 # Removed -- not specific
   - CD79A # Added
-  - IGHG2 # Added
   - PTPRC # Added
   - IGKC # Added
 Erythroid cells:

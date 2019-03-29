@@ -1,0 +1,26 @@
+Cholangiocytes:
+  - KRT19
+  - EPCAM
+  - FXYD2
+  - CLDN4
+  - CLDN10
+  - SOX9
+  - MMP7
+  - CXCL1
+  - CFTR
+  - TFF2
+  - KRT7
+  - CD24
+ab T cells:
+  - CD2
+  - CD3D
+  - TRAC
+  - IL32
+  - CD3E
+Hepatocytes:
+  - ALB
+  - HAMP
+  - ARG1
+  - PCK1
+  - AFP
+  - BCHE
