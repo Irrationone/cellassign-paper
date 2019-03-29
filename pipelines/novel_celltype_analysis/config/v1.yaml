@@ -9,6 +9,7 @@ datasets:
   tian_3_CELseq2: /datadrive/data/external/scrna/tian2018_qc/sce_sc_CELseq2_qc.rds
   tian_3_Dropseq: /datadrive/data/external/scrna/tian2018_qc/sce_sc_Dropseq_qc.rds
   tian_mixture3: /datadrive/data/external/scrna/tian2018_qc/sce_SC3_qc.rds
+  follicular: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/sce_follicular_annotated_final.rds
 
 preprocessing:
   mcparland_liver:
@@ -36,6 +37,12 @@ preprocessing:
     umap_neighbors: 15
     umap_min_dist: 0.1
   tian_mixture3:
+    nmads: Inf
+    max_mito: 100
+    max_ribo: 100
+    umap_neighbors: 15
+    umap_min_dist: 0.1
+  follicular:
     nmads: Inf
     max_mito: 100
     max_ribo: 100
@@ -126,6 +133,15 @@ cellassign:
     num_runs: 3
     B: 20
     design_formula: ~\ path
+    extra_opts: --shrinkage
+    celltypes: all
+  follicular_lk_full:
+    dataset: follicular
+    marker_list: ../../resources/marker_lists/follicular_merged_lk.yaml
+    include_other: FALSE
+    num_runs: 3
+    B: 20
+    design_formula: ~\ patient
     extra_opts: --shrinkage
     celltypes: all
 
