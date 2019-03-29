@@ -1,7 +1,7 @@
 # Pipeline directories
-workdir: /datadrive/projects/cellassign-paper/results/scratch/novel_celltype_analysis/v1
-outdir: /datadrive/projects/cellassign-paper/results/outputs/novel_celltype_analysis/v1
-logdir: /datadrive/projects/cellassign-paper/results/logs/novel_celltype_analysis/v1
+workdir: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v1
+outdir: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v1
+logdir: /datadrive/projects/cellassign-paper/results/logs/real_data_benchmarking/v1
 
 datasets:
   mcparland_liver: /datadrive/data/external/scrna/mcparland2018/human_liver.rds
