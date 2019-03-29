@@ -43,7 +43,7 @@ rule preprocess_sce:
 rule cellassign_sce:
     input:
         normalized=lambda wildcards: expand(
-            '{workdir}/sce_normalized/{{dataset}}.rds'.format(
+            '{workdir}/sce_normalized/{dataset}.rds'.format(
                 workdir=config['workdir'], 
                 dataset=config['cellassign'][wildcards.fit]['dataset']
             )
