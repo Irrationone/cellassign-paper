@@ -44,53 +44,90 @@ preprocessing:
 
 
 cellassign:
-  mcparland_liver:
-    liver_alldata_allmarkers:
-      marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
-      include_other: TRUE
-      num_runs: 1
-      B: 20
-      design_formula: ~\ patient
-      extra_opts: --shrinkage
-      celltypes: all
-    liver_alldata_allmarkers_fixed:
-      marker_list: ../../resources/marker_lists/liver_mcparland_alltypes_revised.yaml
-      include_other: TRUE
-      num_runs: 1
-      B: 20
-      design_formula: ~\ patient
-      extra_opts: --shrinkage
-      celltypes: all
-    liver_3data_3markers:
-      marker_list: ../../resources/marker_lists/liver_mcparland_3types.yaml
-      include_other: FALSE
-      num_runs: 1
-      B: 20
-      design_formula: ~\ patient
-      extra_opts: --shrinkage
-      celltypes: 
-        - Cholangiocytes
-        - Mature\ B\ cells
-        - Hepatocytes
-    liver_3data_allmarkers:
-      marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
-      include_other: TRUE
-      num_runs: 1
-      B: 20
-      design_formula: ~\ patient
-      extra_opts: --shrinkage
-      celltypes:
-        - Cholangiocytes
-        - Mature\ B\ cells
-        - Hepatocytes
-    liver_alldata_3markers:
-      marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
-      include_other: TRUE
-      num_runs: 1
-      B: 20
-      design_formula: ~\ patient
-      extra_opts: --shrinkage
-      celltypes: all
-  
+  liver_alldata_allmarkers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
+    include_other: TRUE
+    num_runs: 1
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: all
+  liver_alldata_allmarkers_fixed:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes_revised.yaml
+    include_other: TRUE
+    num_runs: 1
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: all
+  liver_3data_3markers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_3types.yaml
+    include_other: FALSE
+    num_runs: 1
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: 
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+  liver_3data_allmarkers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
+    include_other: TRUE
+    num_runs: 1
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes:
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+  liver_alldata_3markers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
+    include_other: TRUE
+    num_runs: 1
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: all
+  tian_20markers:
+    dataset:
+      - tian_3_CELseq2
+      - tian_mixture3
+    marker_list: ../../resources/marker_lists/tian_20_73_markers.yaml
+    include_other: FALSE
+    num_runs: 3
+    B: 20
+    design_formula: ~\ path
+    extra_opts: --shrinkage
+    celltypes: all
+  tian_30markers:
+    dataset:
+      - tian_3_CELseq2
+      - tian_mixture3
+    marker_list: ../../resources/marker_lists/tian_30_73_markers.yaml
+    include_other: FALSE
+    num_runs: 3
+    B: 20
+    design_formula: ~\ path
+    extra_opts: --shrinkage
+    celltypes: all
+  tian_50markers:
+    dataset:
+      - tian_3_CELseq2
+      - tian_mixture3
+    marker_list: ../../resources/marker_lists/tian_50_73_markers.yaml
+    include_other: FALSE
+    num_runs: 3
+    B: 20
+    design_formula: ~\ path
+    extra_opts: --shrinkage
+    celltypes: all
+
 
 
