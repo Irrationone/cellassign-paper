@@ -1,0 +1,132 @@
+---
+title: "Parameter inference"
+output: html_notebook
+---
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE, cache = TRUE, cache.lazy = FALSE, fig.width = 8, fig.height = 4.5)
+```
+
+```{r, echo = FALSE}
+library(knitr)
+library(tidyverse)
+library(tensorflow)
+library(SingleCellExperiment)
+library(scater)
+library(data.table)
+library(pheatmap)
+library(ggrepel)
+library(scran)
+library(BiocParallel)
+library(limma)
+library(edgeR)
+library(GSEABase)
+library(scvis)
+library(future)
+
+library(scrna.utils)
+library(scrna.sceutils)
+library(cellassign)
+library(cellassign.utils)
+
+environment(read10xResults2) <- asNamespace("scater")
+
+plan(multiprocess)
+```
+
+# Parameter inference
+
+We do parameter inference with `X` set to NULL (i.e. no batch covariates). 
+
+```{r, echo = FALSE}
+set.seed(1001)
+
+G <- 30
+C <- 8
+marker_prob <- 1/4
+N <- 2000
+P <- 1
+B <- 20
+
+rho <- matrix(rbernoulli(n = G * C, marker_prob),
+              nrow = G,
+              ncol = C,
+              byrow = TRUE) + 0
+
+delta <- matrix(runif(n = G * C, 
+                      min = log(2),
+                      max = 10),
+                nrow = G,
+                ncol = C,
+                byrow = TRUE) * rho
+
+beta <- matrix(rnorm(n = G * P,
+                     mean = -5,
+                     sd = 1),
+               nrow = G,
+               ncol = P,
+               byrow = TRUE)
+
+s <- rlnorm(n = N, meanlog = 0, sdlog = 1)
+s <- s/mean(s)
+
+pi <- rmultinom(n = N, size = 1, prob = rep(1/C, C)) %>% 
+  apply(2, function(x) which(x == 1))
+
+X <- matrix(1, nrow = N, ncol = P)
+
+
+a <- runif(n = B, min = 0, max = 10)
+
+Y <- simulate_cellassign(rho,
+                         s,
+                         pi,
+                         delta,
+                         B = B, 
+                         a = a,
+                         beta,
+                         X = X,
+                         min_Y = 0,
+                         max_Y = 2000)
+```
+
+### Applying CellAssign
+
+```{r, echo = FALSE}
+res <- cellassign_em(exprs_obj = Y, s = s, rho = rho, X = X, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = TRUE, verbose = FALSE)
+```
+
+## Inferred parameters
+
+### Delta
+
+```{r, echo = FALSE}
+delta_df <- data.frame(true=as.numeric(delta), inferred=as.numeric(res$mle_params$delta))
+delta_df <- delta_df %>% dplyr::filter(true != 0)
+
+ggplot(delta_df, aes(x=true, y = inferred)) + geom_point() + theme_bw() + theme_Publication() + xlab(expression("True "~delta)) + ylab(expression("Inferred "~delta)) + geom_abline(slope = 1)
+```
+
+## Beta
+
+```{r, echo = FALSE}
+beta_df <- data.frame(true=as.numeric(beta), inferred=as.numeric(res$mle_params$beta))
+
+ggplot(beta_df, aes(x=true, y = inferred)) + geom_point() + theme_bw() + theme_Publication() + xlab(expression("True "~beta)) + ylab(expression("Inferred "~beta)) + geom_abline(slope = 1)
+```
+
+## Cell type assignments
+
+```{r, echo = FALSE}
+table(pi, res$cell_type)
+```
+
+## Alpha (spline)
+
+Can't be compared, since the min_Y and max_Y used in simulation and in inference are different. 
+
+
+# Summary
+
+As we can see, the model infers $\delta$ and $\beta$ values that are consistent with simulation. 
+

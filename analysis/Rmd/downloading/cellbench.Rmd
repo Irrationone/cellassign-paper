@@ -241,6 +241,9 @@ sce <- tian_merged
 # sce <- sce[,keep_cols]
 
 rho <- rho_master[intersect(rownames(rho_master), rowData(sce)$Symbol),]
+set.seed(101)
+rho <- rho[sample(1:nrow(rho), size = 50),]
+#rho["IGFBP7","H2228"] <- 0
 # rho <- cbind(rho, data.frame('other'=0)) %>%
 #   as.matrix
 s <- sizeFactors(sce)
@@ -251,7 +254,7 @@ counts(sce_markers) <- as.matrix(counts(sce_markers))
 
 design <- model.matrix(~ sample_id, colData(sce_markers))
 
-cellassign_res2 <- cellassign(exprs_obj = sce_markers, 
+cellassign_res3 <- cellassign(exprs_obj = sce_markers, 
                              s = s, 
                              marker_gene_info = rho, 
                              X = design,
@@ -265,9 +268,9 @@ cellassign_res2 <- cellassign(exprs_obj = sce_markers,
 ```
 
 ```{r}
-sce$cellassign_cluster <- cellassign_res2$cell_type
+sce$cellassign_cluster <- cellassign_res3$cell_type
 
-probs <- cellassign_res2$mle_params$gamma
+probs <- cellassign_res3$mle_params$gamma
 colnames(probs) <- paste0(colnames(probs), "_prob")
 
 sce$max_prob <- rowMaxs(probs) 
@@ -283,7 +286,20 @@ plotTSNE(sce, colour_by = "cellassign_cluster")
 ```{r}
 df <- colData(sce) %>%
   as.data.frame %>%
-  dplyr::select(sample_id, H1975, HCC827, H2228, H1975_prob, HCC827_prob, H2228_prob, cellassign_cluster)
+  dplyr::select(sample_id, H1975, HCC827, H2228, H1975_prob, HCC827_prob, H2228_prob) %>%
+  dplyr::mutate(row=1:n())
 
-ggplot(df %>% dplyr::filter(H1975 >= 0.5), aes(x=factor(H1975*9), y=H1975_prob)) + geom_boxplot(outlier.size = -1) +  geom_point(aes(colour=sample_id), position = position_jitter(width = 0.2, height = 0)) + theme_bw() + theme_Publication() + theme_nature()
+cell_props <- melt(df, id.vars = c("sample_id", "row"), measure.vars = c("H1975", "HCC827", "H2228"),
+                   variable.name = "cell_line", value.name = "prop_cells")
+mix_probs <- melt(df, id.vars = c("sample_id", "row"), measure.vars = c("H1975_prob", "HCC827_prob", "H2228_prob"),
+                  variable.name = "cell_line", value.name = "cellassign_prob") %>%
+  dplyr::mutate(cell_line = str_replace_all(cell_line, "_prob", ""))
+
+combined2 <- cell_props %>% dplyr::inner_join(mix_probs)
+total_cells <- combined2 %>% dplyr::group_by(row) %>% dplyr::summarise(total = sum(prop_cells * 9))
+complete_cells <- total_cells %>%
+  dplyr::filter(total == 9)
+
+ggplot(combined2 %>%
+         dplyr::filter(row %in% complete_cells$row), aes(x=factor(prop_cells * 9), y = cellassign_prob)) + geom_boxplot(outlier.size = -1) +  geom_point(aes(colour=sample_id), position = position_jitter(width = 0.2, height = 0)) + theme_bw() + theme_Publication() + theme_nature() + facet_wrap(~ cell_line, ncol = 1)
 ```

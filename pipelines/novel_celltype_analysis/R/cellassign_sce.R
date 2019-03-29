@@ -16,8 +16,8 @@ library(cellassign.utils)
 library(argparse)
 
 parser <- ArgumentParser(description = "Run CellAssign on a SingleCellExperiment")
-parser$add_argument('--sce', metavar='FILE', type='character',
-                    help="Path to SingleCellExperiment RDS")
+parser$add_argument('--sce', metavar='FILE', type='character', nargs = '+',
+                    help="Path(s) to SingleCellExperiment RDS")
 parser$add_argument('--marker_gene_matrix', metavar='FILE', type = 'character',
                     help="Path to a rho matrix", default = NULL)
 parser$add_argument('--marker_list', metavar='FILE', type = 'character',
@@ -42,8 +42,46 @@ parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for cell cycle assignments.")
 args <- parser$parse_args()
 
-sce_path <- args$sce
-sce <- readRDS(sce_path)
+sce_paths <- unlist(args$sce)
+
+if (length(sce_paths) == 1) {
+  sce <- readRDS(sce_paths[1])
+} else {
+  sces <- lapply(sce_paths, function(x) {
+    sce <- readRDS(x)
+    colData(sce)$path <- x
+    return(sce)
+  })
+  
+  coldata_union <- Reduce(union, lapply(sces, function(x) {
+    colnames(colData(x))
+  }))
+  
+  common_genes <- Reduce(intersect, lapply(sces, function(x) {
+    rownames(x)
+  }))
+  
+  sces <- lapply(sces, function(x) {
+    missing_cols <- setdiff(coldata_union, colnames(colData(x)))
+    rowdat_cols <- setdiff(colnames(rowData(x)), c("mean_counts", "log10_mean_counts",
+                                                   "n_cells_by_counts", "pct_dropout_by_counts", "total_counts",
+                                                   "log10_total_counts"))
+    rowData(x) <- rowData(x)[,rowdat_cols]
+    colData(x)[,missing_cols] <- NA
+    colData(x) <- colData(x)[,coldata_union]
+    x <- x[common_genes,]
+    return(x)
+  })
+  
+  sce <- Reduce(cbind, sces)
+  
+  # Recompute size factors
+  qclust <- quickCluster(sce, min.size = 30)
+  sce <- computeSumFactors(sce, clusters = qclust)
+  
+  sce$size_factor <- sizeFactors(sce)
+}
+
 
 if (args$celltypes != "all") {
   sce <- sce %>%

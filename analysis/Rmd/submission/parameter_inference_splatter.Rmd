@@ -1,0 +1,112 @@
+---
+title: "Parameter inference -- splatter"
+output: html_notebook
+---
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE, cache = TRUE, cache.lazy = FALSE, fig.width = 8, fig.height = 4.5)
+```
+
+```{r, echo = FALSE}
+library(knitr)
+library(tidyverse)
+library(tensorflow)
+library(SingleCellExperiment)
+library(scater)
+library(data.table)
+library(pheatmap)
+library(ggrepel)
+library(scran)
+library(BiocParallel)
+library(limma)
+library(edgeR)
+library(GSEABase)
+library(scvis)
+library(future)
+library(splatter)
+
+library(scrna.utils)
+library(scrna.sceutils)
+library(cellassign)
+library(cellassign.utils)
+
+environment(read10xResults2) <- asNamespace("scater")
+
+plan(multiprocess)
+```
+
+## splatter simulate
+
+```{r, echo = FALSE}
+sce_t4k <- readRDS("/datadrive/projects/cellassign-analysis/pipelines/simulate-toil/test/sce_t4k.rds")
+```
+
+```{r, echo = FALSE}
+model_params <- splatEstimate(as.matrix(counts(sce_t4k)))
+```
+
+```{r, echo = FALSE}
+num_groups <- 4
+num_batches <- 1
+num_cells <- 1000
+de_facscale <- 0.8
+de_facloc <- 4
+de_prob <- 0.002
+seed <- 8423
+sim_model <- "splat"
+group_probs <- rep(1/num_groups, num_groups)
+batch_cells <- rep(num_cells/num_batches, num_batches)
+
+model_params_modified <- model_params
+
+model_params_modified@nCells <- num_cells
+model_params_modified@de.prob <- de_prob
+model_params_modified@nBatches <- num_batches
+model_params_modified@batchCells <- batch_cells
+model_params_modified@nGroups <- num_groups
+model_params_modified@group.prob <- group_probs
+
+model_params_modified@de.facLoc <- de_facloc
+model_params_modified@de.facScale <- de_facscale
+
+model_params_modified@seed <- seed
+```
+
+```{r, echo = FALSE}
+sce_sim <- splatSimulate(params = model_params_modified, method = "groups", verbose = TRUE)
+```
+
+```{r, echo = FALSE}
+sce_sim <- normalize_sce_sim(sce_sim, run_dimred = TRUE)
+```
+
+```{r, echo = FALSE}
+plotPCA(sce_sim, ncomponents = 2, colour_by = "Group")
+```
+
+```{r, echo = FALSE}
+plotTSNE(sce_sim, ncomponents = 2, colour_by = "Group")
+```
+
+```{r, echo = FALSE}
+s <- sizeFactors(sce_sim)
+B <- 20
+X <- NULL
+
+markers_to_use <- select_markers(sce_sim, percentile = 0, frac_genes = 1, percentile_type = "mean_expr")
+## CONSTRUCT RHO FROM VALUES IN sce_sim -- CHECK OLD CODE
+
+rho <- create_rho_matrix(sce_sim, markers_to_use)
+```
+
+```{r, echo = FALSE}
+res <- cellassign_em(exprs_obj = sce_sim[rownames(rho),], s = s, rho = rho, X = X, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = TRUE, verbose = FALSE)
+```
+
+### Delta
+
+```{r, echo = FALSE}
+delta_compare(sce_sim[rownames(rho),], res, colour_by = "Group", shape_by = "high_expr")
+```
+
+

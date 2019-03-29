@@ -1,0 +1,102 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(biomaRt)
+library(HoneyBADGER)
+
+gtex_file <- '/datadrive/data/external/gtex/GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_median_tpm.gct'
+gtex_expr <- fread(gtex_file, skip = 2, sep = "\t")
+
+gtex_expr_summarized <- gtex_expr %>%
+  dplyr::group_by(Description) %>% 
+  dplyr::summarise(ft=mean(`Fallopian Tube`))
+
+ft_expr <- gtex_expr_summarized$ft
+names(ft_expr) <- gtex_expr_summarized$Description
+```
+
+```{r}
+filterNoExpression <- function (sce) {
+    return(sce[rowSums(as.matrix(logcounts(sce))[, -1]) > 0,])
+}
+
+sce <- readRDS('/datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v1/sce_hgsc_annotated_final.rds')
+sce_epithelial <- sce %>% 
+  scater::filter(celltype == "Epithelial cells" & Epithelial.cells..broad. > 0.9)
+sce_epithelial$cell_id <- paste0("cell", 1:ncol(sce_epithelial))
+sce_epithelial <- filterNoExpression(sce_epithelial)
+
+
+epi_expr <- as.data.frame(as.matrix(logcounts(sce_epithelial)))
+colnames(epi_expr) <- sce_epithelial$cell_id
+symbols <- df_as_map(rowData(sce_epithelial) %>% as.data.frame,
+                     rownames(epi_expr),
+                     "ID",
+                     "Symbol")
+epi_expr <- epi_expr[!duplicated(symbols),]
+rownames(epi_expr) <- symbols[!duplicated(symbols)]
+
+## WAY TOO SLOW
+# epi_expr <- epi_expr %>%
+#   tibble::rownames_to_column(var = "ID") %>%
+#   dplyr::left_join(rowData(sce_epithelial) %>% 
+#                      as.data.frame %>%
+#                      dplyr::select(ID, Symbol)) %>%
+#   dplyr::group_by(Symbol) %>% 
+#   dplyr::select(-c(ID)) %>%
+#   dplyr::summarise_all(mean) %>%
+#   dplyr::ungroup()
+```
+
+```{r}
+mart.obj <- useMart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = 'hsapiens_gene_ensembl', host = "jul2015.archive.ensembl.org")
+
+common_genes <- sort(intersect(rownames(epi_expr), names(ft_expr)))
+epi_expr_common <- epi_expr[common_genes,]
+ft_expr_common <- ft_expr[common_genes]
+
+minMeanTest <- min(rowMeans(epi_expr_common))
+
+hb <- new('HoneyBADGER', name='VOA11543')
+hb$setGexpMats(epi_expr_common, 
+               ft_expr_common, 
+               mart.obj, 
+               minMeanBoth = minMeanTest, 
+               minMeanTest = minMeanTest,
+               minMeanRef = minMeanTest, verbose = TRUE)
+```
+
+```{r}
+hb$plotGexpProfile()
+```
+
+```{r}
+hb$setMvFit(verbose = FALSE)
+hb$setGexpDev(verbose = FALSE)
+hb$calcGexpCnvBoundaries(t = 1e-2, init = TRUE, verbose = FALSE)
+
+bgf <- hb$bound.genes.final
+genes <- hb$genes
+regions.genes <- range(genes[unlist(bgf)])
+```
+
+
+```{r}
+hb$plotGexpProfile()
+```
+
+```{r}
+hb$retestIdentifiedCnvs(retestBoundGenes = TRUE, retestBoundSnps = FALSE, verbose = FALSE)
+```
+
+```{r}
+hb$results$`gene-based`
+```
+
+```{r}
+trees <- hb$visualizeResults(geneBased=TRUE, alleleBased=FALSE, details=TRUE, margins=c(25,15))
+```
+

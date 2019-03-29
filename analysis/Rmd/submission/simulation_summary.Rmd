@@ -1,0 +1,233 @@
+---
+title: "Simulation result summary"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE, cache = TRUE, cache.lazy = FALSE, fig.width = 8, fig.height = 4.5)
+
+knitr::opts_template$set(evalfig = list(fig.height = 6, fig.width = 7))
+```
+
+```{r, echo = FALSE}
+library(knitr)
+library(tidyverse)
+library(tensorflow)
+library(SingleCellExperiment)
+library(scater)
+library(data.table)
+library(pheatmap)
+library(ggrepel)
+library(grid)
+
+library(scrna.utils)
+library(scrna.sceutils)
+library(cellassign)
+library(cellassign.utils)
+library(vdj.utils)
+```
+
+## Functions
+
+```{r}
+load_annotation_files <- function(output_dir, pattern = "*_eval_measures.tsv") {
+  param_files <- Sys.glob(file.path(output_dir, "*", "*_params.tsv"))
+  ann_files <- Sys.glob(file.path(output_dir, "*", pattern))
+  
+  params <- plyr::rbind.fill(lapply(param_files, function(f) {
+    params <- fread(f)
+    data.frame(root=dirname(f), params)
+  }))
+  
+  anns <- plyr::rbind.fill(lapply(ann_files, function(f) {
+    anns <- tryCatch({
+      df <- fread(f)
+      return(data.frame(root=dirname(f), df))
+    }, error = function(e) {
+      return(data.frame())
+    })
+  }))
+  
+  result <- anns %>% plyr::join(params, by = "root")
+  return(result)
+}
+
+evaluate_de <- function(eval_measures, measures = c("v_measure", "accuracy", "macro_f1", "micro_f1"),
+                        x_var = "de_prob") {
+  if ("mapping_type" %in% names(eval_measures)) {
+    eval_measures <- eval_measures %>%
+      dplyr::filter(is.na(mapping_type) | mapping_type == "de")
+  }
+  
+  if ("gene_set" %in% names(eval_measures)) {
+    eval_measures_markers <- eval_measures %>%
+      dplyr::filter(is.na(gene_set) | gene_set == "markers")
+    
+    eval_measures_full <- eval_measures %>%
+      dplyr::filter(is.na(gene_set) | gene_set == "full")
+    
+    elist <- list('markers'=eval_measures_markers,
+                  'full'=eval_measures_full)
+  } else {
+    elist <- list('cellassign'=eval_measures)
+  }
+  
+  plots <- lapply(elist, function(gs) {
+    eval_measures_markers_de_melted <- gs %>%
+      reshape2::melt(measure.vars = measures,
+                     variable.name = "measure",
+                     value.name = "value") %>%
+      dplyr::mutate_(.dots = setNames(list(lazyeval::interp(~factor(x), x=as.name(x_var))), "xval"))
+    
+    marker_de_plot <- ggplot(eval_measures_markers_de_melted, aes(x=xval, y = value, fill = clustering_method)) + 
+      geom_boxplot(outlier.size = -1) + 
+      theme_bw() + 
+      theme_Publication() + 
+      theme_nature() + 
+      facet_wrap(~ measure, scales = "free", ncol = 1, strip.position = "right") + 
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+      xlab("% genes DE/group") + 
+      ylab("Score")
+    
+    return(marker_de_plot)
+  })
+  
+  return(plots)
+}
+```
+
+# DE prob simulation results
+
+## Resultsdeprob2
+
+```{r, echo = FALSE}
+output_dir <- "/datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob5"
+
+eval_measures <- load_annotation_files(output_dir, pattern = "*_eval_measures.tsv")
+delta_vals <- load_annotation_files(output_dir, pattern = "*_delta_compare.tsv")
+```
+
+```{r}
+de_res <- evaluate_de(eval_measures, measures = c("v_measure",
+                                                  "accuracy",
+                                                  "micro_f1",
+                                                  "macro_f1"),
+                      x_var = "de_prob")
+```
+
+## CellAssign vs. other methods (only seeing marker genes)
+
+```{r, opts.label='evalfig'}
+de_res$markers
+```
+
+## CellAssign vs. other methods (seeing all genes)
+
+```{r, opts.label='evalfig'}
+de_res$full
+```
+
+## Resultsdeprob3
+
+```{r, echo = FALSE}
+output_dir <- "/datadrive/pipeline/results/cellassign-sim-comparison/resultsdeprob5"
+
+eval_measures <- load_annotation_files(output_dir, pattern = "*_eval_measures.tsv")
+delta_vals <- load_annotation_files(output_dir, pattern = "*_delta_compare.tsv")
+```
+
+```{r}
+de_res <- evaluate_de(eval_measures, measures = c("v_measure",
+                                                  "accuracy",
+                                                  "micro_f1",
+                                                  "macro_f1"),
+                      x_var = "de_prob")
+```
+
+## CellAssign vs. other methods (only seeing marker genes)
+
+```{r, opts.label='evalfig'}
+de_res$markers
+```
+
+## CellAssign vs. other methods (seeing all genes)
+
+```{r, opts.label='evalfig'}
+de_res$full
+```
+
+# Wrong marker simulation results
+
+## Wrongmarkers1
+
+```{r, echo = FALSE}
+output_dir <- "/datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers1"
+
+eval_measures <- load_annotation_files(output_dir, pattern = "*_eval_measures.tsv")
+delta_vals <- load_annotation_files(output_dir, pattern = "*_delta_compare.tsv")
+```
+
+## Marker genes/class: 15, scale: 0.03
+
+```{r, echo = FALSE}
+res <- evaluate_de(eval_measures %>% dplyr::filter(max_genes == 15,
+                                                   de_facscale == 0.03), measures = c("v_measure",
+                                               "accuracy",
+                                               "micro_f1",
+                                               "macro_f1"),
+                   x_var = "wrong_marker_proportion")
+
+res$cellassign
+```
+
+## Marker genes/class: 15, scale: 0.06
+
+```{r, echo = FALSE}
+res <- evaluate_de(eval_measures %>% dplyr::filter(max_genes == 15,
+                                                   de_facscale == 0.06), measures = c("v_measure",
+                                               "accuracy",
+                                               "micro_f1",
+                                               "macro_f1"),
+                   x_var = "wrong_marker_proportion")
+
+res$cellassign
+```
+
+
+## Wrongmarkers2
+
+```{r, echo = FALSE}
+output_dir <- "/datadrive/pipeline/results/cellassign-sim-comparison/wrongmarkers2"
+
+eval_measures <- load_annotation_files(output_dir, pattern = "*_eval_measures.tsv")
+delta_vals <- load_annotation_files(output_dir, pattern = "*_delta_compare.tsv")
+```
+
+## Marker genes/class: 5, scale: 0.03
+
+```{r, echo = FALSE}
+res <- evaluate_de(eval_measures %>% dplyr::filter(max_genes == 5,
+                                                   de_facscale == 0.03), measures = c("v_measure",
+                                               "accuracy",
+                                               "micro_f1",
+                                               "macro_f1"),
+                   x_var = "wrong_marker_proportion")
+
+res$cellassign
+```
+
+## Marker genes/class: 5, scale: 0.09
+
+```{r, echo = FALSE}
+res <- evaluate_de(eval_measures %>% dplyr::filter(max_genes == 5,
+                                                   de_facscale == 0.09), measures = c("v_measure",
+                                               "accuracy",
+                                               "micro_f1",
+                                               "macro_f1"),
+                   x_var = "wrong_marker_proportion")
+
+res$cellassign
+```
+

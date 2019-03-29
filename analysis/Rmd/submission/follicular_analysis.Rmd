@@ -1,0 +1,861 @@
+---
+title: "Follicular data"
+output: html_notebook
+---
+
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE, cache = TRUE, cache.lazy = FALSE, fig.width = 8, fig.height = 4.5)
+
+knitr::opts_template$set(evalfig = list(fig.height = 6, fig.width = 7))
+```
+
+```{r, echo = FALSE}
+library(knitr)
+library(tidyverse)
+library(tensorflow)
+library(SingleCellExperiment)
+library(scater)
+library(data.table)
+library(pheatmap)
+library(ggrepel)
+library(grid)
+library(gage)
+
+library(scrna.utils)
+library(scrna.sceutils)
+library(cellassign)
+library(cellassign.utils)
+library(vdj.utils)
+library(Seurat)
+
+library(infotheo)
+library(lmerTest)
+
+# BiocManager::install(c("ExperimentHub", "TabulaMurisData", "DuoClustering2018", "MultiAssayExperiment"))
+# install.packages(c("lmerTest", "aricode"))
+```
+
+# Introduction
+
+
+## Outline
+
+* Experimental substrates
+* QC stats
+* Preliminary analysis
+* Next steps
+
+## Experimental substrates
+
+Data for 5 pre- and post-treatment pairs:
+
+Transformed FL:
+
+* FL1004
+* FL1012
+* FL1018
+
+Progressed FL:
+
+* FL2001
+
+# Data
+
+```{r, echo = FALSE, eval = FALSE}
+data_dir <- "/datadrive/data/follicular"
+filtered_matrix_dirs <- Sys.glob(file.path(data_dir, "*", "filtered_gene_bc_matrices", "GRCh38"))
+
+names(filtered_matrix_dirs) <- stringr::str_extract(filtered_matrix_dirs, "(?<=follicular\\/).*(?=\\/filtered_gene_bc_matrices)")
+```
+
+```{r, echo = FALSE, eval = FALSE}
+sce_follicular <- DropletUtils::read10xCounts(unname(filtered_matrix_dirs))
+sce_follicular <- sce_follicular %>% scater::mutate(
+  dataset = str_extract(Sample, "FL[0-9]+[A-Z0-9_]+"),
+  sample_barcode = paste(dataset, Barcode, sep = "_")
+)
+
+sce_follicular$patient <- str_extract(sce_follicular$dataset, "^FL[0-9]+")
+sce_follicular$timepoint <- str_extract(sce_follicular$dataset, "T[1-2](?=(_R[0-9]+)?$)")
+sce_follicular$replicate <- str_extract(sce_follicular$dataset, "R[0-9]+$")
+sce_follicular$replicate[is.na(sce_follicular$replicate)] <- "R1"
+sce_follicular$transformed_progressed <- ifelse(str_detect(sce_follicular$patient, "^FL1"), "Transformed", "Progressed")
+sce_follicular$status <- with(colData(sce_follicular), ifelse(timepoint == "T2", transformed_progressed, "Primary"))
+```
+
+```{r, echo = FALSE}
+batches <- list('1'=c("FL1004T1", "FL1004T2", "FL1012T1", "FL1012T2", "FL1018T1", "FL1018T2"),
+                '2'=c("FL2001T1", "FL2001T2", "FL2002T2"),
+                '3'=c("FL2002T1"),
+                '4'=c("FL1256T1_R1", "FL1256T1_R2", "FL1256T2_R1", "FL1256T2_R2"))
+
+batch_map <- data.frame(rep(names(batches), sapply(batches, length)), unlist(batches)) 
+colnames(batch_map) <- c("batch", "dataset")
+
+sce_follicular <- sce_follicular %>% scater::mutate(batch=df_as_map(batch_map, dataset, from = "dataset", to = "batch"))
+
+print(sce_follicular)
+```
+
+```{r, echo = FALSE}
+sce_follicular_filt1 <- sce_follicular %>% scater::filter(dataset %in% c("FL1004T1",
+                                                                         "FL1004T2",
+                                                                         "FL1012T1",
+                                                                         "FL1012T2",
+                                                                         "FL1018T1",
+                                                                         "FL1018T2",
+                                                                         "FL2001T1",
+                                                                         "FL2001T2"))
+```
+
+```{r, echo = FALSE}
+get_ensembl_id <- function(x, rowdat, symbol_name = "Symbol", gene_name = "ID") {
+  rowdat <- as.data.frame(rowdat)
+  df_as_map(rowdat %>% subset(x %in% rowdat[,symbol_name]), x, from = symbol_name, to = gene_name)
+}
+
+mito_genes <- as.character(rowData(sce_follicular)$Symbol[str_detect(rowData(sce_follicular)$Symbol, "^MT\\-")]) %>% 
+  get_ensembl_id(rowData(sce_follicular))
+
+ribo_genes <- as.character(rowData(sce_follicular)$Symbol[str_detect(rowData(sce_follicular)$Symbol, "^RP(L|S)")]) %>%
+  get_ensembl_id(rowData(sce_follicular))
+
+sce_follicular_filt1 <- calculateQCMetrics(sce_follicular_filt1, exprs_values = "counts", feature_controls =
+                                             list(mitochondrial=mito_genes, ribosomal=ribo_genes))
+```
+
+## Mitochondrial counts
+
+```{r, echo = FALSE}
+df <- with(colData(sce_follicular_filt1), data.frame(pct_mitochondrial=pct_counts_mitochondrial,
+                                            pct_ribosomal=pct_counts_ribosomal,
+                                            set_id=dataset))
+
+mito_thres <- 5
+
+ggplot(df, aes(x=pct_mitochondrial)) + geom_histogram(aes(fill=set_id)) + theme_bw() + theme_Publication() + scale_x_continuous(breaks = log_scale_breaks(), labels = log_scale_labels(), trans = "log") + geom_vline(aes(xintercept=mito_thres), colour = "red") + xlab("% mito")
+```
+
+## Ribosomal counts
+
+```{r, echo = FALSE}
+ribo_thres <- 60
+
+ggplot(df, aes(x=pct_ribosomal)) + geom_histogram(aes(fill=set_id)) + theme_bw() + theme_Publication() + scale_x_continuous(breaks = log_scale_breaks(), labels = log_scale_labels(), trans = "log") + geom_vline(aes(xintercept=ribo_thres), colour = "red") + xlab("% ribo")
+```
+
+## Filtering
+
+```{r, echo = FALSE}
+sce_follicular_filt2 <- filter_cells(sce_follicular_filt1, nmads = 3, type = "lower", log = TRUE, max_mito = mito_thres, max_ribo = ribo_thres)
+```
+
+## Normalization
+
+```{r, echo = FALSE}
+norm_factors <- edgeR::calcNormFactors(as.matrix(counts(sce_follicular_filt2)), method = "TMM")
+lib_size_factors <- colSums(as.matrix(counts(sce_follicular_filt2)))
+sizeFactors(sce_follicular_filt2) <- norm_factors * lib_size_factors / mean(norm_factors * lib_size_factors)
+
+sce_follicular_filt2$size_factor <- sizeFactors(sce_follicular_filt2)
+```
+
+```{r, echo = FALSE, eval = FALSE}
+sce_follicular_normalized <- normalise(sce_follicular_filt2)
+
+sce_follicular_normalized <- runPCA(sce_follicular_normalized, ntop = 1000, ncomponents = 50, exprs_values = "logcounts")
+sce_follicular_normalized <- runTSNE(sce_follicular_normalized, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+```
+
+```{r, echo = FALSE}
+plotTSNE(sce_follicular_normalized, colour_by = "dataset", ncomponents = 2)
+```
+
+
+## Total number of UMIs
+
+```{r, echo = FALSE}
+plotPCA(sce_follicular_normalized, colour_by = "log10_total_counts")
+```
+
+## Cell cycle
+
+```{r, echo = FALSE, eval = FALSE}
+hs.pairs <- readRDS(system.file("exdata", "human_cycle_markers.rds", package="scran"))
+
+assignments <- cyclone(sce_follicular_normalized, hs.pairs, gene.names=rowData(sce_follicular_normalized)$ID, min.iter = 10, iter = 100, verbose = TRUE, BPPARAM = MulticoreParam(15))
+
+sce_follicular_normalized@colData <- bind_cols(sce_follicular_normalized@colData %>% as.data.frame, assignments$normalized.scores) %>% DataFrame
+sce_follicular_normalized <- scater::mutate(sce_follicular_normalized, Cell_Cycle = assignments$phases)
+```
+
+
+```{r, echo = FALSE}
+plotPCA(sce_follicular_normalized, colour_by = "Cell_Cycle")
+```
+
+```{r, echo = FALSE}
+plotTSNE(sce_follicular_normalized, colour_by = "Cell_Cycle")
+```
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable(t(with(colData(sce_follicular_normalized), table(Cell_Cycle, dataset))))
+```
+
+# Batch correction (for visualization)
+
+## Mutual nearest neighbours
+
+Mutual nearest neighbours is a batch correction method that finds nearest neighbours across batches to correct other cells by. 
+
+We don't have spikes to use here, so we're making an assumption that most noise is technical even for endogenous genes. 
+
+```{r, echo = FALSE, eval = FALSE}
+fit <- trendVar(sce_follicular_normalized, parametric=TRUE, use.spikes = FALSE, block = factor(sce_follicular_normalized$batch))
+decomp <- decomposeVar(sce_follicular_normalized, fit)
+decomp$Symbol <- rowData(sce_follicular_normalized)$Symbol
+
+decomp_chosen <- decomp %>% subset(bio > 0)
+chosen <- rownames(decomp_chosen)
+```
+
+```{r, echo = FALSE, eval = FALSE}
+set.seed(100) 
+
+batches <- unique(sce_follicular_normalized$batch)
+
+expr_matrices <- lapply(batches, function(bat) {
+  sce_subset <- sce_follicular_normalized %>% scater::filter(batch == bat)
+  mat <- as.matrix(logcounts(sce_subset)[chosen,])
+  return(mat)
+})
+
+mnn.out <- do.call(mnnCorrect, c(expr_matrices, list(k=20, BPPARAM = MulticoreParam(15))))
+```
+
+
+```{r, echo = FALSE, eval = FALSE}
+indices <- lapply(batches, function(bat) {
+  sce_subset <- sce_follicular_normalized %>% scater::filter(batch == bat)
+  idx <- unname(sapply(colData(sce_subset)$sample_barcode, function(x) which(sce_follicular_normalized$sample_barcode == x)))
+  return(idx)
+})
+
+expr_mat_combined_mnn <- matrix(NA, nrow = nrow(mnn.out$corrected[[1]]), ncol = length(unlist(indices)))
+for (i in seq_along(indices)) {
+  expr_mat_combined_mnn[,indices[[i]]] <- mnn.out$corrected[[i]]
+}
+rownames(expr_mat_combined_mnn) <- rownames(mnn.out$corrected[[1]])
+
+sce_mnn <- SingleCellExperiment(assays = list(mnn=expr_mat_combined_mnn),
+                                colData = colData(sce_follicular_normalized))
+
+sce_mnn <- runPCA(sce_mnn, exprs_values = "mnn", ntop = 1000, ncomponents = 50)
+sce_mnn <- runTSNE(sce_mnn, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+sce_mnn <- runUMAP(sce_mnn, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
+```
+
+```{r, echo = FALSE}
+reducedDim(sce_follicular_normalized, "PCA_mnn") <- reducedDim(sce_mnn, "PCA")
+reducedDim(sce_follicular_normalized, "TSNE_mnn") <- reducedDim(sce_mnn, "TSNE")
+reducedDim(sce_follicular_normalized, "UMAP_mnn") <- reducedDim(sce_mnn, "UMAP")
+```
+
+```{r, echo = FALSE}
+plotReducedDim(sce_follicular_normalized, use_dimred = "TSNE_mnn", ncomponents = 2, colour_by = "dataset")
+```
+
+```{r, echo = FALSE}
+plotReducedDim(sce_follicular_normalized, use_dimred = "UMAP_mnn", ncomponents = 2, colour_by = "dataset")
+```
+
+# CellAssign
+
+## Conservative
+
+```{r, echo = FALSE}
+follicular_markers1 <- list(
+  'B cells'=c("CD19", "MS4A1", "CD79A", "CD79B", "IGKC", "IGLC2", "IGLC3", "CD74"),
+  'T cells'=c("CD3D", "CD3E", "CD3G", "CD28", "TRAC"),
+  'Myeloid'=c("CD14", "CD68", "CD33", "CD74", "LYZ", "S100A9", "S100A8")
+)
+
+follicular_rho1 <- marker_list_to_mat(follicular_markers1, include_other = FALSE)
+```
+
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable(follicular_rho1)
+```
+
+```{r, echo = FALSE}
+B <- 40
+s <- sizeFactors(sce_follicular_normalized)
+sce <- sce_follicular_normalized[get_ensembl_id(rownames(follicular_rho1), rowData(sce_follicular_normalized)),]
+rownames(sce) <- rownames(follicular_rho1)
+counts(sce) <- as.matrix(counts(sce))
+
+cellassign_res <- cellassign_em(exprs_obj = sce, s = s, rho = follicular_rho1, X = NULL, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, num_runs = 1, min_delta = log(2))
+```
+
+```{r, echo = FALSE, eval = FALSE}
+sce_follicular_normalized_labeled <- sce_follicular_normalized
+
+sce_follicular_normalized_labeled$cellassign_cluster <- factor(cellassign_res$cell_type)
+sce_follicular_normalized_labeled@colData <- bind_cols(sce_follicular_normalized_labeled@colData %>% as.data.frame, as.data.frame(cellassign_res$mle_params$gamma)) %>% DataFrame(check.names = FALSE)
+```
+
+```{r, echo = FALSE, out.width = '75%'}
+plotPCA(sce_follicular_normalized_labeled, ncomponents = 2, colour_by = "cellassign_cluster")
+```
+
+```{r, echo = FALSE, out.width = '75%'}
+plotTSNE(sce_follicular_normalized_labeled, ncomponents = 2, colour_by = "cellassign_cluster")
+```
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable(t(table(sce_follicular_normalized_labeled$cellassign_cluster)))
+```
+
+### T-cell subclustering
+
+```{r, echo = FALSE}
+celltype_prob_threshold <- 0.9
+
+sce_t_cells <- sce_follicular_normalized_labeled %>% 
+  scater::filter(T.cells >= celltype_prob_threshold)
+
+sce_t_cells <- runPCA(sce_t_cells, ntop = 1000, ncomponents = 50)
+sce_t_cells <- runTSNE(sce_t_cells, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
+
+sce_mnn_t <- sce_mnn[,sce_follicular_normalized_labeled$`T cells` >= 0.9]
+
+sce_mnn_t <- runPCA(sce_mnn_t, ntop = 1000, ncomponents = 50, exprs_values = "mnn")
+sce_mnn_t <- runTSNE(sce_mnn_t, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
+sce_mnn_t <- runUMAP(sce_mnn_t, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
+
+reducedDim(sce_t_cells, "PCA_mnn") <- reducedDim(sce_mnn_t, "PCA")
+reducedDim(sce_t_cells, "TSNE_mnn") <- reducedDim(sce_mnn_t, "TSNE")
+reducedDim(sce_t_cells, "UMAP_mnn") <- reducedDim(sce_mnn_t, "UMAP")
+```
+
+```{r, echo = FALSE, eval = FALSE}
+sce_t_cells <- cluster_wrapper(sce_t_cells, gene_subset = NULL, dimreduce_method = "PCA_mnn", clustering_method = "phenograph")
+```
+
+```{r, echo = FALSE, out.width = '75%'}
+plotReducedDim(sce_t_cells, use_dimred = "TSNE_mnn", colour_by = "dataset")
+```
+
+```{r, echo = FALSE, out.width = '75%'}
+plotReducedDim(sce_t_cells, use_dimred = "TSNE_mnn", colour_by = "cluster")
+```
+
+```{r, echo = FALSE}
+marker_tables <- findMarkers(sce_t_cells, clusters = sce_t_cells$cluster, direction = "up")
+
+marker_tables <- lapply(marker_tables, function(x) {
+  x <- x %>% 
+    as.data.frame %>%
+    tibble::rownames_to_column(var = "ID") %>%
+    dplyr::mutate(Symbol=df_as_map(rowData(sce_t_cells) %>% as.data.frame, ID, from = "ID", to = "Symbol"))
+  return(x)
+})
+```
+
+## Full
+
+```{r, echo = FALSE}
+follicular_markers2 <- list(
+  'B cells'=c("CD19", "MS4A1", "CD79A", "CD79B", "IGKC", "IGLC2", "IGLC3", "CD74", "SELL", "CCR7", "CXCR5"),
+  'Tc1'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD8A", "CD8B", "GZMA", "GZMK", "NKG7", "CCL5", "EOMES", "IFNG"),
+  'Tc2'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD8A", "CD8B", "GZMA", "GZMK", "NKG7", "CCL5", "EOMES"),
+  'Naive/CM CD4'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "SELL", "CCR7", "TCF7"),
+  'T regs'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "FOXP3", "IL2RA", "TNFRSF4"),
+  'Tfh'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "CXCR5", "PDCD1", "TCF7", "CXCL13", "TNFRSF4", "ST8SIA1"), # ST8SIA1 very specific according to LM22
+  'Myeloid'=c("CD14", "CD68", "CD33", "CD74", "LYZ", "S100A9", "S100A8", "CD4"),
+  'T gamma delta'=c("CD2", "CD3D", "CD3E", "CD3G", "TRDC", "NKG7", "GNLY", "CCL5", "GZMA"),
+  'CD8 memory/Tc17'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD8A", "CD8B", "CCL5", "KLRB1"),
+  'Th17'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC", "CD4", "KLRB1", "TNFRSF4"),
+  'T_other'=c("CD2", "CD3D", "CD3E", "CD3G", "TRAC")
+  # T gamma delta -- TRDC
+  # KLRB1-expressing cluster (CD4 memory T cells?? check literature) ## KLRB1 == CD161
+  # KLRB1-expressing CCL5 and CD8 cluster?
+  # CD8 activated -- CD69 and IFNG
+) # CD28 in T cells -- but DE'd between different subsets
+# what does the CD69 mean?
+
+# P2RX5 in Tfh and B cells
+
+follicular_rho2 <- marker_list_to_mat(follicular_markers2, include_other = TRUE)
+```
+
+
+```{r, echo = FALSE, results = 'asis'}
+knitr::kable(follicular_rho2)
+```
+
+```{r, echo = FALSE}
+B <- 40
+s <- sizeFactors(sce_follicular_normalized)
+sce <- sce_follicular_normalized[get_ensembl_id(rownames(follicular_rho2), rowData(sce_follicular_normalized)),]
+rownames(sce) <- rownames(follicular_rho2)
+counts(sce) <- as.matrix(counts(sce))
+
+# ADD PATIENT-SPECIFIC COMPONENT TO DESIGN MATRIX
+
+cellassign_res_full <- cellassign_em(exprs_obj = sce, s = s, rho = follicular_rho2, X = NULL, B = B, use_priors = TRUE, prior_type = "shrinkage", delta_variance_prior = FALSE, verbose = FALSE, em_convergence_thres = 1e-5, num_runs = 1, min_delta = log(2))
+```
+
+```{r, echo = FALSE, eval = FALSE}
+sce_follicular_normalized_labeled_full <- sce_follicular_normalized
+
+sce_follicular_normalized_labeled_full$cellassign_cluster <- factor(cellassign_res_full$cell_type)
+sce_follicular_normalized_labeled_full@colData <- bind_cols(sce_follicular_normalized_labeled_full@colData %>% as.data.frame, as.data.frame(cellassign_res_full$mle_params$gamma)) %>% DataFrame(check.names = FALSE)
+```
+
+```{r, echo = FALSE, out.width = '75%'}
+plotTSNE(sce_follicular_normalized_labeled_full, ncomponents = 2, colour_by = "cellassign_cluster")
+```
+
+### Probabilities
+
+```{r, echo = FALSE}
+ph <- plot_gamma_heatmap(cellassign_res_full, sce_follicular_normalized_labeled_full, stratified = FALSE, n_sample = 3000)
+
+grid.newpage()
+grid.draw(ph)
+```
+
+### Match to unsupervised clusters
+
+```{r, echo = FALSE}
+cellassign_cols <- c("cellassign_cluster", colnames(follicular_rho2))
+cellassign_tab <- colData(sce_follicular_normalized_labeled_full) %>%
+  data.frame(check.names = FALSE) %>%
+  dplyr::select(c("sample_barcode", cellassign_cols)) %>%
+  dplyr::rename(cellassign_cluster_full=cellassign_cluster)
+
+sce_t_cells_labeled <- sce_t_cells
+colData(sce_t_cells_labeled) <- colData(sce_t_cells) %>%
+  data.frame(check.names = FALSE) %>%
+  dplyr::left_join(cellassign_tab, by = "sample_barcode") %>%
+  DataFrame(check.names = FALSE)
+```
+
+```{r, echo = FALSE}
+plotReducedDim(sce_t_cells_labeled, use_dimred = "TSNE_mnn", colour_by = "cluster")
+```
+
+```{r, echo = FALSE}
+plotReducedDim(sce_t_cells_labeled, use_dimred = "TSNE_mnn", colour_by = "cellassign_cluster_full")
+```
+
+# Malignant vs. nonmalignant B cell identification
+
+```{r, echo = FALSE}
+sce_b_cells <- sce_follicular_normalized_labeled %>% 
+  scater::filter(B.cells >= celltype_prob_threshold)
+
+sce_b_cells <- runPCA(sce_b_cells, ntop = 1000, ncomponents = 50)
+sce_b_cells <- runTSNE(sce_b_cells, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
+
+sce_mnn_b <- sce_mnn[,sce_follicular_normalized_labeled$`B cells` >= 0.9]
+
+sce_mnn_b <- runPCA(sce_mnn_b, ntop = 1000, ncomponents = 50, exprs_values = "mnn")
+sce_mnn_b <- runTSNE(sce_mnn_b, ncomponents = 2, use_dimred = "PCA", n_dimred = 50)
+
+reducedDim(sce_b_cells, "PCA_mnn") <- reducedDim(sce_mnn_b, "PCA")
+reducedDim(sce_b_cells, "TSNE_mnn") <- reducedDim(sce_mnn_b, "TSNE")
+```
+
+```{r, echo = FALSE}
+plotReducedDim(sce_b_cells, use_dimred = "TSNE_mnn", colour_by = "dataset")
+```
+
+## Patient-by-patient analysis
+
+### FL1004
+
+```{r, echo = FALSE}
+sce_FL1004_B <- sce_b_cells %>% 
+  scater::filter(patient == "FL1004")
+
+# This does way better than running PCA + TSNE again (on the non-MNN data)
+plotReducedDim(sce_FL1004_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "dataset")
+```
+
+```{r, echo = FALSE}
+set.seed(101)
+sce_FL1004_B <- cluster_wrapper(sce_FL1004_B, gene_subset = NULL, dimreduce_method = "PCA_mnn", clustering_method = "phenograph")
+
+plotReducedDim(sce_FL1004_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "cluster")
+```
+
+```{r, echo = FALSE}
+nonmalignant_clusters <- c("3")
+
+FL1004_B_mapping <- colData(sce_FL1004_B) %>%
+  data.frame(check.names = FALSE) %>%
+  dplyr::select(sample_barcode, cluster) %>%
+  dplyr::mutate(malignant_status_manual=ifelse(cluster %in% nonmalignant_clusters, "nonmalignant", "malignant"))
+```
+
+### FL1012
+
+```{r, echo = FALSE}
+sce_FL1012_B <- sce_b_cells %>% 
+  scater::filter(patient == "FL1012")
+
+set.seed(101)
+sce_FL1012_B <- cluster_wrapper(sce_FL1012_B, gene_subset = NULL, dimreduce_method = "PCA_mnn", clustering_method = "phenograph")
+
+plotReducedDim(sce_FL1012_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "dataset")
+```
+
+```{r, echo = FALSE}
+plotReducedDim(sce_FL1012_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "cluster")
+```
+
+```{r, echo = FALSE}
+nonmalignant_clusters <- c("2", "7", "11")
+
+FL1012_B_mapping <- colData(sce_FL1012_B) %>%
+  data.frame(check.names = FALSE) %>%
+  dplyr::select(sample_barcode, cluster) %>%
+  dplyr::mutate(malignant_status_manual=ifelse(cluster %in% nonmalignant_clusters, "nonmalignant", "malignant"))
+```
+
+
+### FL1018
+
+```{r, echo = FALSE}
+sce_FL1018_B <- sce_b_cells %>% 
+  scater::filter(patient == "FL1018")
+
+set.seed(101)
+sce_FL1018_B <- cluster_wrapper(sce_FL1018_B, gene_subset = NULL, dimreduce_method = "PCA_mnn", clustering_method = "phenograph")
+
+plotReducedDim(sce_FL1018_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "dataset")
+```
+
+```{r, echo = FALSE}
+plotReducedDim(sce_FL1018_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "cluster")
+```
+
+```{r, echo = FALSE}
+nonmalignant_clusters <- c("8")
+
+FL1018_B_mapping <- colData(sce_FL1018_B) %>%
+  data.frame(check.names = FALSE) %>%
+  dplyr::select(sample_barcode, cluster) %>%
+  dplyr::mutate(malignant_status_manual=ifelse(cluster %in% nonmalignant_clusters, "nonmalignant", "malignant"))
+```
+
+### FL2001
+
+```{r, echo = FALSE}
+sce_FL2001_B <- sce_b_cells %>% 
+  scater::filter(patient == "FL2001")
+
+set.seed(101)
+sce_FL2001_B <- cluster_wrapper(sce_FL2001_B, gene_subset = NULL, dimreduce_method = "PCA_mnn", clustering_method = "phenograph")
+
+plotReducedDim(sce_FL2001_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "dataset")
+```
+
+```{r, echo = FALSE}
+plotReducedDim(sce_FL2001_B, ncomponents = 2, use_dimred = "TSNE_mnn", colour_by = "cluster")
+```
+
+```{r, echo = FALSE}
+nonmalignant_clusters <- c("2", "9")
+
+FL2001_B_mapping <- colData(sce_FL2001_B) %>%
+  data.frame(check.names = FALSE) %>%
+  dplyr::select(sample_barcode, cluster) %>%
+  dplyr::mutate(malignant_status_manual=ifelse(cluster %in% nonmalignant_clusters, "nonmalignant", "malignant"))
+```
+
+```{r, echo = FALSE}
+B_mapping <- do.call(rbind,
+                     list(FL1004_B_mapping, FL1012_B_mapping, FL1018_B_mapping, FL2001_B_mapping))
+
+colData(sce_follicular_normalized_labeled) <- colData(sce_follicular_normalized_labeled) %>%
+  data.frame(check.names = FALSE) %>%
+  dplyr::left_join(B_mapping %>% dplyr::select(-c(cluster))) %>%
+  DataFrame
+
+colData(sce_follicular_normalized_labeled_full) <- colData(sce_follicular_normalized_labeled_full) %>%
+  data.frame(check.names = FALSE) %>%
+  dplyr::left_join(B_mapping %>% dplyr::select(-c(cluster))) %>%
+  DataFrame
+
+colData(sce_b_cells) <- colData(sce_b_cells) %>%
+  data.frame(check.names = FALSE) %>%
+  dplyr::left_join(B_mapping %>% dplyr::select(-c(cluster))) %>%
+  DataFrame
+```
+
+```{r, echo = FALSE}
+plotReducedDim(sce_b_cells, use_dimred = "TSNE_mnn", colour_by = "malignant_status_manual")
+```
+
+
+# Proportions and differential expression
+
+```{r, echo = FALSE}
+compute_celltype_proportions <- function(sce, celltype_col = "cellassign_cluster") {
+  celltype_counts <- as.data.frame(table(colData(sce)[,"dataset"], colData(sce)[,celltype_col])) %>%
+    dplyr::rename(dataset=Var1, celltype=Var2, count=Freq) %>%
+    dplyr::group_by(dataset) %>%
+    dplyr::mutate(proportion=count/sum(count)) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(celltype=paste0(celltype, " (scrna)"))
+  
+  df <- reshape2::dcast(celltype_counts, formula = dataset ~ celltype, value.var = "proportion")
+  
+  return(df)
+}
+```
+
+```{r, echo = FALSE}
+sce_follicular_normalized_labeled_full$celltype <- sce_follicular_normalized_labeled_full$cellassign_cluster
+```
+
+```{r, echo = FALSE}
+scrna_prop <- compute_celltype_proportions(sce_follicular_normalized_labeled_full, celltype_col = "celltype")
+```
+
+```{r, echo = FALSE}
+gage_analysis <- function(sce, comparison_type = "timepoint", filter_ribo = TRUE, filter_mito = TRUE, gene_set_path, rowdat) {
+  if (comparison_type == "timepoint") {
+    de_table <- findMarkers(sce, clusters = sce$timepoint, block = factor(sce$patient))
+    de_table <- add_symbol(de_table, filter_mito = filter_mito, filter_ribo = filter_ribo, rowdat)
+    
+    df <- de_table$T2
+    fcvals <- df$logFC.T1
+  } else if (comparison_type == "malignant") {
+    sce <- sce %>% scater::filter(malignant_status %in% c("malignant", "nonmalignant"))
+    
+    de_table <- findMarkers(sce, clusters = sce$malignant_status, block = factor(sce$patient))
+    de_table <- add_symbol(de_table, filter_mito = filter_mito, filter_ribo = filter_ribo, rowdat)
+    
+    df <- de_table$malignant
+    fcvals <- df$logFC.nonmalignant
+  } else {
+    stop("Other comparisons not implemented.")
+  }
+  names(fcvals) <- df$Symbol
+  
+  gs <- gage::readList(gene_set_path)
+  
+  res <- gage::gage(fcvals, gsets = gs, ref = NULL, samp = NULL)
+  mean_fcvals <- sapply(gs, function(x) mean(fcvals[x], na.rm = TRUE))
+  
+  mean_fcval_df <- data.frame(pathway=names(mean_fcvals), mean_logFC=unname(mean_fcvals))
+  
+  res_g <- data.frame(subset(as.data.frame(res$greater), stat.mean > 0) %>% tibble::rownames_to_column(var = "pathway"), type = "greater")
+  res_l <- data.frame(subset(as.data.frame(res$less), stat.mean < 0) %>% tibble::rownames_to_column(var = "pathway"), type = "less")
+  
+  res_combined <- rbind(res_g, res_l)
+  
+  res_combined <- plyr::join(res_combined, mean_fcval_df)
+  
+  return(list(genes=df, pathways=res_combined))
+}
+
+add_symbol <- function(de_result, filter_ribo = TRUE, filter_mito = TRUE, rowdat) {
+  de_result <- lapply(de_result, function(x) {
+    x$Symbol <- df_as_map(rowdat, rownames(x), from = "ID", to = "Symbol")
+    if (filter_ribo) {
+      x <- subset(x, !str_detect(Symbol, "^RP"))
+    }
+    if (filter_mito) {
+      x <- subset(x, !str_detect(Symbol, "^MT"))
+    }
+    return(x)
+  })
+  return(de_result)
+}
+```
+
+```{r, echo = FALSE}
+filter_ribo <- TRUE
+filter_mito <- TRUE
+
+pathway_timepoint_tfh <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "Tfh"), 
+                                              comparison_type = "timepoint",
+                                              filter_ribo = filter_ribo,
+                                              filter_mito = filter_mito,
+                                              gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
+                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+
+plot_markers(pathway_timepoint_tfh$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
+```
+
+```{r}
+pathway_timepoint_cytotoxic <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "Cytotoxic T cells"), 
+                                              comparison_type = "timepoint",
+                                              filter_ribo = filter_ribo,
+                                              filter_mito = filter_mito,
+                                              gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
+                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+
+plot_markers(pathway_timepoint_cytotoxic$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
+```
+
+```{r, echo = FALSE}
+pathway_timepoint_cytotoxic$pathways %>% dplyr::arrange(-mean_logFC) %>% head
+```
+
+Upregulation of PD-1 (PD-1 blockade?) in cytotoxic T cells at T2? CHECK if this corresponds to membership in the IFNG-containing subcluster of CD8 T cells. 
+
+```{r}
+pathway_timepoint_naive <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "Naive/CM CD4"), 
+                                              comparison_type = "timepoint",
+                                              filter_ribo = filter_ribo,
+                                              filter_mito = filter_mito,
+                                              gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
+                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+
+plot_markers(pathway_timepoint_naive$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
+```
+
+```{r}
+pathway_timepoint_naive$pathways %>% dplyr::filter(q.val < 0.05) %>% dplyr::arrange(-mean_logFC) %>% head(10)
+```
+
+
+```{r}
+pathway_timepoint_malignantb <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "B cells" & malignant_status_manual == "malignant"), 
+                                              comparison_type = "timepoint",
+                                              filter_ribo = filter_ribo,
+                                              filter_mito = filter_mito,
+                                              gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
+                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+
+plot_markers(pathway_timepoint_malignantb$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
+```
+
+```{r, echo = FALSE}
+plot_markers(pathway_timepoint_malignantb$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74"))
+```
+
+```{r}
+pathway_timepoint_malignantb$pathways %>% dplyr::filter(q.val < 0.05) %>% dplyr::arrange(-mean_logFC) %>% head(10)
+```
+
+```{r}
+pathway_timepoint_nonmalignantb <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "B cells" & malignant_status_manual == "nonmalignant"), 
+                                              comparison_type = "timepoint",
+                                              filter_ribo = filter_ribo,
+                                              filter_mito = filter_mito,
+                                              gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
+                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+
+plot_markers(pathway_timepoint_nonmalignantb$pathways %>% plyr::rename(c('pathway'='Symbol', 'q.val'='FDR', 'mean_logFC'='logFC')) %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 5, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal")
+```
+
+```{r}
+pathway_timepoint_FL1018malignantb <- gage_analysis(sce = sce_follicular_normalized_labeled_full %>% scater::filter(celltype == "B cells" & malignant_status_manual == "malignant" & patient == "FL1018"), 
+                                              comparison_type = "timepoint",
+                                              filter_ribo = filter_ribo,
+                                              filter_mito = filter_mito,
+                                              gene_set_path = "/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt", 
+                                       rowdat = rowData(sce_follicular_normalized_labeled_full))
+```
+
+```{r, echo = FALSE}
+plot_markers(pathway_timepoint_FL1018malignantb$genes %>% as.data.frame %>% dplyr::mutate(is_significant = FDR <= 0.05), top_n = 10, log_q_val_threshold = NULL, nrow = 1, subtitle = "T2 vs. T1", top_direction = "equal", highlight_genes = c("TCL1A", "BCL2", "BCL6", "HLA-A", "HLA-B", "HLA-C", "FCER2", "CD74"))
+```
+
+# FACS validation
+
+Should be run with minimally-filtered dataset (i.e. filtered at 10% mito or higher), as opposed to a 5% filter that could be used for analysis. 
+
+## Data {#bigxtable2}
+
+```{r, echo = FALSE}
+facs_table_T <- "/datadrive/data/follicular/FACS/FL_paired T pops.csv"
+
+facs_T <- fread(facs_table_T, sep = ",", skip = 1)
+colnames(facs_T)[1] <- "dataset"
+
+facs_T <- subset(facs_T, dataset %in% unique(sce_follicular_normalized_labeled$dataset))
+
+column_mapping <- c(
+  'LIVE/Singlets\\Count\\\\'='Singlets',
+  'LIVE/Singlets/Lym\\Count\\\\'='Lymphocytes',
+  'LIVE/Singlets/Lym/T\\Count\\\\'='T cells',
+  'LIVE/Singlets/Lym/T/CD4\\Count\\\\'='CD4 T cells',
+  'LIVE/Singlets/Lym/T/CD4/CD4+Mem\\Count\\\\'='CD4 T mem',
+  'LIVE/Singlets/Lym/T/CD4/CD4+Naive\\Count\\\\'='CD4 T naive',
+  'LIVE/Singlets/Lym/T/CD4/Tfh\\Count\\\\'='CD4 Tfh',
+  'LIVE/Singlets/Lym/T/CD8\\Count\\\\'='CD8 T cells',
+  'LIVE/Singlets/Lym/T/CD8/CD8+Mem\\Count\\\\'='CD8 T mem',
+  'LIVE/Singlets/Lym/T/CD8/CD8+Naive\\Count\\\\'='CD8 T naive'
+)
+
+facs_T_labeled <- facs_T %>% dplyr::select(c("dataset", names(column_mapping))) %>% plyr::rename(column_mapping)
+
+facs_T_labeled_prop <- facs_T_labeled %>% 
+  dplyr::mutate(
+    `T cells` = `T cells`/Lymphocytes,
+    `CD4 T cells` = `CD4 T cells`/Lymphocytes,
+    `CD4 T mem` = `CD4 T mem`/Lymphocytes,
+    `CD4 T naive` = `CD4 T naive`/Lymphocytes,
+    `CD4 Tfh` = `CD4 Tfh`/Lymphocytes,
+    `CD8 T cells` = `CD8 T cells`/Lymphocytes,
+    `CD8 T mem` = `CD8 T mem`/Lymphocytes,
+    `CD8 T naive` = `CD8 T naive`/Lymphocytes
+  )
+```
+
+```{r, echo = FALSE}
+scrna_facs_T <- facs_T_labeled_prop %>% plyr::join(scrna_prop)
+metadata <- subset(colData(sce_follicular), select = c("dataset", "timepoint", "transformed_progressed", "patient")) %>% unique %>% as.data.frame
+scrna_facs_T <- scrna_facs_T %>% plyr::join(metadata)
+```
+
+## T cell proportion
+
+```{r, echo = FALSE}
+ggplot(scrna_facs_T, aes(x=`T cells`, y = `Cytotoxic T cells (scrna)` + `Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`)) + 
+  geom_point(aes(colour=patient)) + 
+  theme_bw() + 
+  theme_Publication() + 
+  geom_abline(slope = 1) + 
+  xlab("T cell proportion (FACS)") + 
+  ylab("T cell proportion (scrna)")
+```
+
+## CD4 T cell (out of T cell) proportion
+
+```{r, echo = FALSE}
+ggplot(scrna_facs_T, aes(x=`CD4 T cells`/`T cells`, y = (`Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`)/(`Cytotoxic T cells (scrna)` + `Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`))) + 
+  geom_point(aes(colour=patient)) + 
+  theme_bw() + 
+  theme_Publication() + 
+  geom_abline(slope = 1) + 
+  xlab("CD4 T/T cell proportion (FACS)") + 
+  ylab("CD4 T/T cell proportion (scrna)")
+```
+
+## Tfh out of CD4 T cell proportion
+
+```{r, echo = FALSE}
+ggplot(scrna_facs_T, aes(x=`CD4 Tfh`/`CD4 T cells`, y = `Tfh (scrna)`/(`Naive/CM CD4 (scrna)` + `T regs (scrna)` + `Tfh (scrna)`))) + 
+  geom_point(aes(colour=patient)) + 
+  theme_bw() + 
+  theme_Publication() + 
+  geom_abline(slope = 1) + 
+  xlab("Tfh/CD4 T cell proportion (FACS)") + 
+  ylab("Tfh/CD4 T cell proportion (scrna)")
+```
+
+Generally fairly consistent. Note that quantifying memory T cells is a problem since we don't have a good marker to distinguish naive from CM. 
+
+
+

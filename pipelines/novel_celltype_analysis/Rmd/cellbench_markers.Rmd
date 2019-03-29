@@ -1,0 +1,194 @@
+---
+title: "Determining markers for the CellBench data"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 5
+---
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, tidy = FALSE, warning = FALSE, message = FALSE, cache = FALSE, cache.lazy = FALSE, fig.width = 8, fig.height = 4.5)
+```
+
+```{r}
+library(tidyverse)
+library(data.table)
+library(limma)
+library(org.Hs.eg.db)
+library(edgeR)
+library(yaml)
+```
+
+# Data
+
+We take bulk RNA-seq data from [Holik et al. Nucleic Acids Research 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5389713/). 
+
+Preprocessing code taken from the single cell RNA-seq study by the same group. 
+
+```{r}
+bulkrna_counts <- fread('/datadrive/data/external/bulkrna/holik2017/GSE86337_reverse.stranded.unfiltered.count.matrix.txt') %>%
+  as.data.frame
+rownames(bulkrna_counts) <- bulkrna_counts$`Entrez Gene IDs`
+
+bulkrna_counts <- bulkrna_counts[,2:11]
+```
+
+```{r}
+entrez_map <- select(org.Hs.eg.db, as.character(rownames(bulkrna_counts)), c("SYMBOL"), "ENTREZID")
+
+gene_annotations <- entrez_map %>%
+  dplyr::rename(GeneID=ENTREZID,
+                Symbol=SYMBOL)
+
+# From preprocessing.tar.gz on their website
+cell.line <- rep(c("HCC827", "H2228", "H838", "A549","H1975"), each = 2)
+
+dge <- DGEList(counts = bulkrna_counts, group = cell.line, genes = gene_annotations, remove.zeros = TRUE)
+
+keep <- rowSums(cpm(dge$counts)>0.5)>=2
+summary(keep)
+dge_filt <- dge[keep,]
+
+dge_filt <- calcNormFactors(dge_filt, method="TMM")
+```
+
+```{r}
+dge_subset <- dge_filt[,dge_filt$samples$group %in% c("HCC827", "H2228", "H1975")]
+
+design <- model.matrix(~ 0+dge_subset$samples$group)
+colnames(design) <- levels(dge_subset$samples$group)
+v <- voom(dge_subset, design)
+fit <- lmFit(v, design)
+contrast.matrix <- makeContrasts(H2228-H1975, HCC827-H1975, HCC827-H2228, levels = design)
+fit2 <- contrasts.fit(fit, contrast.matrix)
+fit2 <- eBayes(fit2)
+```
+
+```{r}
+tt <- topTable(fit2, n=Inf)
+
+tt_sig <- tt %>%
+  dplyr::filter(adj.P.Val < 0.05)
+```
+
+## Marker gene derivation
+
+```{r}
+lfc_table <- tt_sig[,c("H2228...H1975", "HCC827...H1975")]
+
+lfc_table <- lfc_table %>%
+  dplyr::mutate(H1975=0,
+                H2228=H2228...H1975,
+                HCC827=HCC827...H1975) %>%
+  dplyr::select(H1975, H2228, HCC827)
+rownames(lfc_table) <- tt_sig$GeneID
+
+lfc_table <- (lfc_table - matrix(rep(rowMins(as.matrix(lfc_table)), each = 3), ncol = 3, byrow = TRUE))
+```
+
+```{r}
+binarize <- function(x, threshold) {
+  x[x <= threshold] <- -Inf
+  x[x > -Inf] <- 1
+  x[x == -Inf] <- 0
+  return(x)
+}
+
+# Same code as the Koh et al. selection
+maxdiffs <- apply(lfc_table, 1, function(x) max(diff(sort(x))))
+thres_vals <- apply(lfc_table, 1, function(x) sort(x)[which.max(diff(sort(x)))])
+
+expr_mat_thres <- plyr::rbind.fill(lapply(1:nrow(lfc_table), function(i) {
+  lfc_table[i,] <- binarize(lfc_table[i,], thres_vals[i])
+}))
+rownames(expr_mat_thres) <- rownames(lfc_table)
+rho_master <- expr_mat_thres[(maxdiffs >= quantile(maxdiffs, c(.99))) & (thres_vals <= log(2)),] %>%
+  as.matrix
+```
+
+```{r}
+symbols <- df_as_map(dge_subset$genes, rownames(rho_master), from = "GeneID", to = "Symbol")
+
+rho_master <- rho_master[!is.na(symbols),]
+rownames(rho_master) <- symbols[!is.na(symbols)]
+```
+
+```{r}
+tian_3_celseq <- readRDS('/datadrive/projects/cellassign-paper/results/scratch/novel_celltype_analysis/v1/sce_normalized/tian_3_CELseq2.rds')
+tian_3_mixture <- readRDS('/datadrive/projects/cellassign-paper/results/scratch/novel_celltype_analysis/v1/sce_normalized/tian_mixture3.rds')
+```
+
+## Subset for genes only in the SCEs
+
+```{r}
+singlecell_genes <- intersect(rowData(tian_3_celseq)$Symbol, rowData(tian_3_mixture)$Symbol)
+```
+
+```{r}
+rho <- rho_master[intersect(rownames(rho_master), singlecell_genes),]
+```
+
+```{r}
+set.seed(101)
+rho1 <- rho[sample(1:nrow(rho), size = 20),]
+set.seed(101)
+rho2 <- rho[sample(1:nrow(rho), size = 30),]
+set.seed(101)
+rho3 <- rho[sample(1:nrow(rho), size = 50),]
+```
+
+```{r}
+convert_rho_to_markerlist <- function(rho) {
+  markerlist <- lapply(1:ncol(rho), function(i) {
+    genes <- rownames(rho)[as.logical(rho[,i])]
+  })
+  names(markerlist) <- colnames(rho)
+  return(markerlist)
+}
+```
+
+```{r}
+ml1 <- convert_rho_to_markerlist(rho1)
+ml2 <- convert_rho_to_markerlist(rho2)
+ml3 <- convert_rho_to_markerlist(rho3)
+
+write_yaml(ml1, file = "/datadrive/projects/cellassign-paper/resources/marker_lists/tian_20_73_markers.yaml")
+write_yaml(ml2, file = "/datadrive/projects/cellassign-paper/resources/marker_lists/tian_30_73_markers.yaml")
+write_yaml(ml3, file = "/datadrive/projects/cellassign-paper/resources/marker_lists/tian_50_73_markers.yaml")
+```
+
+
+
+## SCRATCH -- DELETE
+
+```{r}
+gamma <- cellassign_res$mle_params$gamma
+colnames(gamma) <- paste0(colnames(gamma), "_em")
+
+sce2 <- sce
+colData(sce2) <- colData(sce2) %>%
+  cbind(gamma)
+```
+
+```{r}
+df <- colData(sce2) %>%
+    as.data.frame %>%
+    dplyr::select(path, H1975, HCC827, H2228, H1975_em, HCC827_em, H2228_em) %>%
+    dplyr::mutate(row=1:n())
+
+cell_props <- melt(df, id.vars = c("path", "row"), measure.vars = c("H1975", "HCC827", "H2228"),
+                   variable.name = "cell_line", value.name = "prop_cells")
+mix_probs <- melt(df, id.vars = c("path", "row"), measure.vars = c("H1975_em", "HCC827_em", "H2228_em"),
+                  variable.name = "cell_line", value.name = "cellassign_prob") %>%
+    dplyr::mutate(cell_line = factor(str_replace_all(cell_line, "_em", "")))
+
+combined5 <- cell_props %>% dplyr::inner_join(mix_probs)
+total_cells <- combined5 %>% dplyr::group_by(row) %>% dplyr::summarise(total = sum(prop_cells))
+complete_cells <- total_cells %>%
+    dplyr::filter(total == 9)
+
+ggplot(combined5 %>%
+           dplyr::filter(row %in% complete_cells$row), aes(x=factor(prop_cells), y = cellassign_prob)) + geom_boxplot(outlier.size = -1) +  geom_point(aes(colour=path), position = position_jitter(width = 0.2, height = 0)) + theme_bw() + theme_Publication() + theme_nature() + facet_wrap(~ cell_line, ncol = 1)
+```
+
+
