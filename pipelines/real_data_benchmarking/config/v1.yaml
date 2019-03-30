@@ -241,7 +241,7 @@ cellassign:
     include_other: TRUE
     num_runs: 3
     B: 20
-    design_formula: ~\ patient
+    design_formula: none
     extra_opts: --shrinkage
     celltypes: all
   liver_panglaodb_full:
