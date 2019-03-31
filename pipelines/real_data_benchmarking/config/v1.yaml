@@ -95,6 +95,19 @@ cellassign:
       - Cholangiocytes
       - Mature\ B\ cells
       - Hepatocytes
+  liver_4data_3markers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_3types.yaml
+    include_other: FALSE
+    num_runs: 1
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: 
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+      - NK\ cells
   liver_3data_allmarkers:
     dataset: mcparland_liver
     marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
