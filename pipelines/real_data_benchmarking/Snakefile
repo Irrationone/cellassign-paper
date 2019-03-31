@@ -57,6 +57,7 @@ rule cellassign_sce:
         num_runs=lambda wildcards: config['cellassign'][wildcards.fit]['num_runs'],
         B=lambda wildcards: config['cellassign'][wildcards.fit]['B'],
         formula=lambda wildcards: config['cellassign'][wildcards.fit]['design_formula'],
+        celltypes=lambda wildcards: config['cellassign'][wildcards.fit]['celltypes'],
         extra_opts=lambda wildcards: config['cellassign'][wildcards.fit]['extra_opts'],
     threads: 20
     log:
@@ -71,6 +72,7 @@ rule cellassign_sce:
         '--num_runs {params.num_runs} '
         '--rbf_pieces {params.B} '
         '--design_formula {params.formula} '
+        '--celltypes {params.celltypes} '
         '{params.extra_opts} '
         '--outfname {output.fit} '
         '>& {log}'
