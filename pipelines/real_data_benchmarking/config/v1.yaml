@@ -107,6 +107,30 @@ cellassign:
       - Cholangiocytes
       - Mature\ B\ cells
       - Hepatocytes
+  liver_3data_4markers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_4types.yaml
+    include_other: FALSE
+    num_runs: 1
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: 
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+  liver_3data_4markers_2:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_4types.yaml
+    include_other: FALSE
+    num_runs: 1
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: 
+      - NK\ cells
+      - Mature\ B\ cells
+      - Hepatocytes
   liver_alldata_3markers:
     dataset: mcparland_liver
     marker_list: ../../resources/marker_lists/liver_mcparland_3types.yaml
@@ -125,7 +149,7 @@ cellassign:
     design_formula: ~\ patient
     extra_opts: --shrinkage
     celltypes: all
-  liver_alldata_3markers_2: # To show that ab T cells and gd T cells will get confused due to similarity
+  liver_alldata_3markers_2: 
     dataset: mcparland_liver
     marker_list: ../../resources/marker_lists/liver_mcparland_3types_2.yaml
     include_other: TRUE
@@ -134,7 +158,7 @@ cellassign:
     design_formula: ~\ patient
     extra_opts: --shrinkage
     celltypes: all
-  liver_alldata_3markers_2_revised: # To show that ab T cells and gd T cells will get confused due to similarity
+  liver_alldata_3markers_2_revised: 
     dataset: mcparland_liver
     marker_list: ../../resources/marker_lists/liver_mcparland_3types_2_revised.yaml
     include_other: TRUE
@@ -256,6 +280,15 @@ cellassign:
   liver_panglaodb_canonical:
     dataset: mcparland_liver
     marker_list: ../../resources/marker_lists/liver_panglaodb_human_canonical.yaml
+    include_other: TRUE
+    num_runs: 1
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: all
+  liver_panglaodb_canonical_revised:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_panglaodb_human_canonical_revised.yaml
     include_other: TRUE
     num_runs: 1
     B: 20
