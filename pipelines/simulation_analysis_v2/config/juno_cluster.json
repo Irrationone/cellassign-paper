@@ -4,7 +4,7 @@
         "queue"     : "general",
         "nCPUs"     : "1",
         "memory"    : 8000,
-        "time"      : "00:30:00",
+        "time"      : "1:00",
         "resources" : "\"select[mem>8000] rusage[mem=8000] span[hosts=1]\"",
         "name"      : "simulations.{rule}.{wildcards}",
         "output"    : "../../results/logs/simulation_analysis_v2/cluster_logs/output/{rule}/{wildcards}.out",
