@@ -6,7 +6,7 @@ singularity: "docker://alzhang/spectrum-master-rstudio:v1.2"
 rule all:
     input:
         expand(
-            '{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
+            '{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}.rds'.format(outdir=config['workdir']),
             de_prob=config['simulation_settings']['variables']['de_prob'],
             down_prob=config['simulation_settings']['variables']['down_prob'],
             seed=config['simulation_settings']['variables']['seed']
@@ -16,7 +16,7 @@ rule create_sce:
     input:
         base_params=config['simulation_settings']['constants']['base_params'],
     output:
-        sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
+        sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}.rds'.format(outdir=config['workdir']),
     params:
         name='create-sce-{seed}-{de_prob}-{down_prob}',
         random_seed='{seed}',
@@ -63,9 +63,9 @@ rule create_sce:
 
 # rule cluster_sce:
 #     input:
-#         sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
+#         sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}.rds'.format(outdir=config['workdir']),
 #     output:
-#         sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
+#         sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}.rds'.format(outdir=config['workdir']),
 #     params:
 
 # rule cellassign_sce:
