@@ -1,0 +1,79 @@
+
+configfile: 'config/v1.yaml'
+
+singularity: "docker://alzhang/spectrum-master-rstudio:v1.2"
+
+rule all:
+    input:
+        expand(
+            sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
+            de_prob=config['simulation_settings']['variables']['de_prob'],
+            down_prob=config['simulation_settings']['variables']['down_prob'],
+            seed=config['simulation_settings']['variables']['seed']
+        )
+
+rule create_sce:
+    input:
+        base_params=lambda wildcards: config['base_params'][wildcards.base],
+    output:
+        sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
+    params:
+        name='create-sce-{seed}-{de_prob}-{down_prob}',
+        random_seed='{seed}',
+        sim_model='splat',
+        num_cells=config['simulation_settings']['constants']['num_cells'],
+        num_groups=config['simulation_settings']['constants']['num_groups'],
+        num_batches=config['simulation_settings']['constants']['num_batches'],
+        group_probs=config['simulation_settings']['constants']['group_probs'],
+        batch_probs=config['simulation_settings']['constants']['batch_probs'],
+        de_facloc=config['simulation_settings']['constants']['de_facloc'],
+        de_facscale=config['simulation_settings']['constants']['de_facscale'],
+        de_nu=config['simulation_settings']['constants']['de_nu'],
+        de_min=config['simulation_settings']['constants']['de_min'],
+        de_max=config['simulation_settings']['constants']['de_max'],
+        batch_facloc=config['simulation_settings']['constants']['batch_facloc'],
+        batch_facscale=config['simulation_settings']['constants']['batch_facscale'],
+        de_prob='{de_prob}',
+        down_prob='{down_prob}',
+    log:
+        '{logdir}/logs/create_sce/{{de_prob}}_{{down_prob}}/{{seed}}.log'.format(logdir=config['logdir']),
+    benchmark:
+        '{logdir}/benchmarks/create_sce/{{de_prob}}_{{down_prob}}/{{seed}}.txt'.format(logdir=config['logdir']),
+    shell:
+        'Rscript R/create_sce.R '
+        '--params {input.base_params} '
+        '--outfname {output.sce} '
+        '--seed {params.random_seed} '
+        '--sim_model {params.sim_model} '
+        '--num_cells {params.num_cells} '
+        '--num_groups {params.num_groups} '
+        '--num_batches {params.num_batches} '
+        '--group_probs {params.group_probs} '
+        '--batch_probs {params.batch_probs} '
+        '--de_facloc {params.de_facloc} '
+        '--de_facscale {params.de_fascale} '
+        '--de_nu {params.de_nu} '
+        '--de_min {params.de_min} '
+        '--de_max {params.de_max} '
+        '--batch_facloc {params.batch_facloc} '
+        '--batch_facscale {params.batch_facscale} '
+        '--de_prob {params.de_prob} '
+        '--down_prob {params.down_prob} '
+        '>& {log}'
+
+# rule cluster_sce:
+#     input:
+#         sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
+#     output:
+#         sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
+#     params:
+
+# rule cellassign_sce:
+#     input:
+    
+#     output:
+    
+#     params:
+
+    
+    

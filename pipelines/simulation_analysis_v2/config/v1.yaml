@@ -1,0 +1,40 @@
+workdir: ../../results/scratch/simulation_analysis_v2/v1
+outdir: ../../results/outputs/simulation_analysis_v2/v1
+logdir: ../../results/logs/simulation_analysis_v2/v1
+
+simulation_settings:
+  variables:
+    de_prob:
+      - 0.05
+      - 0.15
+      - 0.25
+      - 0.35
+      - 0.45
+      - 0.55
+    down_prob:
+      - 0.5
+    seed:
+      - 6812
+      - 1249
+      - 2159
+      - 8172
+      - 1205
+      - 6592
+      - 1021
+      - 5522
+      - 6124
+  constants:
+    num_cells: 2000
+    num_groups: 3
+    group_probs: 0.33,0.33,0.34
+    num_batches: 1
+    batch_probs: 1
+    de_facloc: 0.04
+    de_facscale: 0.0237
+    de_nu: 0.959
+    de_min: 1
+    de_max: 1000
+    batch_facloc: 1
+    batch_facscale: 1
+
+    
