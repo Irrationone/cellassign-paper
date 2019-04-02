@@ -36,7 +36,7 @@ parser$add_argument('--conda_env', type = 'character',
                     help="Name of conda environment with tensorflow", default = "r-tensorflow")
 parser$add_argument('--design_formula', type = 'character',
                     help="Design matrix formula, or 'none' for none", default = "none")
-parser$add_argument('--celltypes', type = 'character',
+parser$add_argument('--celltypes', type = 'character', nargs = '+',
                     help="Celltypes to subset", default = "all")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for cell cycle assignments.")
@@ -83,9 +83,11 @@ if (length(sce_paths) == 1) {
 }
 
 
-if (args$celltypes != "all") {
+if (all(unlist(args$celltypes) != "all")) {
   sce <- sce %>%
-    scater::filter(celltype %in% args$celltypes)
+    scater::filter(celltype %in% unlist(args$celltypes))
+  
+  print(sce)
 }
 
 # Attempt to snakemake's default
