@@ -14,7 +14,7 @@ rule all:
 
 rule create_sce:
     input:
-        base_params=lambda wildcards: config['base_params'][wildcards.base],
+        base_params=config['simulation_settings']['constants']['base_params'],
     output:
         sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
     params:
