@@ -51,7 +51,7 @@ rule create_sce:
         '--group_probs {params.group_probs} '
         '--batch_probs {params.batch_probs} '
         '--de_facloc {params.de_facloc} '
-        '--de_facscale {params.de_fascale} '
+        '--de_facscale {params.de_facscale} '
         '--de_nu {params.de_nu} '
         '--de_min {params.de_min} '
         '--de_max {params.de_max} '
