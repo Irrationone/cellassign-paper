@@ -83,6 +83,15 @@ cellassign:
     design_formula: ~\ patient
     extra_opts: --shrinkage
     celltypes: all
+  liver_alldata_allmarkers_revised2:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes_revised2.yaml
+    include_other: TRUE
+    num_runs: 1
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: all
   liver_3data_3markers:
     dataset: mcparland_liver
     marker_list: ../../resources/marker_lists/liver_mcparland_3types.yaml
