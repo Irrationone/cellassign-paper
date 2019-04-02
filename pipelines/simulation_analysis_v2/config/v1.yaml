@@ -26,9 +26,13 @@ simulation_settings:
   constants:
     num_cells: 2000
     num_groups: 3
-    group_probs: 0.33,0.33,0.34
+    group_probs:
+      - 0.33
+      - 0.33 
+      - 0.34
     num_batches: 1
-    batch_probs: 1
+    batch_probs:
+      - 1
     de_facloc: 0.04
     de_facscale: 0.0237
     de_nu: 0.959
