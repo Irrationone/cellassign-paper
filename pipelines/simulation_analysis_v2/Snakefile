@@ -6,7 +6,7 @@ singularity: "docker://alzhang/spectrum-master-rstudio:v1.2"
 rule all:
     input:
         expand(
-            sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
+            '{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}'.format(outdir=config['workdir']),
             de_prob=config['simulation_settings']['variables']['de_prob'],
             down_prob=config['simulation_settings']['variables']['down_prob'],
             seed=config['simulation_settings']['variables']['seed']
