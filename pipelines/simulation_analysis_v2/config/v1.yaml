@@ -41,7 +41,7 @@ simulation_settings:
     de_max: 1000
     batch_facloc: 1
     batch_facscale: 1
-    base_params: ../../cellassign-sim-comparison/data/sce_t4k_params.rds
+    base_params: ../cellassign-sim-comparison/data/sce_t4k_params.rds
 
 
     
