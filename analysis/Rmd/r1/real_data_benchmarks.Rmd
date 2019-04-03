@@ -29,6 +29,7 @@ library(scrna.utils)
 ```{r}
 fit_liver_alldata_allmarkers <- readRDS('/datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v1/cellassign/liver_alldata_allmarkers.rds')
 fit_liver_alldata_allmarkers_fixed <- readRDS('/datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v1/cellassign/liver_alldata_allmarkers_fixed.rds')
+fit_liver_alldata_allmarkers_revised2 <- readRDS('/datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v1/cellassign/liver_alldata_allmarkers_revised2.rds')
 fit_liver_alldata_3markers <- readRDS('/datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v1/cellassign/liver_alldata_3markers.rds')
 fit_liver_alldata_3markers_revised <- readRDS('/datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v1/cellassign/liver_alldata_3markers_revised.rds')
 fit_liver_alldata_3markers_2 <- readRDS('/datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v1/cellassign/liver_alldata_3markers_2.rds')
@@ -50,6 +51,7 @@ sce_liver$fit_liver_alldata_allmarkers_fixed <- fit_liver_alldata_allmarkers_fix
 sce_liver$fit_liver_panglaodb_full <- fit_liver_panglaodb_full$cell_type
 sce_liver$fit_liver_panglaodb_canonical <- fit_liver_panglaodb_canonical$cell_type
 sce_liver$fit_liver_panglaodb_canonical_revised <- fit_liver_panglaodb_canonical_revised$cell_type
+sce_liver$fit_liver_alldata_allmarkers_revised2 <- fit_liver_alldata_allmarkers_revised2$cell_type
 ```
 
 ```{r}
@@ -679,3 +681,411 @@ p2 <- plotTSNE(sce_follicular_hgsc_merged, colour_by = "fit_fl") +
 
 cowplot::plot_grid(p1, p2, align = 'hv', axis = 'tblr', ncol = 2)
 ```
+
+
+# SCINA
+
+```{r}
+library(SCINA)
+```
+
+```{r}
+liver_original_markers <- read_yaml('/datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_alltypes.yaml')
+liver_revised_markers1 <- read_yaml('/datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_alltypes_revised.yaml')
+liver_revised_markers2 <- read_yaml('/datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_alltypes_revised2.yaml')
+liver_3_markers <- read_yaml('/datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_3types.yaml')
+liver_3_markers_revised <- read_yaml('/datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_3types_revised.yaml')
+liver_4_markers <- read_yaml('/datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_4types.yaml')
+
+expr_mat <- as.matrix(logcounts(sce_liver))
+rownames(expr_mat) <- rowData(sce_liver)$Symbol
+
+scina_liver_0 <- SCINA(exp = expr_mat, signatures = liver_original_markers, max_iter = 1000, rm_overlap = 0, allow_unknown = 1)
+scina_liver_0_2 <- SCINA(exp = expr_mat, signatures = liver_original_markers, max_iter = 1000, rm_overlap = 1, allow_unknown = 1)
+scina_liver_1 <- SCINA(exp = expr_mat, signatures = liver_revised_markers1, max_iter = 1000, rm_overlap = 0, allow_unknown = 1)
+scina_liver_2 <- SCINA(exp = expr_mat, signatures = liver_revised_markers2, max_iter = 1000, rm_overlap = 0, allow_unknown = 1)
+scina_liver_2_2 <- SCINA(exp = expr_mat, signatures = liver_revised_markers2, max_iter = 1000, rm_overlap = 1, allow_unknown = 1)
+
+expr_mat2 <- as.matrix(logcounts(sce_liver_4_types))
+rownames(expr_mat2) <- rowData(sce_liver_4_types)$Symbol
+
+expr_mat3 <- as.matrix(logcounts(sce_liver_3_types))
+rownames(expr_mat3) <- rowData(sce_liver_3_types)$Symbol
+
+scina_liver_3 <- SCINA(exp = expr_mat2, signatures = liver_3_markers, max_iter = 1000, rm_overlap = 0, allow_unknown = 1)
+scina_liver_3_2 <- SCINA(exp = expr_mat2, signatures = liver_3_markers, max_iter = 1000, rm_overlap = 1, allow_unknown = 1)
+scina_liver_4 <- SCINA(exp = expr_mat, signatures = liver_3_markers, max_iter = 1000, rm_overlap = 0, allow_unknown = 1)
+scina_liver_4_2 <- SCINA(exp = expr_mat, signatures = liver_3_markers, max_iter = 1000, rm_overlap = 1, allow_unknown = 1)
+scina_liver_5 <- SCINA(exp = expr_mat, signatures = liver_3_markers_revised, max_iter = 1000, rm_overlap = 0, allow_unknown = 1)
+scina_liver_5_2 <- SCINA(exp = expr_mat, signatures = liver_3_markers_revised, max_iter = 1000, rm_overlap = 1, allow_unknown = 1)
+scina_liver_6 <- SCINA(exp = expr_mat3, signatures = liver_original_markers, max_iter = 1000, rm_overlap = 0, allow_unknown = 1)
+scina_liver_6_2 <- SCINA(exp = expr_mat3, signatures = liver_original_markers, max_iter = 1000, rm_overlap = 1, allow_unknown = 1)
+scina_liver_6_3 <- SCINA(exp = expr_mat3, signatures = liver_original_markers, max_iter = 1000, rm_overlap = 0, allow_unknown = 1, sensitivity_cutoff = 0.9)
+scina_liver_6_4 <- SCINA(exp = expr_mat3, signatures = liver_original_markers, max_iter = 1000, rm_overlap = 0, allow_unknown = 1, sensitivity_cutoff = 0.5)
+scina_liver_6_5 <- SCINA(exp = expr_mat3, signatures = liver_original_markers, max_iter = 1000, rm_overlap = 0, allow_unknown = 1, sensitivity_cutoff = 0.2)
+scina_liver_6_6 <- SCINA(exp = expr_mat3, signatures = liver_original_markers, max_iter = 1000, rm_overlap = 0, allow_unknown = 1, sensitivity_cutoff = 0.1)
+scina_liver_7 <- SCINA(exp = expr_mat3, signatures = liver_4_markers, max_iter = 1000, rm_overlap = 0, allow_unknown = 1)
+scina_liver_7_2 <- SCINA(exp = expr_mat3, signatures = liver_4_markers, max_iter = 1000, rm_overlap = 1, allow_unknown = 1)
+```
+
+```{r}
+liver_scina_performance <- data.frame(celltype=sce_liver$celltype,
+                                      `SCINA (original, overlaps)` = scina_liver_0$cell_labels,
+                                      `SCINA (original, no overlaps)` = scina_liver_0_2$cell_labels,
+                                      `SCINA (revised, overlaps)` = scina_liver_2$cell_labels,
+                                      `SCINA (revised, no overlaps)` = scina_liver_2_2$cell_labels,
+                                      `CellAssign (original)` = fit_liver_alldata_allmarkers$cell_type,
+                                      `CellAssign (revised)` = fit_liver_alldata_allmarkers_revised2$cell_type,
+                                      stringsAsFactors = FALSE,
+                                      check.names = FALSE
+)
+liver_scina_performance$cell_id <- 1:nrow(liver_scina_performance)
+
+liver_melted <- reshape2::melt(liver_scina_performance,
+                               id.vars = c("cell_id", "celltype"),
+                               variable.name = "method", 
+                               value.name = "predicted_type")
+
+liver_performance <- liver_melted %>%
+  dplyr::group_by(method) %>%
+  dplyr::summarise(accuracy=sum(predicted_type == celltype)/length(celltype)) %>% 
+  dplyr::ungroup() %>%
+  dplyr::mutate(marker_list_type=Hmisc::capitalize(str_extract(method, "(original|revised)")))
+
+liver_performance$method2 <- c("SCINA (overlaps)", "SCINA (no overlaps)", "SCINA (overlaps)", "SCINA (no overlaps)", "CellAssign", "CellAssign")
+```
+
+```{r}
+ggplot(liver_performance, aes(x=method2, y=accuracy)) + 
+  geom_bar(stat = 'identity', width = 0.5) + 
+  geom_text(aes(x=method2, y=accuracy+0.05, label = round(accuracy, 2))) + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  facet_wrap(~ marker_list_type, ncol = 2) + 
+  stripped_theme(strip_face = 'bold') +
+  xlab("Method") + 
+  ylab("Accuracy") + 
+  scale_y_continuous(expand = c(0, 0, 0.05, 0.02))
+```
+
+```{r}
+sce_liver_3_types$scina_liver_7 <- scina_liver_7$cell_labels
+sce_liver_3_types$scina_liver_7_2 <- scina_liver_7_2$cell_labels
+sce_liver_3_types$scina_liver_6 <- scina_liver_6$cell_labels
+sce_liver_3_types$scina_liver_6_2 <- scina_liver_6_2$cell_labels
+sce_liver_3_types$scina_liver_6_3 <- scina_liver_6_3$cell_labels
+sce_liver_3_types$scina_liver_6_4 <- scina_liver_6_4$cell_labels
+sce_liver_3_types$scina_liver_6_5 <- scina_liver_6_5$cell_labels
+sce_liver_3_types$scina_liver_6_6 <- scina_liver_6_6$cell_labels
+```
+
+```{r}
+p1 <- plotTSNE(sce_liver_3_types, colour_by = "scina_liver_7") + 
+  xlab("TSNE-1") + 
+  ylab("TSNE-2") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  guides(fill = guide_legend(title = "Celltype", ncol = 2)) + 
+  ggtitle("SCINA (overlaps)") + 
+  scale_fill_manual(values = liver_celltype_colours)
+
+p2 <- plotTSNE(sce_liver_3_types, colour_by = "scina_liver_7_2") + 
+  xlab("TSNE-1") + 
+  ylab("TSNE-2") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  guides(fill = guide_legend(title = "Celltype", ncol = 2)) + 
+  ggtitle("SCINA (no overlaps)") + 
+  scale_fill_manual(values = liver_celltype_colours)
+
+cowplot::plot_grid(p1, p2, ncol = 2, align = 'hv', axis = 'tblr')
+```
+
+```{r}
+p1 <- plotTSNE(sce_liver_3_types, colour_by = "scina_liver_6") + 
+  xlab("TSNE-1") + 
+  ylab("TSNE-2") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  guides(fill = guide_legend(title = "Celltype", ncol = 2)) + 
+  ggtitle("SCINA (overlaps)") + 
+  scale_fill_manual(values = liver_celltype_colours)
+
+p2 <- plotTSNE(sce_liver_3_types, colour_by = "scina_liver_6_2") + 
+  xlab("TSNE-1") + 
+  ylab("TSNE-2") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  guides(fill = guide_legend(title = "Celltype", ncol = 2)) + 
+  ggtitle("SCINA (no overlaps)") + 
+  scale_fill_manual(values = liver_celltype_colours)
+
+cowplot::plot_grid(p1, p2, ncol = 2, align = 'hv', axis = 'tblr')
+```
+
+```{r}
+runs <- c("scina_liver_6_3", "scina_liver_6_4", "scina_liver_6_5", "scina_liver_6_6")
+sensitivities <- c(0.9, 0.5, 0.2, 0.1)
+
+plots <- lapply(seq_along(runs), function(i) {
+  plotTSNE(sce_liver_3_types, colour_by = runs[i]) + 
+    xlab("TSNE-1") + 
+    ylab("TSNE-2") + 
+    theme_bw() + 
+    theme_Publication() + 
+    theme_nature() + 
+    guides(fill = guide_legend(title = "Celltype", ncol = 2)) + 
+    ggtitle(paste0("SCINA (sensitivity = ", sensitivities[i], ")")) + 
+    scale_fill_manual(values = liver_celltype_colours)
+})
+
+
+cowplot::plot_grid(plotlist = plots, ncol = 2, align = 'hv', axis = 'tblr')
+```
+
+```{r}
+sce_liver$scina_liver_4 <- scina_liver_4$cell_labels
+sce_liver$scina_liver_4_2 <- scina_liver_4_2$cell_labels
+sce_liver$scina_liver_5 <- scina_liver_5$cell_labels
+sce_liver$scina_liver_5_2 <- scina_liver_5_2$cell_labels
+```
+
+```{r}
+runs <- c("scina_liver_4", "scina_liver_4_2", "scina_liver_5", "scina_liver_5_2")
+labels <- c("SCINA (3 types, overlaps)", "SCINA (3 types, no overlaps)", "SCINA (3 types revised, overlaps)", "SCINA (3 types revised, no overlaps)")
+
+plots2 <- lapply(seq_along(runs), function(i) {
+  plotTSNE(sce_liver, colour_by = runs[i]) + 
+    xlab("TSNE-1") + 
+    ylab("TSNE-2") + 
+    theme_bw() + 
+    theme_Publication() + 
+    theme_nature() + 
+    guides(fill = guide_legend(title = "Celltype", ncol = 2)) + 
+    ggtitle(labels[i]) + 
+    scale_fill_manual(values = liver_celltype_colours)
+})
+
+
+cowplot::plot_grid(plotlist = plots2, ncol = 2, align = 'hv', axis = 'tblr')
+```
+
+# Koh reanalysis
+
+```{r}
+sce_koh <- readRDS('/datadrive/projects/cellassign-paper/results/outputs/external/v1/koh/sce_annotated.rds')
+```
+
+```{r}
+koh_matrix <- read.table('/datadrive/projects/cellassign-paper/results/scratch/external/v1/koh/cellassign_rho.tsv', header = TRUE, row.names = 1, sep = "\t") 
+
+koh_marker_list <- lapply(colnames(koh_matrix), function(x) {
+  sort(rownames(koh_matrix)[which(koh_matrix[,x] == 1)])
+})
+names(koh_marker_list) <- colnames(koh_matrix)
+```
+
+```{r}
+scina_koh_1 <- SCINA(exp = as.matrix(logcounts(sce_koh)), signatures = koh_marker_list, max_iter = 1000, rm_overlap = 0, allow_unknown = 1)
+
+# This does not work -- errors
+scina_koh_2 <- SCINA(exp = as.matrix(logcounts(sce_koh)), signatures = koh_marker_list, max_iter = 1000)
+```
+
+```{r}
+sce_koh_markers <- sce_koh[rownames(koh_matrix),]
+counts(sce_koh_markers) <- as.matrix(counts(sce_koh_markers))
+
+fit_koh1 <- cellassign(sce_koh_markers, 
+                       marker_gene_info = as.matrix(koh_matrix),
+                       s = sizeFactors(sce_koh_markers),
+                       min_delta = 2, 
+                       shrinkage = TRUE,
+                       B = 20, 
+                       X = NULL,
+                       dirichlet_concentration = 0.01)
+
+sce_koh$fit_koh1 <- fit_koh1$cell_type
+sce_koh$scina_1 <- scina_koh_1$cell_labels
+```
+
+```{r}
+koh_celltype_colours <- get_colour_palette(c(sce_koh$celltype, fit_koh1$cell_type, scina_koh_1$cell_labels))
+
+p1 <- plotTSNE(sce_koh, colour_by = "celltype") + 
+  xlab("TSNE-1") + 
+  ylab("TSNE-2") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  guides(fill = guide_legend(title = "Celltype", ncol = 2)) + 
+  ggtitle("Celltype (Koh et al.)") + 
+  scale_fill_manual(values = koh_celltype_colours)
+
+cellassign_accuracy <- round(with(colData(sce_koh), sum(fit_koh1 == celltype)/length(celltype)) * 100, 2)
+p2 <- plotTSNE(sce_koh, colour_by = "fit_koh1") + 
+  xlab("TSNE-1") + 
+  ylab("TSNE-2") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  guides(fill = guide_legend(title = "Celltype", ncol = 2)) + 
+  ggtitle("CellAssign") + 
+  scale_fill_manual(values = koh_celltype_colours) + 
+  annotate(x = Inf, y = Inf, hjust = 1, vjust = 1, geom = 'text', label = paste0('Accuracy = ', cellassign_accuracy, '%'), size = 3)
+
+scina_accuracy <- round(with(colData(sce_koh), sum(scina_1 == celltype)/length(celltype)) * 100, 2)
+p3 <- plotTSNE(sce_koh, colour_by = "scina_1") + 
+  xlab("TSNE-1") + 
+  ylab("TSNE-2") + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  guides(fill = guide_legend(title = "Celltype", ncol = 2)) + 
+  ggtitle("SCINA") + 
+  scale_fill_manual(values = koh_celltype_colours) +  
+  annotate(x = Inf, y = Inf, hjust = 1, vjust = 1, geom = 'text', label = paste0('Accuracy = ', scina_accuracy, '%'), size = 3)
+
+cowplot::plot_grid(p1, p2, p3, ncol = 3, align = 'hv', axis = 'tblr')
+```
+
+# CellBench (for SCINA)
+
+```{r}
+batch_correct2 <- function(sce, batch_col, method = "scanorama") {
+  ## Feature selection
+  batches <- unique(colData(sce)[,batch_col])
+  
+  fit <- trendVar(sce, parametric=TRUE, use.spikes = FALSE)
+  decomp <- decomposeVar(sce, fit)
+  decomp$Symbol <- rowData(sce)$Symbol
+  
+  decomp_chosen <- decomp %>% subset(bio > 0)
+  chosen <- rownames(decomp_chosen)
+  
+  chosen_features <- rep(list(chosen), length(batches))
+  
+  ## Batch correction
+  if (method == "scanorama") {
+    norm_matrices <- lapply(batches, function(bat) {
+      sce_sub <- sce[,colData(sce)[,batch_col] == bat]
+      norm_data <- t(as.matrix(logcounts(sce_sub)))
+      return(norm_data)
+    })
+    
+    indexes <- lapply(batches, function(bat) {
+      which(colData(sce)[,batch_col] == bat)
+    })
+    
+    scanorama <- reticulate::import('scanorama')
+    
+    # Integration and batch correction
+    integrated_corrected_data <- scanorama$correct(norm_matrices,
+                                                   chosen_features,
+                                                   return_dimred = TRUE,
+                                                   return_dense = TRUE)
+    
+    scanorama_mat <- matrix(NA, nrow = sum(sapply(indexes, length)), ncol = 100)
+    scanorama_mat_expr <- matrix(NA, nrow = sum(sapply(indexes, length)), ncol = ncol(integrated_corrected_data[[2]][[1]]))
+    for (i in seq_along(indexes)) {
+      idx <- indexes[[i]]
+      scanorama_mat[idx,] <- integrated_corrected_data[[1]][[i]]
+      scanorama_mat_expr[idx,] <- integrated_corrected_data[[2]][[i]]
+    }
+    reducedDim(sce, "scanorama_int") <- scanorama_mat
+    
+    sce_sel <- sce
+    sce_sel <- sce_sel[integrated_corrected_data[[3]],]
+    assay(sce_sel, "scanorama") <- t(scanorama_mat_expr)
+    pca_res <- pca2(sce_sel, ntop = 1000, ncomponents = 50, exprs_values = "scanorama")
+    reducedDim(sce_sel, "PCA2") <- pca_res$x
+    
+    sce_sel <- runTSNE(sce_sel, use_dimred = "PCA2", n_dimred = 50)
+    sce_sel <- runUMAP(sce_sel, use_dimred = "PCA2", n_dimred = 50)
+    
+    reducedDim(sce, "scanorama_PCA") <- reducedDim(sce_sel, "PCA2")
+    reducedDim(sce, "scanorama_TSNE") <- reducedDim(sce_sel, "TSNE")
+    reducedDim(sce, "scanorama_UMAP") <- reducedDim(sce_sel, "UMAP")
+    sce@metadata$batchcor_pca_res <- pca_res
+    sce@metadata$batchcor_genes <- chosen
+    
+    exprs_bc <- assay(sce_sel, "scanorama")
+  } else {
+    stop("Other methods not implemented.")
+  }
+  
+  return(list(sce=sce, exprs=exprs_bc))
+}
+```
+
+```{r}
+tian_expr_mat <- as.matrix(logcounts(sce_tian_mix))
+rownames(tian_expr_mat) <- rowData(sce_tian_mix)$Symbol
+tian_marker_list <- read_yaml('/datadrive/projects/cellassign-paper/resources/marker_lists/tian_50_73_markers.yaml')
+
+scina_tian_1 <- SCINA(exp = tian_expr_mat, signatures = tian_marker_list, max_iter = 1000, rm_overlap = 0, allow_unknown = 0)
+```
+
+```{r}
+tian_mix_bc_res <- batch_correct2(sce_tian_mix, batch_col = "sample_id", method = "scanorama")
+```
+
+```{r}
+tian_expr_mat2 <- tian_mix_bc_res$exprs
+rownames(tian_expr_mat2) <- df_as_map(rowData(sce_tian_mix) %>% as.data.frame, rownames(tian_expr_mat2), from = "ID", to = "Symbol")
+
+scina_tian_2 <- SCINA(exp = tian_expr_mat2, signatures = tian_marker_list, max_iter = 1000, rm_overlap = 0, allow_unknown = 0)
+```
+
+```{r}
+tian_expr_mat3 <- as.matrix(logcounts(tian_3_mixture))
+rownames(tian_expr_mat3) <- rowData(tian_3_mixture)$Symbol
+
+scina_tian_3 <- SCINA(exp = tian_expr_mat3, signatures = tian_marker_list, max_iter = 1000, rm_overlap = 0, allow_unknown = 0)
+```
+
+```{r}
+scina_objects <- list(scina_tian_3, scina_tian_2)
+names(scina_objects) <- c('cellmix4', 'pure_cellmix4_batchcorrected')
+rowlabels <- list(which(sce_tian_mix$sample_id == "mixture"), 1:ncol(scina_tian_2$probabilities))
+
+scina_probs <- plyr::rbind.fill(lapply(seq_along(scina_objects), function(i) {
+  fit <- scina_objects[[i]]
+  gammas <- fit$probabilities %>% 
+    t
+  rownames(gammas) <- rowlabels[[i]]
+  gammas <- gammas %>%
+    reshape2::melt() %>%
+    dplyr::rename(cell_id=Var1, cell_line=Var2, scina_prob=value) %>%
+    dplyr::mutate(group=names(scina_objects)[i])
+  return(gammas)
+}))
+scina_probs$group <- factor(scina_probs$group)
+```
+
+```{r}
+scina_prob_df <- true_probs %>%
+  dplyr::left_join(scina_probs) %>%
+  dplyr::filter(cell_id %in% valid_cells$cell_id,
+                sample_id == "mixture")
+```
+
+```{r}
+ggplot(scina_prob_df, aes(x=factor(num_cells), y=scina_prob, fill = factor(group))) + 
+  geom_boxplot(alpha = 0.7, position = "dodge", outlier.size = -1) + 
+  geom_point(alpha = 0.2, position = position_jitterdodge(jitter.width = 0.2, jitter.height = 0)) + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  facet_wrap(~ cell_line, ncol = 1) + 
+  stripped_theme(strip_face = "bold") + 
+  guides(fill = guide_legend(title = "Number of marker genes")) + 
+  xlab("# cells in 9-cell barcode") + 
+  ylab("SCINA probability")
+```
+
