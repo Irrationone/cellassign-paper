@@ -118,8 +118,10 @@ if (marker_setting == "markers") {
                                    frac_genes = frac_genes, 
                                    max_genes_per_class = max_genes)
   gene_subset <- markers_to_use
+  n_markers <- length(markers_to_use)
 } else if (marker_setting == "full") {
   gene_subset <- NULL
+  n_markers <- NA
 } else {
   stop("Unrecognized marker setting.")
 }
@@ -151,7 +153,7 @@ clusters_annotated <- data.frame(sce@metadata$param_df,
                                  max_genes=max_genes,
                                  fc_percentile=fc_percentile,
                                  expr_percentile=expr_percentile,
-                                 num_markers=length(markers_to_use),
+                                 num_markers=n_markers,
                                  test_proportion=test_proportion,
                                  cluster_df,
                                  stringsAsFactors = FALSE)
