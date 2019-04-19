@@ -3,6 +3,26 @@ configfile: 'config/v1.yaml'
 
 singularity: "docker://alzhang/spectrum-master-rstudio:v1.3"
 
+def get_final_outputs(wildcards):
+    output_files = []
+    
+    for clust_method in config['cluster_settings']['clustering_methods']:
+        for marker_setting in config['cluster_settings']['clustering_methods'][wildcards.clust_method]:
+            output_files = output_files + expand(
+                '{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{clust_method}_{marker_setting}_{{max_genes}}_{{wrong_prop}}.tsv'.format(
+                    outdir=config['outdir'],
+                    clust_method=clust_method,
+                    marker_setting=marker_setting
+                ),
+                de_prob=config['simulation_settings']['variables']['de_prob'],
+                down_prob=config['simulation_settings']['variables']['down_prob'],
+                seed=config['simulation_settings']['variables']['seed'],
+                max_genes=config['cluster_settings']['max_genes'],
+                wrong_prop=config['cluster_settings']['wrong_marker_proportion']
+            )
+    
+    return output_files
+
 rule all:
     input:
         expand(
@@ -11,17 +31,7 @@ rule all:
             down_prob=config['simulation_settings']['variables']['down_prob'],
             seed=config['simulation_settings']['variables']['seed']
         ),
-        expand(
-            '{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{max_genes}}_{{wrong_prop}}'.format(
-                outdir=config['outdir']
-            ),
-            de_prob=config['simulation_settings']['variables']['de_prob'],
-            down_prob=config['simulation_settings']['variables']['down_prob'],
-            seed=config['simulation_settings']['variables']['seed'],
-            clust_method=config['cluster_settings']['clustering_methods'],
-            max_genes=config['cluster_settings']['max_genes'],
-            wrong_prop=config['cluster_settings']['wrong_marker_proportion']
-        )
+        get_final_outputs,
 
 rule create_sce:
     input:
@@ -76,9 +86,9 @@ rule cluster_sce:
     input:
         sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}.rds'.format(outdir=config['workdir']),
     output:
-        clust_results=directory('{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{max_genes}}_{{wrong_prop}}'.format(outdir=config['outdir'])),
+        clust_results='{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}_{{wrong_prop}}.tsv'.format(outdir=config['outdir']),
     params:
-        name='cluster-sce-{seed}-{de_prob}-{down_prob}-{clust_method}-{max_genes}-{wrong_prop}',
+        name='cluster-sce-{seed}-{de_prob}-{down_prob}-{clust_method}-{marker_setting}-{max_genes}-{wrong_prop}',
         dimreduce_method=config['cluster_settings']['dimreduce_method'],
         conda_env=config['cluster_settings']['conda_env'],
         fc_percentile=config['cluster_settings']['fc_percentile'],
@@ -88,10 +98,11 @@ rule cluster_sce:
         clust_method='{clust_method}',
         max_genes='{max_genes}',
         wrong_prop='{wrong_prop}',
+        marker_settings='{marker_setting}',
     log:
-        '{logdir}/logs/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{max_genes}}_{{wrong_prop}}.log'.format(logdir=config['logdir']),
+        '{logdir}/logs/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}_{{wrong_prop}}.log'.format(logdir=config['logdir']),
     benchmark:
-        '{logdir}/benchmarks/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{max_genes}}_{{wrong_prop}}.txt'.format(logdir=config['logdir']),
+        '{logdir}/benchmarks/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}_{{wrong_prop}}.txt'.format(logdir=config['logdir']),
     shell:
         'Rscript R/cluster_sce.R '
         '--sce {input.sce} '
@@ -105,7 +116,11 @@ rule cluster_sce:
         '--clust_method {params.clust_method} '
         '--max_genes {params.max_genes} '
         '--wrong_prop {params.wrong_prop} '
+        '--marker_setting {params.marker_setting} '
         '>& {log}'
+
+rule evaluate_cluster:
+    input:
 
 
 # rule cellassign_sce:

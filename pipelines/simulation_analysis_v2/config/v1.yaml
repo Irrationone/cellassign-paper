@@ -46,18 +46,49 @@ simulation_settings:
 cluster_settings:
   dimreduce_method: PCA
   clustering_methods:
-    - cellassign
-    - scina
-    - phenograph
-    - SC3
-    - kmeans
-    - seurat_0.4
-    - seurat_0.8
-    - seurat_1.2
-    - densitycut
-    - scmap
-    - Zheng_cor
-    - dynamicTreeCut
+    scina:
+      - markers
+    phenograph:
+      - full
+      - markers
+    SC3:
+      - full
+      - markers
+    kmeans:
+      - full
+      - markers
+    seurat_0.4:
+      - full
+      - markers
+    seurat_0.8:
+      - full
+      - markers
+    seurat_1.2:
+      - full
+      - markers
+    densitycut:
+      - full
+      - markers
+    scmap:
+      - full
+      - markers
+    Zheng_cor:
+      - full
+      - markers
+    dynamicTreeCut:
+      - full
+      - markers
+  conda_env: r-tensorflow
+  fc_percentile: 0.95
+  expr_percentile: 0.9
+  frac_genes: 1
+  max_genes: 
+    - 15
+  wrong_marker_proportion: 
+    - 0
+  test_proportion: 0.5
+
+cellassign_settings:
   conda_env: r-tensorflow
   fc_percentile: 0.95
   expr_percentile: 0.9
