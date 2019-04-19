@@ -7,7 +7,7 @@ def get_final_outputs(wildcards):
     output_files = []
     
     for clust_method in config['cluster_settings']['clustering_methods']:
-        for marker_setting in config['cluster_settings']['clustering_methods'][wildcards.clust_method]:
+        for marker_setting in config['cluster_settings']['clustering_methods'][clust_method]:
             output_files = output_files + expand(
                 '{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{clust_method}_{marker_setting}_{{max_genes}}.tsv'.format(
                     outdir=config['outdir'],
