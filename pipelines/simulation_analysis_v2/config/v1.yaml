@@ -46,8 +46,8 @@ simulation_settings:
 cluster_settings:
   dimreduce_method: PCA
   clustering_methods:
-    scina:
-      - markers
+    # scina:
+    #   - markers
     phenograph:
       - full
       - markers
