@@ -96,7 +96,7 @@ rule cluster_sce:
         test_proportion=config['cluster_settings']['test_proportion'],
         clust_method='{clust_method}',
         max_genes='{max_genes}',
-        marker_setting=lambda wildcards: config['cluster_settings']['clustering_methods'][wildcards.clust_method],
+        marker_setting='{marker_setting}',
     log:
         '{logdir}/logs/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}.log'.format(logdir=config['logdir']),
     benchmark:
