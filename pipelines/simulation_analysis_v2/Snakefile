@@ -104,7 +104,7 @@ rule cluster_sce:
     shell:
         'Rscript R/cluster_sce.R '
         '--sce {input.sce} '
-        '--outdir {output.clust_results} '
+        '--outfname {output.clust_results} '
         '--dimreduce_method {params.dimreduce_method} '
         '--conda_env {params.conda_env} '
         '--fc_percentile {params.fc_percentile} '
