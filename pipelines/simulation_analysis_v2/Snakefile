@@ -87,7 +87,7 @@ rule cluster_sce:
     output:
         clust_results='{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}.tsv'.format(outdir=config['outdir']),
     params:
-        name='cluster-sce-{seed}-{de_prob}-{down_prob}-{clust_method}-{marker_setting}-{max_genes}-{wrong_prop}',
+        name='cluster-sce-{seed}-{de_prob}-{down_prob}-{clust_method}-{marker_setting}-{max_genes}',
         dimreduce_method=config['cluster_settings']['dimreduce_method'],
         conda_env=config['cluster_settings']['conda_env'],
         fc_percentile=config['cluster_settings']['fc_percentile'],
