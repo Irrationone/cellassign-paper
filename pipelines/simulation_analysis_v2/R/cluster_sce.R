@@ -126,11 +126,7 @@ if (marker_setting == "markers") {
   stop("Unrecognized marker setting.")
 }
 
-if (clustering_method == "scina") {
-  ## TODO: Implement SCINA-based clustering
-  
-  cluster_df <- data.frame(cell=as.character(colData(sce_sim)$Cell), cluster=sce_sim$cluster)
-} else if (str_detect(clustering_method, "^seurat_")) {
+if (str_detect(clustering_method, "^seurat_")) {
   seurat_resolution <- as.numeric(str_replace(clustering_method, "^seurat_", ""))
 
   sce_sim <- cluster_wrapper(sce, gene_subset = gene_subset, dimreduce_method = dimreduce_method, clustering_method = "seurat", seurat_resolution = seurat_resolution)
