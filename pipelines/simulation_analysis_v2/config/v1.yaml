@@ -66,3 +66,4 @@ cluster_settings:
     - 15
   wrong_marker_proportion: 
     - 0
+  test_proportion: 0.5
