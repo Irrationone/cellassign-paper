@@ -94,6 +94,8 @@ clustering_method <- args$clust_method
 max_genes <- args$max_genes
 marker_setting <- args$marker_setting
 
+sce_total <- readRDS(args$sce)
+
 ## Split SCE into training and test sets
 coldat <- as.data.frame(colData(sce_total))
 sets <- splitstackshape::stratified(coldat, group = "Group", size = (1-test_proportion), bothSets = TRUE)
@@ -125,21 +127,21 @@ if (marker_setting == "markers") {
 if (clustering_method == "scina") {
   ## TODO: Implement SCINA-based clustering
   
-  cluster_df <- data.frame(cluster=sce$cluster)
+  cluster_df <- data.frame(cell=as.character(colData(sce_sim)$Cell), cluster=sce_sim$cluster)
 } else if (str_detect(clustering_method, "^seurat_")) {
   seurat_resolution <- as.numeric(str_replace(clustering_method, "^seurat_", ""))
 
   sce_sim <- cluster_wrapper(sce, gene_subset = gene_subset, dimreduce_method = dimreduce_method, clustering_method = "seurat", seurat_resolution = seurat_resolution)
   
-  cluster_df <- data.frame(cluster=sce_sim$cluster)
+  cluster_df <- data.frame(cell=as.character(colData(sce_sim)$Cell), cluster=sce_sim$cluster)
 } else if (clustering_method %in% c("Zheng_cor", "scmap")) {
   sce_sim <- cluster_wrapper(sce, gene_subset = gene_subset, dimreduce_method = dimreduce_method, clustering_method = clustering_method, object2 = sce_train, object2_cluster_label = "Group")
   
-  cluster_df <- data.frame(cluster=sce_sim$cluster)
+  cluster_df <- data.frame(cell=as.character(colData(sce_sim)$Cell), cluster=sce_sim$cluster)
 } else {
   sce_sim <- cluster_wrapper(sce, gene_subset = gene_subset, dimreduce_method = dimreduce_method, clustering_method = clustering_method)
 
-  cluster_df <- data.frame(cluster=sce_sim$cluster)
+  cluster_df <- data.frame(cell=as.character(colData(sce_sim)$Cell), cluster=sce_sim$cluster)
 }
 
 clusters_annotated <- data.frame(sce@metadata$param_df,
