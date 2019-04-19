@@ -9,7 +9,7 @@ def get_final_outputs(wildcards):
     for clust_method in config['cluster_settings']['clustering_methods']:
         for marker_setting in config['cluster_settings']['clustering_methods'][wildcards.clust_method]:
             output_files = output_files + expand(
-                '{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{clust_method}_{marker_setting}_{{max_genes}}_{{wrong_prop}}.tsv'.format(
+                '{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{clust_method}_{marker_setting}_{{max_genes}}.tsv'.format(
                     outdir=config['outdir'],
                     clust_method=clust_method,
                     marker_setting=marker_setting
@@ -17,8 +17,7 @@ def get_final_outputs(wildcards):
                 de_prob=config['simulation_settings']['variables']['de_prob'],
                 down_prob=config['simulation_settings']['variables']['down_prob'],
                 seed=config['simulation_settings']['variables']['seed'],
-                max_genes=config['cluster_settings']['max_genes'],
-                wrong_prop=config['cluster_settings']['wrong_marker_proportion']
+                max_genes=config['cluster_settings']['max_genes']
             )
     
     return output_files
@@ -86,7 +85,7 @@ rule cluster_sce:
     input:
         sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}.rds'.format(outdir=config['workdir']),
     output:
-        clust_results='{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}_{{wrong_prop}}.tsv'.format(outdir=config['outdir']),
+        clust_results='{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}.tsv'.format(outdir=config['outdir']),
     params:
         name='cluster-sce-{seed}-{de_prob}-{down_prob}-{clust_method}-{marker_setting}-{max_genes}-{wrong_prop}',
         dimreduce_method=config['cluster_settings']['dimreduce_method'],
@@ -97,12 +96,11 @@ rule cluster_sce:
         test_proportion=config['cluster_settings']['test_proportion'],
         clust_method='{clust_method}',
         max_genes='{max_genes}',
-        wrong_prop='{wrong_prop}',
         marker_settings='{marker_setting}',
     log:
-        '{logdir}/logs/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}_{{wrong_prop}}.log'.format(logdir=config['logdir']),
+        '{logdir}/logs/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}.log'.format(logdir=config['logdir']),
     benchmark:
-        '{logdir}/benchmarks/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}_{{wrong_prop}}.txt'.format(logdir=config['logdir']),
+        '{logdir}/benchmarks/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}.txt'.format(logdir=config['logdir']),
     shell:
         'Rscript R/cluster_sce.R '
         '--sce {input.sce} '
@@ -115,7 +113,6 @@ rule cluster_sce:
         '--test_proportion {params.test_proportion} '
         '--clust_method {params.clust_method} '
         '--max_genes {params.max_genes} '
-        '--wrong_prop {params.wrong_prop} '
         '--marker_setting {params.marker_setting} '
         '>& {log}'
 

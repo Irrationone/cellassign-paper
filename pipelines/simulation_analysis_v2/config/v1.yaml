@@ -84,8 +84,6 @@ cluster_settings:
   frac_genes: 1
   max_genes: 
     - 15
-  wrong_marker_proportion: 
-    - 0
   test_proportion: 0.5
 
 cellassign_settings:
