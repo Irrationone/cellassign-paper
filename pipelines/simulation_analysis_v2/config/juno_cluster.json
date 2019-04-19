@@ -21,6 +21,7 @@
     },
     "assign_celltypes_sce" :
     {
+        "nCPUs"     : 8,
         "memory"    : 16,
         "time"      : "2:00",
         "resources" : "\"select[mem>16] rusage[mem=16] span[hosts=1]\"",
