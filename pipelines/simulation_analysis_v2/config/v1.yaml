@@ -86,7 +86,10 @@ cluster_settings:
     - 15
   test_proportion: 0.5
 
-cellassign_settings:
+assign_celltype_settings:
+  methods:
+    - cellassign
+    - scina
   conda_env: r-tensorflow
   fc_percentile: 0.95
   expr_percentile: 0.9

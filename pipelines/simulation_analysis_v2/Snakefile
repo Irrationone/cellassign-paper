@@ -3,7 +3,7 @@ configfile: 'config/v1.yaml'
 
 singularity: "docker://alzhang/spectrum-master-rstudio:v1.3"
 
-def get_final_outputs(wildcards):
+def get_cluster_outputs(wildcards):
     output_files = []
     
     for clust_method in config['cluster_settings']['clustering_methods']:
@@ -30,7 +30,18 @@ rule all:
             down_prob=config['simulation_settings']['variables']['down_prob'],
             seed=config['simulation_settings']['variables']['seed']
         ),
-        get_final_outputs,
+        get_cluster_outputs,
+        expand(
+            '{outdir}/assign_celltypes_sce/clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.tsv'.format(
+                outdir=config['outdir']
+            ),
+            de_prob=config['simulation_settings']['variables']['de_prob'],
+            down_prob=config['simulation_settings']['variables']['down_prob'],
+            seed=config['simulation_settings']['variables']['seed'],
+            max_genes=config['assign_celltype_settings']['max_genes'],
+            ss_method=config['assign_celltype_settings']['methods'],
+            wm_prop=config['assign_celltype_settings']['wrong_marker_proportion']
+        )
 
 rule create_sce:
     input:
@@ -114,6 +125,43 @@ rule cluster_sce:
         '--clust_method {params.clust_method} '
         '--max_genes {params.max_genes} '
         '--marker_setting {params.marker_setting} '
+        '>& {log}'
+
+rule assign_celltypes_sce:
+    input:
+        sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}.rds'.format(outdir=config['workdir']),
+    output:
+        clust_results='{outdir}/assign_celltypes_sce/clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.tsv'.format(outdir=config['outdir']),
+        delta_results='{outdir}/assign_celltypes_sce/deltas/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.tsv'.format(outdir=config['outdir']),
+        fit_results='{outdir}/assign_celltypes_sce/fits/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.rds'.format(outdir=config['outdir']),
+    params:
+        name='assign-celltypes-sce-{seed}-{de_prob}-{down_prob}-{ss_method}-{max_genes}-{wm_prop}',
+        conda_env=config['cluster_settings']['conda_env'],
+        fc_percentile=config['cluster_settings']['fc_percentile'],
+        expr_percentile=config['cluster_settings']['expr_percentile'],
+        frac_genes=config['cluster_settings']['frac_genes'],
+        test_proportion=config['cluster_settings']['test_proportion'],
+        ss_method='{ss_method}',
+        max_genes='{max_genes}',
+        wm_prop='{wm_prop}',
+    log:
+        '{logdir}/logs/assign_celltypes_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.log'.format(logdir=config['logdir']),
+    benchmark:
+        '{logdir}/benchmarks/assign_celltypes_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.txt'.format(logdir=config['logdir']),
+    shell:
+        'Rscript R/assign_celltypes.R '
+        '--sce {input.sce} '
+        '--out_clusters {output.clust_results} '
+        '--out_deltas {output.delta_results} '
+        '--out_fit {output.fit_results} '
+        '--conda_env {params.conda_env} '
+        '--fc_percentile {params.fc_percentile} '
+        '--expr_percentile {params.expr_percentile} '
+        '--frac_genes {params.frac_genes} '
+        '--test_proportion {params.test_proportion} '
+        '--method {params.ss_method} '
+        '--max_genes {params.max_genes} '
+        '--wrong_prop {params.wm_prop} '
         '>& {log}'
 
 rule evaluate_cluster:
