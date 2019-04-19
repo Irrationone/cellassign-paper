@@ -318,5 +318,7 @@ cellassign:
     extra_opts: --shrinkage
     celltypes: all
 
-
+# TODO: SCINA portion
+scina:
+  
 

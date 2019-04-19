@@ -43,5 +43,26 @@ simulation_settings:
     batch_facscale: 1
     base_params: ../cellassign-sim-comparison/data/sce_t4k_params.rds
 
-
-    
+cluster_settings:
+  dimreduce_method: PCA
+  clustering_methods:
+    - cellassign
+    - scina
+    - phenograph
+    - SC3
+    - kmeans
+    - seurat_0.4
+    - seurat_0.8
+    - seurat_1.2
+    - densitycut
+    - scmap
+    - Zheng_cor
+    - dynamicTreeCut
+  conda_env: r-tensorflow
+  fc_percentile: 0.95
+  expr_percentile: 0.9
+  frac_genes: 1
+  max_genes: 
+    - 15
+  wrong_marker_proportion: 
+    - 0
