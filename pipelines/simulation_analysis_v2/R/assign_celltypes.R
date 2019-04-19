@@ -88,6 +88,10 @@ rho <- create_rho_matrix(sce_total,
                          markers_to_use, 
                          wrong_proportion = wrong_marker_proportion)
 
+s <- sizeFactors(sce)
+B <- 20
+X <- NULL
+
 marker_list <- lapply(colnames(rho), function(x) {
   genes <- rownames(rho)[rho[,x] == 1]
   if (length(genes) > 0) {
@@ -104,7 +108,7 @@ if (method == "cellassign") {
   res <- cellassign(exprs_obj = sce[rownames(rho),], 
                     s = s, 
                     marker_gene_info = rho, 
-                    X = NULL, 
+                    X = X, 
                     B = B, 
                     shrinkage = TRUE, 
                     verbose = FALSE, 
@@ -117,8 +121,8 @@ if (method == "cellassign") {
   delta_compare_res <- delta_compare(sce[rownames(rho),], res, colour_by = "Group", shape_by = "high_expr")
   delta_compare_df <- delta_compare_res$df
 } else {
-  expr_mat <- as.matrix(logcounts(sce_liver))
-  rownames(expr_mat) <- rowData(sce_liver)$Symbol
+  expr_mat <- as.matrix(logcounts(sce))
+  rownames(expr_mat) <- rowData(sce)$Symbol
   
   res <- SCINA(exp = expr_mat, 
                signatures = marker_list, 
