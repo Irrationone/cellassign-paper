@@ -6,20 +6,21 @@ singularity: "docker://alzhang/spectrum-master-rstudio:v1.3"
 def get_cluster_outputs(wildcards):
     output_files = []
     
-    for clust_method in config['cluster_settings']['clustering_methods']:
-        for marker_setting in config['cluster_settings']['clustering_methods'][clust_method]:
-            output_files = output_files + expand(
-                '{outdir}/evaluate/clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{clust_method}_{marker_setting}_{{max_genes}}.tsv'.format(
-                    outdir=config['outdir'],
-                    clust_method=clust_method,
-                    marker_setting=marker_setting
-                ),
-                de_prob=config['simulation_settings']['variables']['de_prob'],
-                down_prob=config['simulation_settings']['variables']['down_prob'],
-                seed=config['simulation_settings']['variables']['seed'],
-                max_genes=config['cluster_settings']['max_genes']
-            )
-    
+    if len(config['cluster_settings']['clustering_methods']) > 0:
+        for clust_method in config['cluster_settings']['clustering_methods']:
+            for marker_setting in config['cluster_settings']['clustering_methods'][clust_method]:
+                output_files = output_files + expand(
+                    '{outdir}/evaluate/clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{clust_method}_{marker_setting}_{{max_genes}}.tsv'.format(
+                        outdir=config['outdir'],
+                        clust_method=clust_method,
+                        marker_setting=marker_setting
+                    ),
+                    de_prob=config['simulation_settings']['variables']['de_prob'],
+                    down_prob=config['simulation_settings']['variables']['down_prob'],
+                    seed=config['simulation_settings']['variables']['seed'],
+                    max_genes=config['cluster_settings']['max_genes']
+                )
+        
     return output_files
 
 def get_celltype_outputs(wildcards):
