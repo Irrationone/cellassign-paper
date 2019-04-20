@@ -68,7 +68,8 @@ sce <- readRDS(args$sce)
 cluster_info <- fread(args$cluster_file)
 
 clusters <- cluster_info %>%
-  dplyr::select(Cell, cluster)
+  dplyr::select(cell, cluster) %>%
+  dplyr::rename(Cell=cell)
 
 sce_filtered <- sce %>%
   scater::filter(Cell %in% clusters$Cell)
@@ -87,7 +88,7 @@ if (all(sce_filtered$cluster %in% sce_filtered$Group)) {
   evaluation_measures <- map_and_evaluate_clusters(sce_filtered)
 }
 
-run_params <- cluster_info[,!colnames(cluster_info) %in% c("Cell", "cluster")] %>%
+run_params <- cluster_info[,!colnames(cluster_info) %in% c("cell", "cluster")] %>%
   unique
 
 eval_df <- data.frame(run_params,
