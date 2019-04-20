@@ -127,7 +127,8 @@ if (method == "cellassign") {
   res <- SCINA(exp = expr_mat, 
                signatures = marker_list, 
                max_iter = 1000,
-               rm_overlap = 0)
+               rm_overlap = 0, 
+               allow_unknown = 0)
   
   sce$cluster <- str_replace(res$cell_labels, "^DEFac", "")
   
