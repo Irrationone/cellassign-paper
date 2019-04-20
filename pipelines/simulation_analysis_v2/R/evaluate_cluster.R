@@ -88,7 +88,7 @@ if (all(sce_filtered$cluster %in% sce_filtered$Group)) {
   evaluation_measures <- map_and_evaluate_clusters(sce_filtered)
 }
 
-run_params <- cluster_info[,!colnames(cluster_info) %in% c("cell", "cluster")] %>%
+run_params <- as.data.frame(cluster_info)[,which(!colnames(cluster_info) %in% c("cell", "cluster"))] %>%
   unique
 
 eval_df <- data.frame(run_params,
