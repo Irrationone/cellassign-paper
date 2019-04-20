@@ -1,5 +1,5 @@
 
-configfile: 'config/v1.yaml'
+configfile: 'config/naive_cd4_vs_naive_cd8_fixed.yaml'
 
 singularity: "docker://alzhang/spectrum-master-rstudio:v1.3"
 
@@ -179,6 +179,7 @@ rule evaluate_celltypes:
     params:
         name='evaluate-celltypes-{seed}-{de_prob}-{down_prob}-{ss_method}-{max_genes}-{wm_prop}',
         conda_env=config['cluster_settings']['conda_env'],
+        method='{ss_method}',
     log:
         '{logdir}/logs/evaluate_celltypes/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.log'.format(logdir=config['logdir']),
     benchmark:
@@ -189,6 +190,7 @@ rule evaluate_celltypes:
         '--cluster_file {input.clust_results} '
         '--outfname {output.evaluation_results} '
         '--conda_env {params.conda_env} '
+        '--method {params.method} '
         '>& {log}'
 
 
@@ -201,6 +203,7 @@ rule evaluate_clusters:
     params:
         name='evaluate-clusters-{seed}-{de_prob}-{down_prob}-{clust_method}-{marker_setting}-{max_genes}',
         conda_env=config['cluster_settings']['conda_env'],
+        method='{clust_method}',
     log:
         '{logdir}/logs/evaluate_clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}.log'.format(logdir=config['logdir']),
     benchmark:
@@ -210,6 +213,7 @@ rule evaluate_clusters:
         '--sce {input.sce} '
         '--cluster_file {input.clust_results} '
         '--outfname {output.evaluation_results} '
+        '--method {params.method} '
         '--conda_env {params.conda_env} '
         '>& {log}'
 
