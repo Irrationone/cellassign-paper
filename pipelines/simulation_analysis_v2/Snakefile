@@ -1,5 +1,5 @@
 
-configfile: 'config/b_vs_cd8_wrong_markers.yaml'
+configfile: 'config/naive_cd4_vs_naive_cd8_wrong_markers.yaml'
 
 singularity: "docker://alzhang/spectrum-master-rstudio:v1.3"
 
