@@ -6,7 +6,7 @@ singularity: "docker://alzhang/spectrum-master-rstudio:v1.3"
 def get_cluster_outputs(wildcards):
     output_files = []
     
-    if len(config['cluster_settings']['clustering_methods']) > 0:
+    if config['cluster_settings']['clustering_methods']:
         for clust_method in config['cluster_settings']['clustering_methods']:
             for marker_setting in config['cluster_settings']['clustering_methods'][clust_method]:
                 output_files = output_files + expand(
