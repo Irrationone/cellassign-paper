@@ -9,7 +9,7 @@ def get_cluster_outputs(wildcards):
     for clust_method in config['cluster_settings']['clustering_methods']:
         for marker_setting in config['cluster_settings']['clustering_methods'][clust_method]:
             output_files = output_files + expand(
-                '{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{clust_method}_{marker_setting}_{{max_genes}}.tsv'.format(
+                '{outdir}/evaluate/clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{clust_method}_{marker_setting}_{{max_genes}}.tsv'.format(
                     outdir=config['outdir'],
                     clust_method=clust_method,
                     marker_setting=marker_setting
@@ -22,6 +22,21 @@ def get_cluster_outputs(wildcards):
     
     return output_files
 
+def get_celltype_outputs(wildcards):
+    output_files = expand(
+        '{outdir}/evaluate/celltypes/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.tsv'.format(
+            outdir=config['outdir']
+        ),
+        de_prob=config['simulation_settings']['variables']['de_prob'],
+        down_prob=config['simulation_settings']['variables']['down_prob'],
+        seed=config['simulation_settings']['variables']['seed'],
+        max_genes=config['assign_celltype_settings']['max_genes'],
+        ss_method=config['assign_celltype_settings']['methods'],
+        wm_prop=config['assign_celltype_settings']['wrong_marker_proportion']
+    )
+    
+    return output_files
+
 rule all:
     input:
         expand(
@@ -31,17 +46,8 @@ rule all:
             seed=config['simulation_settings']['variables']['seed']
         ),
         get_cluster_outputs,
-        expand(
-            '{outdir}/assign_celltypes_sce/clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.tsv'.format(
-                outdir=config['outdir']
-            ),
-            de_prob=config['simulation_settings']['variables']['de_prob'],
-            down_prob=config['simulation_settings']['variables']['down_prob'],
-            seed=config['simulation_settings']['variables']['seed'],
-            max_genes=config['assign_celltype_settings']['max_genes'],
-            ss_method=config['assign_celltype_settings']['methods'],
-            wm_prop=config['assign_celltype_settings']['wrong_marker_proportion']
-        )
+        get_celltype_outputs,
+
 
 rule create_sce:
     input:
@@ -164,16 +170,48 @@ rule assign_celltypes_sce:
         '--wrong_prop {params.wm_prop} '
         '>& {log}'
 
-rule evaluate_cluster:
+rule evaluate_celltypes:
     input:
+        sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}.rds'.format(outdir=config['workdir']),
+        clust_results='{outdir}/assign_celltypes_sce/clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.tsv'.format(outdir=config['outdir']),
+    output:
+        evaluation_results='{outdir}/evaluate/celltypes/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.tsv'.format(outdir=config['outdir']),
+    params:
+        name='evaluate-celltypes-{seed}-{de_prob}-{down_prob}-{ss_method}-{max_genes}-{wm_prop}',
+        conda_env=config['cluster_settings']['conda_env'],
+    log:
+        '{logdir}/logs/evaluate_celltypes/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.log'.format(logdir=config['logdir']),
+    benchmark:
+        '{logdir}/benchmarks/evaluate_celltypes/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}.txt'.format(logdir=config['logdir']),
+    shell:
+        'Rscript R/evaluate_cluster.R '
+        '--sce {input.sce} '
+        '--cluster_file {input.clust_results} '
+        '--outfname {output.evaluation_results} '
+        '--conda_env {params.conda_env} '
+        '>& {log}'
 
 
-# rule cellassign_sce:
-#     input:
-    
-#     output:
-    
-#     params:
+rule evaluate_clusters:
+    input:
+        sce='{outdir}/simulated_sce/sce_{{de_prob}}_{{down_prob}}_{{seed}}.rds'.format(outdir=config['workdir']),
+        clust_results='{outdir}/cluster_sce/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}.tsv'.format(outdir=config['outdir']),
+    output:
+        evaluation_results='{outdir}/evaluate/clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}.tsv'.format(outdir=config['outdir']),
+    params:
+        name='evaluate-clusters-{seed}-{de_prob}-{down_prob}-{clust_method}-{marker_setting}-{max_genes}',
+        conda_env=config['cluster_settings']['conda_env'],
+    log:
+        '{logdir}/logs/evaluate_clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}.log'.format(logdir=config['logdir']),
+    benchmark:
+        '{logdir}/benchmarks/evaluate_clusters/{{de_prob}}_{{down_prob}}_{{seed}}/{{clust_method}}_{{marker_setting}}_{{max_genes}}.txt'.format(logdir=config['logdir']),
+    shell:
+        'Rscript R/evaluate_cluster.R '
+        '--sce {input.sce} '
+        '--cluster_file {input.clust_results} '
+        '--outfname {output.evaluation_results} '
+        '--conda_env {params.conda_env} '
+        '>& {log}'
 
     
     
