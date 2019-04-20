@@ -1,6 +1,6 @@
-workdir: ../../results/scratch/simulation_analysis_v2/v1
-outdir: ../../results/outputs/simulation_analysis_v2/v1
-logdir: ../../results/logs/simulation_analysis_v2/v1
+workdir: ../../results/scratch/simulation_analysis_v2/b_vs_cd8_fixed
+outdir: ../../results/outputs/simulation_analysis_v2/b_vs_cd8_fixed
+logdir: ../../results/logs/simulation_analysis_v2/b_vs_cd8_fixed
 
 
 simulation_settings:
@@ -46,8 +46,6 @@ simulation_settings:
 cluster_settings:
   dimreduce_method: PCA
   clustering_methods:
-    # scina:
-    #   - markers
     phenograph:
       - full
       - markers
