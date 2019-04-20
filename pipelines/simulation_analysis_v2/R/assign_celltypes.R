@@ -145,6 +145,7 @@ clusters_annotated <- data.frame(sce@metadata$param_df,
                                  expr_percentile=expr_percentile,
                                  num_markers=n_markers,
                                  test_proportion=test_proportion,
+                                 wrong_marker_proportion=wrong_marker_proportion,
                                  cluster_df,
                                  stringsAsFactors = FALSE)
 
@@ -157,6 +158,7 @@ if (nrow(delta_compare_df) > 0) {
                                  expr_percentile=expr_percentile,
                                  num_markers=n_markers,
                                  test_proportion=test_proportion,
+                                 wrong_marker_proportion=wrong_marker_proportion,
                                  delta_compare_df,
                                  stringsAsFactors = FALSE)
 } else {

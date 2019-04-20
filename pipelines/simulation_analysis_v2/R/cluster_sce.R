@@ -151,6 +151,7 @@ clusters_annotated <- data.frame(sce@metadata$param_df,
                                  expr_percentile=expr_percentile,
                                  num_markers=n_markers,
                                  test_proportion=test_proportion,
+                                 marker_setting=marker_setting,
                                  cluster_df,
                                  stringsAsFactors = FALSE)
 
