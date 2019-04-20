@@ -29,6 +29,8 @@ parser$add_argument('--sce', metavar='FILE', type='character',
                     help="Input SCE object")
 parser$add_argument('--cluster_file', metavar='FILE', type='character',
                     help="Cluster results")
+parser$add_argument('--method', type='character',
+                    help="Clustering method")
 parser$add_argument('--outfname', metavar='FILE', type = 'character',
                     help="Output measures for clustering.")
 parser$add_argument('--conda_env', type = 'character',
@@ -78,7 +80,7 @@ colData(sce_filtered) <- colData(sce_filtered) %>%
   dplyr::left_join(clusters) %>%
   DataFrame()
 
-if (all(sce_filtered$cluster %in% sce_filtered$Group)) {
+if (args$method %in% c("cellassign", "scina", "Zheng_cor", "scmap")) {
   message("Evaluating directly ...")
   evaluation_measures <- compute_evaluation_measures(sce_filtered, 
                                                      truth_labels = sce_filtered$Group,
