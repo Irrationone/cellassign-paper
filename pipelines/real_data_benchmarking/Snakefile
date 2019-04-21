@@ -24,6 +24,7 @@ rule preprocess_sce:
         name='preprocess-sce-{dataset}',
         mito_thres=lambda wildcards: config['preprocessing'][wildcards.dataset]['max_mito'],
         ribo_thres=lambda wildcards: config['preprocessing'][wildcards.dataset]['max_ribo'],
+        nmads=lambda wildcards: config['preprocessing'][wildcards.dataset]['nmads'],
         umap_neighbors=lambda wildcards: config['preprocessing'][wildcards.dataset]['umap_neighbors'],
         umap_min_dist=lambda wildcards: config['preprocessing'][wildcards.dataset]['umap_min_dist'],
     log:
@@ -35,6 +36,7 @@ rule preprocess_sce:
         '--sce {input.raw} '
         '--mito_thres {params.mito_thres} '
         '--ribo_thres {params.ribo_thres} '
+        '--nmads {params.nmads} '
         '--umap_neighbors {params.umap_neighbors} '
         '--umap_min_dist {params.umap_min_dist} '
         '--outfname {output.normalized} '
