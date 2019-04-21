@@ -126,6 +126,7 @@ rule evaluate_celltypes:
         name='evaluate-celltypes-{seed}-{de_prob}-{down_prob}-{ss_method}-{max_genes}-{wm_prop}-{run}',
         conda_env=config['assign_celltype_settings']['conda_env'],
         method='{ss_method}',
+        marker_subset=lambda wildcards: config['assign_celltype_settings']['runs'][wildcards.run]['marker_celltypes'],
     log:
         '{logdir}/logs/evaluate_celltypes/{{de_prob}}_{{down_prob}}_{{seed}}/{{ss_method}}_{{max_genes}}_{{wm_prop}}_{{run}}.log'.format(logdir=config['logdir']),
     benchmark:
@@ -135,6 +136,7 @@ rule evaluate_celltypes:
         '--sce {input.sce} '
         '--cluster_file {input.clust_results} '
         '--outfname {output.evaluation_results} '
+        '--marker_types {params.marker_subset} '
         '--conda_env {params.conda_env} '
         '--method {params.method} '
         '>& {log}'
