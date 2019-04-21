@@ -123,7 +123,7 @@ if (method == "cellassign") {
                     min_delta = 0, 
                     num_runs = 5)
   
-  sce$cluster <- res$cell_type
+  sce$cluster <- plyr::mapvalues(res$cell_type, from = c("other"), to = c("unknown"))
 } else {
   expr_mat <- as.matrix(logcounts(sce))
   rownames(expr_mat) <- rowData(sce)$Symbol
