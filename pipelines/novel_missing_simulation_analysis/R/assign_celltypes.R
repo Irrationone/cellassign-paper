@@ -58,7 +58,6 @@ reticulate::use_condaenv(args$conda_env, conda = "/home/rstudio/miniconda/bin/co
 fc_percentile <- args$fc_percentile
 expr_percentile <- args$expr_percentile
 frac_genes <- args$frac_genes
-test_proportion <- args$test_proportion
 max_genes <- args$max_genes
 wrong_marker_proportion <- args$wrong_prop
 method <- args$method
@@ -124,7 +123,7 @@ if (method == "cellassign") {
                     rel_tol_em = 1e-5,
                     max_iter_adam = 1e3,
                     min_delta = 0, 
-                    num_runs = 5)
+                    num_runs = 3)
   
   sce$cluster <- plyr::mapvalues(res$cell_type, from = c("other"), to = c("unknown"))
 } else {
@@ -133,8 +132,7 @@ if (method == "cellassign") {
   
   res <- SCINA(exp = expr_mat, 
                signatures = marker_list, 
-               max_iter = 1000,
-               rm_overlap = 0, 
+               max_iter = 1000, 
                allow_unknown = 1)
   
   sce$cluster <- res$cell_labels
