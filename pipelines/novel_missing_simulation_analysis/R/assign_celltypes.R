@@ -91,6 +91,7 @@ sce <- sce %>%
 
 # Subset rho
 rho <- rho[,marker_subset_types,drop=FALSE]
+rho <- rho[rowSums(rho) != 0,,drop=FALSE]
 
 marker_list <- lapply(colnames(rho), function(x) {
   genes <- rownames(rho)[rho[,x] == 1]
