@@ -90,7 +90,7 @@ sce <- sce %>%
   scater::filter(Group %in% data_subset_types)
 
 # Subset rho
-rho <- rho[,marker_subset_types]
+rho <- rho[,marker_subset_types,drop=FALSE]
 
 marker_list <- lapply(colnames(rho), function(x) {
   genes <- rownames(rho)[rho[,x] == 1]
