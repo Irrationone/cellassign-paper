@@ -124,9 +124,8 @@ if (method == "cellassign") {
                     shrinkage = TRUE, 
                     verbose = FALSE, 
                     rel_tol_em = 1e-5,
-                    max_iter_adam = 1e3,
                     min_delta = 0, 
-                    num_runs = 3)
+                    num_runs = 5)
   
   sce$cluster <- plyr::mapvalues(res$cell_type, from = c("other"), to = c("unknown"))
 } else if (method == "scina") {
