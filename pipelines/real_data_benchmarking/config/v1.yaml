@@ -21,54 +21,63 @@ preprocessing:
     max_ribo: 100
     umap_neighbors: 15
     umap_min_dist: 0.1
+    extra_opts: --run_dimred
   tian_3_10x:
     nmads: 3
     max_mito: 100
     max_ribo: 100
     umap_neighbors: 15
     umap_min_dist: 0.1
+    extra_opts: --run_dimred
   tian_3_CELseq2:
     nmads: 3
     max_mito: 100
     max_ribo: 100
     umap_neighbors: 15
     umap_min_dist: 0.1
+    extra_opts: --run_dimred
   tian_3_Dropseq:
     nmads: 3
     max_mito: 100
     max_ribo: 100
     umap_neighbors: 15
     umap_min_dist: 0.1
+    extra_opts: --run_dimred
   tian_mixture3:
     nmads: 3
     max_mito: 100
     max_ribo: 100
     umap_neighbors: 15
     umap_min_dist: 0.1
+    extra_opts: --run_dimred
   follicular:
     nmads: Inf
     max_mito: 100
     max_ribo: 100
     umap_neighbors: 15
     umap_min_dist: 0.1
+    extra_opts: ""
   follicular_bcell:
     nmads: Inf
     max_mito: 100
     max_ribo: 100
     umap_neighbors: 15
     umap_min_dist: 0.1
+    extra_opts: ""
   hgsc:
     nmads: Inf
     max_mito: 100
     max_ribo: 100
     umap_neighbors: 15
     umap_min_dist: 0.1
+    extra_opts: ""
   koh:
     nmads: Inf
     max_mito: 100
     max_ribo: 100
     umap_neighbors: 15
     umap_min_dist: 0.1
+    extra_opts: ""
 
 
 cellassign:

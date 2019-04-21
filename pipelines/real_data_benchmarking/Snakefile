@@ -27,6 +27,7 @@ rule preprocess_sce:
         nmads=lambda wildcards: config['preprocessing'][wildcards.dataset]['nmads'],
         umap_neighbors=lambda wildcards: config['preprocessing'][wildcards.dataset]['umap_neighbors'],
         umap_min_dist=lambda wildcards: config['preprocessing'][wildcards.dataset]['umap_min_dist'],
+        extra_opts=lambda wildcards: config['preprocessing'][wildcards.dataset]['extra_opts'],
     log:
         '{logdir}/logs/preprocess_sce/{{dataset}}.log'.format(logdir=config['logdir'])
     benchmark:
@@ -39,6 +40,7 @@ rule preprocess_sce:
         '--nmads {params.nmads} '
         '--umap_neighbors {params.umap_neighbors} '
         '--umap_min_dist {params.umap_min_dist} '
+        '{params.extra_opts} '
         '--outfname {output.normalized} '
         '>& {log}'
 
