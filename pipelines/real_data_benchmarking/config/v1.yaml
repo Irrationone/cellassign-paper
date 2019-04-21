@@ -12,6 +12,7 @@ datasets:
   follicular: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/sce_follicular_annotated_final.rds
   follicular_bcell: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds
   hgsc: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v2/sce_hgsc_annotated_final.rds
+  koh: /datadrive/projects/cellassign-paper/results/outputs/external/v1/koh/sce_annotated.rds
 
 preprocessing:
   mcparland_liver:
@@ -57,6 +58,12 @@ preprocessing:
     umap_neighbors: 15
     umap_min_dist: 0.1
   hgsc:
+    nmads: Inf
+    max_mito: 100
+    max_ribo: 100
+    umap_neighbors: 15
+    umap_min_dist: 0.1
+  koh:
     nmads: Inf
     max_mito: 100
     max_ribo: 100
@@ -317,8 +324,26 @@ cellassign:
     design_formula: ~\ patient
     extra_opts: --shrinkage
     celltypes: all
+  koh_full:
+    dataset: koh
+    marker_list: ../../resources/marker_lists/koh_markers.yaml
+    include_other: TRUE
+    num_runs: 1
+    B: 20
+    design_formula: none
+    extra_opts: --shrinkage
+    celltypes: all
+  koh_high:
+    dataset: koh
+    marker_list: ../../resources/marker_lists/koh_markers_merged.yaml
+    include_other: TRUE
+    num_runs: 1
+    B: 20
+    design_formula: none
+    extra_opts: --shrinkage
+    celltypes: all
 
 # TODO: SCINA portion
 scina:
-  
+
 

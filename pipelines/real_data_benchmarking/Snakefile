@@ -1,6 +1,6 @@
 configfile: "config/v1.yaml"
 
-singularity: "docker://alzhang/spectrum-master-rstudio:v1.0"
+singularity: "docker://alzhang/spectrum-master-rstudio:v1.4"
 
 rule all:
     input:
