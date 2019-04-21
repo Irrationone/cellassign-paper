@@ -13,6 +13,12 @@ simulation_settings:
       - 8123
       - 3143
       - 8423
+      - 1719
+      - 5011
+      - 1594
+      - 3419
+      - 1258
+      - 6255
   constants:
     num_cells: 1000
     num_groups: 6
@@ -39,6 +45,7 @@ assign_celltype_settings:
   methods:
     - cellassign
     - scina
+    - scina_0.1
   conda_env: r-tensorflow
   fc_percentile: 0.95
   expr_percentile: 0.9
