@@ -1,7 +1,7 @@
 
 configfile: 'config/naive_cd4_vs_naive_cd8_wrong_markers_20.yaml'
 
-singularity: "docker://alzhang/spectrum-master-rstudio:v1.3"
+singularity: "docker://alzhang/spectrum-master-rstudio:v1.4"
 
 def get_cluster_outputs(wildcards):
     output_files = []

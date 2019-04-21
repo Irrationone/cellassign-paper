@@ -1,7 +1,7 @@
 
 configfile: 'config/b_vs_cd8.yaml'
 
-singularity: "docker://alzhang/spectrum-master-rstudio:v1.3"
+singularity: "docker://alzhang/spectrum-master-rstudio:v1.4"
 
 def get_celltype_outputs(wildcards):
     output_files = expand(
