@@ -99,7 +99,8 @@ marker_list <- lapply(colnames(rho), function(x) {
   }
 })
 names(marker_list) <- colnames(rho)
-marker_list <- marker_list[sapply(marker_list, function(x) !is.null(x))]
+
+print(marker_list)
 
 gene_subset <- markers_to_use
 n_markers <- length(markers_to_use)
