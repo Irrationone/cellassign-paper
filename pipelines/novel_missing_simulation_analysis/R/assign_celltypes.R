@@ -85,10 +85,6 @@ rho <- create_rho_matrix(sce,
                          wrong_proportion = wrong_marker_proportion)
 colnames(rho) <- str_replace(colnames(rho), "^DEFac", "")
 
-s <- sizeFactors(sce)
-B <- 20
-X <- NULL
-
 # Subset data
 sce <- sce %>%
   scater::filter(Group %in% data_subset_types)
@@ -107,6 +103,10 @@ marker_list <- marker_list[sapply(marker_list, function(x) !is.null(x))]
 
 gene_subset <- markers_to_use
 n_markers <- length(markers_to_use)
+
+s <- sizeFactors(sce)
+B <- 20
+X <- NULL
 
 if (method == "cellassign") {
   # Add other group to rho
