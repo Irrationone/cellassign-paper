@@ -83,6 +83,7 @@ markers_to_use <- select_markers(sce,
 rho <- create_rho_matrix(sce, 
                          markers_to_use, 
                          wrong_proportion = wrong_marker_proportion)
+colnames(rho) <- str_replace(colnames(rho), "^DEFac", "")
 
 s <- sizeFactors(sce)
 B <- 20
@@ -122,7 +123,7 @@ if (method == "cellassign") {
                     min_delta = 0, 
                     num_runs = 5)
   
-  sce$cluster <- str_replace(res$cell_type, "^DEFac", "")
+  sce$cluster <- res$cell_type
 } else {
   expr_mat <- as.matrix(logcounts(sce))
   rownames(expr_mat) <- rowData(sce)$Symbol
@@ -133,7 +134,7 @@ if (method == "cellassign") {
                rm_overlap = 0, 
                allow_unknown = 1)
   
-  sce$cluster <- str_replace(res$cell_labels, "^DEFac", "")
+  sce$cluster <- res$cell_labels
 }
 
 cluster_df <- data.frame(cell=as.character(colData(sce)$Cell), cluster=sce$cluster)
