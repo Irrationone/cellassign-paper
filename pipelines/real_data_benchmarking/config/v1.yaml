@@ -336,7 +336,7 @@ cellassign:
   koh_full:
     dataset: koh
     marker_list: ../../resources/marker_lists/koh_markers.yaml
-    include_other: TRUE
+    include_other: FALSE
     num_runs: 1
     B: 20
     design_formula: none
@@ -345,7 +345,7 @@ cellassign:
   koh_high:
     dataset: koh
     marker_list: ../../resources/marker_lists/koh_markers_merged.yaml
-    include_other: TRUE
+    include_other: FALSE
     num_runs: 1
     B: 20
     design_formula: none
