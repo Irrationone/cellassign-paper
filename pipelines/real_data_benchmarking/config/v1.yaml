@@ -337,7 +337,7 @@ cellassign:
     dataset: koh
     marker_list: ../../resources/marker_lists/koh_markers.yaml
     include_other: FALSE
-    num_runs: 1
+    num_runs: 3
     B: 20
     design_formula: none
     extra_opts: --shrinkage
@@ -346,7 +346,7 @@ cellassign:
     dataset: koh
     marker_list: ../../resources/marker_lists/koh_markers_merged.yaml
     include_other: FALSE
-    num_runs: 1
+    num_runs: 3
     B: 20
     design_formula: none
     extra_opts: --shrinkage
