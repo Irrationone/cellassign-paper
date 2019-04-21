@@ -109,6 +109,9 @@ s <- sizeFactors(sce)
 B <- 20
 X <- NULL
 
+expr_mat <- as.matrix(logcounts(sce))
+rownames(expr_mat) <- rowData(sce)$Symbol
+
 if (method == "cellassign") {
   # Add other group to rho
   rho_exp <- marker_list_to_mat(marker_list, include_other = TRUE)
@@ -126,16 +129,23 @@ if (method == "cellassign") {
                     num_runs = 3)
   
   sce$cluster <- plyr::mapvalues(res$cell_type, from = c("other"), to = c("unknown"))
-} else {
-  expr_mat <- as.matrix(logcounts(sce))
-  rownames(expr_mat) <- rowData(sce)$Symbol
-  
+} else if (method == "scina") {
   res <- SCINA(exp = expr_mat, 
                signatures = marker_list, 
                max_iter = 1000, 
                allow_unknown = 1)
   
   sce$cluster <- res$cell_labels
+} else if (method == "scina_0.1") {
+  res <- SCINA(exp = expr_mat, 
+               signatures = marker_list, 
+               max_iter = 1000, 
+               allow_unknown = 1, 
+               sensitivity_cutoff = 0.1)
+  
+  sce$cluster <- res$cell_labels
+} else {
+  stop("Unrecognized method")
 }
 
 cluster_df <- data.frame(cell=as.character(colData(sce)$Cell), cluster=sce$cluster)
