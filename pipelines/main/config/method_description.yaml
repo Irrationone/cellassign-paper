@@ -1,0 +1,14 @@
+Marker gene:
+  - cellassign
+  - scina
+Unsupervised:
+  - densitycut
+  - dynamicTreeCut
+  - phenograph
+  - SC3
+  - seurat_0.4
+  - seurat_0.8
+  - seurat_1.2
+Supervised:
+  - scmap
+  - Zheng_cor
