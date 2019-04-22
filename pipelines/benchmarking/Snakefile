@@ -75,6 +75,7 @@ rule run_cellassign:
         timeseed='{timeseed}',
         max_batch_size=5000,
         conda_env='r-tensorflow',
+    threads: 20
     log:
         '{logdir}/logs/run_cellassign/{{simtype}}/{{evaltype}}/{{seed}}_{{timeseed}}.log'.format(logdir=config['logdir']),
     benchmark:
