@@ -38,6 +38,8 @@ parser$add_argument('--design_formula', type = 'character',
                     help="Design matrix formula, or 'none' for none", default = "none")
 parser$add_argument('--celltypes', type = 'character', nargs = '+',
                     help="Celltypes to subset", default = "all")
+parser$add_argument('--celltype_col', type = 'character',
+                    help="Celltype column", default = "celltype")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for cell cycle assignments.")
 args <- parser$parse_args()
@@ -84,6 +86,8 @@ if (length(sce_paths) == 1) {
 
 
 if (all(unlist(args$celltypes) != "all")) {
+  sce$celltype <- as.data.frame(colData(sce))[,args$celltype_col]
+  
   sce <- sce %>%
     scater::filter(celltype %in% unlist(args$celltypes))
   
