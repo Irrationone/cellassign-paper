@@ -4,7 +4,7 @@ outdir: '/datadrive/projects/cellassign-paper/results/outputs/benchmarking/v2'
 logdir: '/datadrive/projects/cellassign-paper/results/logs/benchmarking/v2'
 
 # This file
-benchmark_config_file: '/datadrive/projects/cellassign-paper/pipelines/benchmarking/config/v2.yaml'
+benchmark_config_file: '/datadrive/projects/cellassign-paper/pipelines/benchmarking/config/revised1.yaml'
 
 base_sce_param_file: /datadrive/projects/cellassign-paper/pipelines/cellassign-sim-comparison/data/sce_t4k_params.rds
 seeds:
