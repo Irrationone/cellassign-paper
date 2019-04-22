@@ -1,0 +1,123 @@
+# Directories
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v3'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v3'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/hgsc_analysis/v3'
+
+# Random seeds
+cluster_random_seed: 19279
+
+# Sample names (in same order as filtered matrices)
+hgsc_sample_names:
+  - Left\ Ovary
+  - Right\ Ovary
+
+# Paths to filtered gene expression matrices
+hgsc_data:
+  VOA11543SA:
+    dataset: Left\ Ovary
+    patient: VOA11543
+    timepoint: T1
+    site: Left\ ovary
+    filtered_matrix_path: '/datadrive/data/hgsc/5prime_GE_batch2_GRCh38/VOA11543SA/filtered_gene_bc_matrices/GRCh38'
+  VOA11543SB:
+    dataset: Right\ Ovary
+    patient: VOA11543
+    timepoint: T1
+    site: Right\ ovary
+    filtered_matrix_path: '/datadrive/data/hgsc/5prime_GE_batch2_GRCh38/VOA11543SB/filtered_gene_bc_matrices/GRCh38'
+
+# Paths for Shih et al. data
+shih_normal_data:
+  GSM3348307_TB10040568_NORMAL_S1:
+    dataset: GSM3348307_TB10040568_NORMAL_S1
+    patient: LG1
+    timepoint: T1
+    site: Ovary
+    umicount_path: /datadrive/data/external/scrna/shih2018/umicounts/GSM3348307_TB10040568_NORMAL_S1.counts.umiCounts.table.csv
+
+# Filtering thresholds
+filter_settings:
+  hgsc:
+    mito_thres: 20
+    ribo_thres: 50
+  shih:
+    mito_thres: 100
+    ribo_thres: 100
+
+# Marker list matrices for CellAssign
+marker_lists:
+  big: 
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/hgsc_big.yaml'
+    include_other: TRUE
+  small:
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/hgsc_small.yaml'
+    include_other: TRUE
+
+# CellAssign settings
+cellassign_settings:
+  num_runs: 3
+  B: 20
+  extra_opts: "--delta_prior"
+  threads: 18
+
+differential_expression_settings:
+  ReactomePA:
+    gene_method: voom
+    num_genes: 50
+    # Minimum number of UMIs to test a gene for DE
+    min_gene_counts: 500
+    celltype_groups:
+      endothelial:
+        - Endothelial\ cells
+      epithelial:
+        - Epithelial\ cells
+      smoothmuscle:
+        - Vascular\ smooth\ muscle\ cells
+      monocyte:
+        - Monocyte/Macrophage
+      myofibroblast:
+        - Ovarian\ myofibroblast
+    patient_groups:
+      VOA11543:
+        - VOA11543
+  fgsea:
+    gene_method: scran
+    # Minimum number of UMIs to test a gene for DE
+    min_gene_counts: 500
+    celltype_groups:
+      epithelial:
+        - Epithelial\ cells
+    patient_groups:
+      VOA11543:
+        - VOA11543
+
+gene_sets: 
+  reactome: '/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt'
+  hallmark: '/datadrive/projects/cellassign-analysis/downloads/h.all.v6.2.symbols.gmt'
+
+scvis:
+  default_config: '/datadrive/projects/cellassign-paper/resources/scvis/config/default_config.yaml'
+  dimname: PCA # no need to use scanorama PCA
+
+# Unsupervised clustering settings
+cluster_settings:
+  hgsc_epithelial:
+    methods: 
+      - 'seurat_0.2'
+      - 'phenograph'
+      - 'SC3'
+    use_method: 'seurat_0.2'
+    celltypes:
+      - Epithelial\ cells
+  hgsc_all:
+    methods:
+      - 'seurat_0.8'
+      - 'seurat_1.2'
+      - 'SC3'
+    use_method: 'seurat_0.8'
+  hgsc_all_subset:
+    methods:
+      - 'seurat_0.8'
+      - 'seurat_1.2'
+    use_method: 'seurat_0.8'
+
