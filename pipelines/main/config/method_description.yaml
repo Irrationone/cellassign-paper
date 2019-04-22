@@ -9,6 +9,7 @@ Unsupervised:
   - seurat_0.4
   - seurat_0.8
   - seurat_1.2
+  - kmeans
 Supervised:
   - scmap
   - Zheng_cor
