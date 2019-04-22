@@ -29,8 +29,8 @@ parser$add_argument('--rm_overlap', type = 'integer',
                     help="Remove overlapping genes", default = 1, choices = c(0,1))
 parser$add_argument('--allow_unknown', type = 'integer', 
                     help="Allow unknown celltypes", default = 1, choices = c(0,1))
-parser$add_argument('--batch_correct', action = 'store_true',
-                    help="Batch correct multiple SCEs")
+parser$add_argument('--batch_correct', type = 'character',
+                    help="Batch correct multiple SCEs", default = "none")
 parser$add_argument('--celltypes', type = 'character', nargs = '+',
                     help="Celltypes to subset", default = "all")
 parser$add_argument('--celltype_col', type = 'character',
@@ -149,12 +149,11 @@ if (length(sce_paths) == 1) {
   sce <- computeSumFactors(sce, clusters = qclust)
   
   sce$size_factor <- sizeFactors(sce)
-  
-  if (args$batch_correct) {
-    bc_res <- batch_correct2(sce, batch_col = "batch", method = "scanorama")
-  }
 }
 
+if (args$batch_correct != "none") {
+  bc_res <- batch_correct2(sce, batch_col = args$batch_correct, method = "scanorama")
+}
 
 if (all(unlist(args$celltypes) != "all")) {
   sce$celltype <- as.data.frame(colData(sce))[,args$celltype_col]
@@ -171,7 +170,7 @@ marker_list <- lapply(marker_list, function(x) {
   get_ensembl_id(intersect(x, rowData(sce)$Symbol), sce)
 })
 
-if (args$batch_correct) {
+if (args$batch_correct != "none") {
   message("Using batch corrected values")
   expr_mat <- bc_res$exprs
 } else {
