@@ -379,14 +379,14 @@ scina:
     rm_overlap: 0
     celltypes: all
     extra_opts: ""
-  koh_full_no_overlap:
-    dataset: koh
-    marker_list: ../../resources/marker_lists/koh_markers.yaml
-    allow_unknown: 0
-    sensitivity_cutoff: 1
-    rm_overlap: 1
-    celltypes: all
-    extra_opts: ""
+  # koh_full_no_overlap: # FAILS WITH Cholesky error
+  #   dataset: koh
+  #   marker_list: ../../resources/marker_lists/koh_markers.yaml
+  #   allow_unknown: 0
+  #   sensitivity_cutoff: 1
+  #   rm_overlap: 1
+  #   celltypes: all
+  #   extra_opts: ""
   tian_50markers_mixture_only:
     dataset:
       - tian_mixture3
