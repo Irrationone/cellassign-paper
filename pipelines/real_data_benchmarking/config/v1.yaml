@@ -13,6 +13,7 @@ datasets:
   follicular_bcell: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds
   hgsc: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v2/sce_hgsc_annotated_final.rds
   koh: /datadrive/projects/cellassign-paper/data/koh_annotated/sce_koh_annotated_v1.rds
+  koh_broad: /datadrive/projects/cellassign-paper/data/koh_annotated/sce_koh_annotated_broad.rds
 
 preprocessing:
   mcparland_liver:
@@ -72,6 +73,13 @@ preprocessing:
     umap_min_dist: 0.1
     extra_opts: ""
   koh:
+    nmads: Inf
+    max_mito: 100
+    max_ribo: 100
+    umap_neighbors: 15
+    umap_min_dist: 0.1
+    extra_opts: ""
+  koh_broad:
     nmads: Inf
     max_mito: 100
     max_ribo: 100
@@ -351,8 +359,193 @@ cellassign:
     design_formula: none
     extra_opts: --shrinkage
     celltypes: all
+  koh_low:
+    dataset: koh_broad
+    marker_list: /datadrive/projects/cellassign-paper/resources/marker_lists/koh_markers_APS_MPS.yaml
+    include_other: FALSE
+    num_runs: 3
+    B: 20
+    design_formula: none
+    extra_opts: --shrinkage --celltype_col cellassign_broad
+    celltypes: APS_MPS
 
 # TODO: SCINA portion
 scina:
+  koh_full:
+    dataset: koh
+    marker_list: ../../resources/marker_lists/koh_markers.yaml
+    allow_unknown: 0
+    sensitivity_cutoff: 1
+    rm_overlap: 0
+    celltypes: all
+    extra_opts: ""
+  koh_full_no_overlap:
+    dataset: koh
+    marker_list: ../../resources/marker_lists/koh_markers.yaml
+    allow_unknown: 0
+    sensitivity_cutoff: 1
+    rm_overlap: 1
+    celltypes: all
+    extra_opts: ""
+  tian_50markers_mixture_only:
+    dataset:
+      - tian_mixture3
+    marker_list: ../../resources/marker_lists/tian_50_73_markers.yaml
+    allow_unknown: 0
+    sensitivity_cutoff: 1
+    rm_overlap: 0
+    celltypes: all
+    extra_opts: ""
+  tian_50markers_bc:
+    dataset:
+      - tian_3_CELseq2
+      - tian_mixture3
+    marker_list: ../../resources/marker_lists/tian_50_73_markers.yaml
+    allow_unknown: 0
+    sensitivity_cutoff: 1
+    rm_overlap: 0
+    celltypes: all
+    extra_opts: --batch_correct
+  liver_alldata_allmarkers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 0
+    celltypes: all
+    extra_opts: ""
+  liver_alldata_allmarkers_no_overlap:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 1
+    celltypes: all
+    extra_opts: ""
+  liver_alldata_allmarkers_revised2:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes_revised2.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 0
+    celltypes: all
+    extra_opts: ""
+  liver_alldata_allmarkers_revised2_no_overlap:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes_revised2.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 1
+    celltypes: all
+    extra_opts: ""
+  liver_3data_3markers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_3types.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 0
+    celltypes: 
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+    extra_opts: ""
+  liver_3data_4markers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_4types.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 0
+    celltypes: 
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+    extra_opts: ""
+  liver_3data_allmarkers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 0
+    celltypes: 
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+    extra_opts: ""
+  liver_3data_allmarkers_0.8:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 0.8
+    rm_overlap: 0
+    celltypes: 
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+    extra_opts: ""
+  liver_3data_allmarkers_0.5:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 0.5
+    rm_overlap: 0
+    celltypes: 
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+    extra_opts: ""
+  liver_3data_allmarkers_0.2:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 0.2
+    rm_overlap: 0
+    celltypes: 
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+    extra_opts: ""
+  liver_3data_allmarkers_0.1:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_alltypes.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 0.1
+    rm_overlap: 0
+    celltypes: 
+      - Cholangiocytes
+      - Mature\ B\ cells
+      - Hepatocytes
+    extra_opts: ""
+  liver_alldata_3markers:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_3types.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 0
+    celltypes: all
+    extra_opts: ""
+  liver_alldata_3markers_no_overlap:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_3types.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 1
+    celltypes: all
+    extra_opts: ""
+  liver_alldata_3markers_revised:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_3types_revised.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 0
+    celltypes: all
+    extra_opts: ""
+  liver_alldata_3markers_revised_no_overlap:
+    dataset: mcparland_liver
+    marker_list: ../../resources/marker_lists/liver_mcparland_3types_revised.yaml
+    allow_unknown: 1
+    sensitivity_cutoff: 1
+    rm_overlap: 1
+    celltypes: all
+    extra_opts: ""
 
 
