@@ -5,6 +5,7 @@ logdir: /datadrive/projects/cellassign-paper/results/logs/real_data_benchmarking
 
 datasets:
   mcparland_liver: /datadrive/data/external/scrna/mcparland2018/human_liver.rds
+  mcparland_liver_bc: /datadrive/data/external/scrna/mcparland2018/human_liver.rds
   tian_3_10x: /datadrive/data/external/scrna/tian2018_qc/sce_sc_10x_qc.rds
   tian_3_CELseq2: /datadrive/data/external/scrna/tian2018_qc/sce_sc_CELseq2_qc.rds
   tian_3_Dropseq: /datadrive/data/external/scrna/tian2018_qc/sce_sc_Dropseq_qc.rds
