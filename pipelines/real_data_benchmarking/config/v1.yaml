@@ -363,7 +363,7 @@ cellassign:
     dataset: koh_broad
     marker_list: /datadrive/projects/cellassign-paper/resources/marker_lists/koh_markers_APS_MPS.yaml
     include_other: FALSE
-    num_runs: 3
+    num_runs: 1
     B: 20
     design_formula: none
     extra_opts: --shrinkage --celltype_col cellassign_broad
