@@ -1,0 +1,200 @@
+# Directories
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v5'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/follicular_analysis/v5'
+
+# Random seeds
+cluster_random_seed: 19279
+
+# Sample names (in same order as filtered matrices)
+follicular_sample_names:
+  - FL1018T1
+  - FL1018T2
+  - FL2001T1
+  - FL2001T2
+
+# Paths to filtered gene expression matrices
+follicular_data:
+  FL1018T1:
+    dataset: FL1018T1
+    patient: FL1018
+    timepoint: T1
+    progression_status: primary
+    patient_progression_status: transformed
+    filtered_matrix_path: '/datadrive/data/follicular/FL1018T1/filtered_gene_bc_matrices/GRCh38'
+  FL1018T2:
+    dataset: FL1018T2
+    patient: FL1018
+    timepoint: T2
+    progression_status: transformed
+    patient_progression_status: transformed
+    filtered_matrix_path: '/datadrive/data/follicular/FL1018T2/filtered_gene_bc_matrices/GRCh38'
+  FL2001T1:
+    dataset: FL2001T1
+    patient: FL2001
+    timepoint: T1
+    progression_status: primary
+    patient_progression_status: progressed
+    filtered_matrix_path: '/datadrive/data/follicular/FL2001T1/filtered_gene_bc_matrices/GRCh38'
+  FL2001T2:
+    dataset: FL2001T2
+    patient: FL2001
+    timepoint: T2
+    progression_status: progressed
+    patient_progression_status: progressed
+    filtered_matrix_path: '/datadrive/data/follicular/FL2001T2/filtered_gene_bc_matrices/GRCh38'
+
+
+# Paths to RLN filtered gene expression matrices
+RLN_data:
+  RLN-2:
+    dataset: RLN-2
+    patient: RLN-2
+    timepoint: T1
+    progression_status: none
+    patient_progression_status: healthy
+    filtered_matrix_path: '/datadrive/data/RLN/RLN-2/filtered_gene_bc_matrices/GRCh38'
+  RLN-3:
+    dataset: RLN-3
+    patient: RLN-3
+    timepoint: T1
+    progression_status: none
+    patient_progression_status: healthy
+    filtered_matrix_path: '/datadrive/data/RLN/RLN-3/filtered_gene_bc_matrices/GRCh38'
+  RLN-4:
+    dataset: RLN-4
+    patient: RLN-4
+    timepoint: T1
+    progression_status: none
+    patient_progression_status: healthy
+    filtered_matrix_path: '/datadrive/data/RLN/RLN-4/filtered_gene_bc_matrices/GRCh38'
+  RLN-5:
+    dataset: RLN-5
+    patient: RLN-5
+    timepoint: T1
+    progression_status: none
+    patient_progression_status: healthy
+    filtered_matrix_path: '/datadrive/data/RLN/RLN-5/filtered_gene_bc_matrices/GRCh38'
+
+# Unsupervised clustering settings
+cluster_settings:
+  follicular_t:
+    methods: 
+      - 'seurat_0.8'
+      - 'phenograph'
+    use_method: 'seurat'
+    celltypes:
+      - CD4\ T\ cells
+      - Cytotoxic\ T\ cells
+      - Tfh
+  follicular_b:
+    methods: 
+      - 'seurat_0.8'
+      - 'phenograph'
+    use_method: 'phenograph'
+    celltypes:
+      - B\ cells
+  follicular_malignant:
+    methods:
+      - 'seurat_0.8'
+      - 'phenograph'
+    use_method: 'phenograph'
+    celltypes:
+      - B\ cells\ \(malignant\)
+  follicular_all:
+    methods:
+      - 'seurat_0.8'
+      - 'seurat_1.2'
+      - 'SC3'
+    use_method: 'seurat_0.8'
+  follicular_all_subset:
+    methods:
+      - 'seurat_0.8'
+      - 'seurat_1.2'
+    use_method: 'seurat_0.8'
+
+# Filtering thresholds
+filter_settings:
+  mito_thres: 10
+  ribo_thres: 60
+
+# Marker list matrices for CellAssign
+marker_lists:
+  small: 
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_small.yaml'
+    include_other: TRUE
+  big: 
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_big_merged.yaml'
+    include_other: TRUE
+  lambdakappa:
+    path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_lambda_kappa.yaml'
+    include_other: TRUE
+
+# CellAssign settings
+cellassign_settings:
+  num_runs: 3
+  B: 20
+  extra_opts: "--delta_prior"
+  threads: 18
+
+# Differential expression settings
+differential_expression_settings:
+  ReactomePA:
+    gene_method: voom
+    num_genes: 50
+    # Minimum number of UMIs to test a gene for DE
+    min_gene_counts: 500
+    celltype_groups:
+      cytotoxic:
+        - Cytotoxic\ T\ cells
+      follicular_helper:
+        - Tfh
+      malignant:
+        - B\ cells\ \(malignant\)
+      b:
+        - B\ cells
+      helper:
+        - CD4\ T\ cells
+    patient_groups:
+      FL1018:
+        - FL1018
+      FL2001:
+        - FL2001
+  fgsea:
+    gene_method: scran
+    # Minimum number of UMIs to test a gene for DE
+    min_gene_counts: 500
+    celltype_groups:
+      malignant:
+        - B\ cells\ \(malignant\)
+    patient_groups:
+      FL1018:
+        - FL1018
+      FL2001:
+        - FL2001
+  
+b_cell_labels:
+  - B\ cells
+  - B\ cells\ \(malignant\)
+
+gene_sets: 
+  reactome: '/datadrive/projects/cellassign-analysis/downloads/c2.cp.reactome.v6.2.symbols.gmt'
+  hallmark: '/datadrive/projects/cellassign-analysis/downloads/h.all.v6.2.symbols.gmt'
+
+# Probabilities to filter celltypes at (for post-annotation filtering jobs)
+celltype_filters:
+  broad_t_cell_probability: 0.9
+  broad_b_cell_probability: 0.9
+
+celltype_full_groups:
+  nonmalignant_b:
+    - B\ cells
+
+# Settings for batch correction
+batch_correction_settings:
+  method: scanorama
+  batch_variable: patient
+
+scvis:
+  default_config: '/datadrive/projects/cellassign-paper/resources/scvis/config/default_config.yaml'
+  dimname: PCA # no need to use scanorama PCA
