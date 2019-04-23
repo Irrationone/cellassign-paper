@@ -1,5 +1,5 @@
 
-configfile: 'config/b_vs_cd8.yaml'
+configfile: 'config/custom_params.yaml'
 
 singularity: "docker://alzhang/spectrum-master-rstudio:v1.4"
 
