@@ -27,11 +27,36 @@ liver_results:
   scina_fit_11_0.2: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.2.rds
   scina_fit_11_0.1: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.1.rds
   scina_fit_11_0.1_bc: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.1_bc.rds
+  ## Novel data results
+  cellassign_fit_novel1: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_4data_3markers.rds
+  cellassign_fit_novel8_raw: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_alldata_3markers.rds
+  cellassign_fit_novel8: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_4data_3markers_revised.rds
+  scina_fit_novel1: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_4data_3markers.rds
+  scina_fit_novel8_raw: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_alldata_3markers.rds
+  scina_fit_novel8: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_alldata_3markers_revised.rds
 
 liver_plots:
   extra_markers_celltypes:
     - Hepatocytes
     - Cholangiocytes
+    - Mature\ B\ cells
+  celltypes_novel1:
+    - Hepatocytes
+    - Cholangiocytes
+    - Mature\ B\ cells
+    - NK\ cells
+  celltypes_novel8:
+    - Hepatocytes
+    - Cholangiocytes
+    - Mature\ B\ cells
+    - NK\ cells
+    - Macrophages
+    - ab\ T\ cells
+    - LSECs
+    - gd\ T\ cells
+    - Hepatic\ Stellate\ Cells
+    - Plasma\ cells
+    - Erythroid\ cells
     - Mature\ B\ cells
 
 delta_deprobs:
