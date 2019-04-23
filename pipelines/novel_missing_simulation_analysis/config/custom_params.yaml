@@ -51,7 +51,7 @@ assign_celltype_settings:
   expr_percentile: 0.9
   frac_genes: 1
   max_genes: 
-    - 15
+    - 30
   wrong_marker_proportion: 
     - 0
   runs:

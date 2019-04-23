@@ -13,6 +13,26 @@ simulation_analysis_results:
 
 method_description: /datadrive/projects/cellassign-paper/pipelines/main/config/method_description.yaml
 
+liver_results:
+  sce_normalized: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v2/sce_normalized/mcparland_liver.rds
+  cellassign_fit_3: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_3data_3markers.rds
+  cellassign_fit_4: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_3data_4markers.rds
+  cellassign_fit_11: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_3data_allmarkers.rds
+  scina_fit_3: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_3markers.rds
+  scina_fit_4: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_4markers.rds
+  scina_fit_11: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers.rds
+  scina_fit_11_0.8: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.8.rds
+  scina_fit_11_0.5: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.5.rds
+  scina_fit_11_0.2: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.2.rds
+  scina_fit_11_0.1: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.1.rds
+  scina_fit_11_0.1_bc: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.1_bc.rds
+
+liver_plots:
+  extra_markers_celltypes:
+    - Hepatocytes
+    - Cholangiocytes
+    - Mature\ B\ cells
+
 delta_deprobs:
   - 0.15
   - 0.45

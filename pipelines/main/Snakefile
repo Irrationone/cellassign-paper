@@ -13,6 +13,7 @@ rule all:
         hgsc_overview_figure='{outdir}/figures/hgsc_overview_figure.pdf'.format(outdir=config['outdir']),
         ## Supplemental figures
         sim_performance_b_cd8='{outdir}/supplemental_figures/sim_performance_b_cd8.pdf'.format(outdir=config['outdir']),
+        sim_performance_correlation='{outdir}/supplemental_figures/sim_performance_correlation.pdf'.format(outdir=config['outdir']),
         wrong_marker_figure='{outdir}/supplemental_figures/wrong_marker_naivecd8_naivecd4.pdf'.format(outdir=config['outdir']),
         benchmarking_figure='{outdir}/supplemental_figures/benchmarking_evaluation.pdf'.format(outdir=config['outdir']),
         real_data_evaluation_figure='{outdir}/supplemental_figures/real_data_evaluation.pdf'.format(outdir=config['outdir']),
@@ -30,6 +31,7 @@ rule all:
         hgsc_malignant_cluster_de='{outdir}/supplemental_figures/hgsc_malignant_cluster_de.pdf'.format(outdir=config['outdir']),
         cellassign_hgsc_evaluation='{outdir}/supplemental_figures/cellassign_hgsc_evaluation.pdf'.format(outdir=config['outdir']),
         cellassign_follicular_evaluation='{outdir}/supplemental_figures/cellassign_follicular_evaluation.pdf'.format(outdir=config['outdir']),
+        liver_extra_celltype_figure='{outdir}/supplemental_figures/liver_extra_celltypes.pdf'.format(outdir=config['outdir']),
         ## Supplemental tables
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
@@ -274,6 +276,49 @@ rule benchmarking_evaluation:
         'Rscript R/supplemental_figures/benchmarking_evaluation.R '
         '--benchmark_times {input.benchmark_times} '
         '--outfname {output.benchmarking_figure} '
+        '>& {log}'
+
+rule liver_extra_celltypes:
+    input:
+        sce_liver=config['liver_results']['sce_normalized'],
+        cellassign_fit_3=config['liver_results']['cellassign_fit_3'],
+        cellassign_fit_4=config['liver_results']['cellassign_fit_4'],
+        cellassign_fit_11=config['liver_results']['cellassign_fit_11'],
+        scina_fit_3=config['liver_results']['scina_fit_3'],
+        scina_fit_4=config['liver_results']['scina_fit_4'],
+        scina_fit_11=config['liver_results']['scina_fit_11'],
+        scina_fit_11_0.8=config['liver_results']['scina_fit_11_0.8'],
+        scina_fit_11_0.5=config['liver_results']['scina_fit_11_0.5'],
+        scina_fit_11_0.2=config['liver_results']['scina_fit_11_0.2'],
+        scina_fit_11_0.1=config['liver_results']['scina_fit_11_0.1'],
+        scina_fit_11_0.1_bc=config['liver_results']['scina_fit_11_0.1_bc'],
+    output:
+        liver_extra_celltype_figure='{outdir}/supplemental_figures/liver_extra_celltypes.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-liver-extra-celltypes',
+        dimreduce_type='TSNE',
+        celltypes_to_subset=config['liver_plots']['extra_markers_celltypes'],
+    log:
+        '{logdir}/logs/liver_extra_celltypes.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/liver_extra_celltypes.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_extra_celltype.R '
+        '--sce_liver {input.sce_liver} '
+        '--cellassign_fit_3 {input.cellassign_fit_3} '
+        '--cellassign_fit_4 {input.cellassign_fit_4} '
+        '--cellassign_fit_11 {input.cellassign_fit_11} '
+        '--scina_fit_3 {input.scina_fit_3} '
+        '--scina_fit_4 {input.scina_fit_4} '
+        '--scina_fit_11 {input.scina_fit_11} '
+        '--scina_fit_11_0.8 {input.scina_fit_11_0.8} '
+        '--scina_fit_11_0.5 {input.scina_fit_11_0.5} '
+        '--scina_fit_11_0.2 {input.scina_fit_11_0.2} '
+        '--scina_fit_11_0.1 {input.scina_fit_11_0.1} '
+        '--scina_fit_11_0.1_bc {input.scina_fit_11_0.1_bc} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--celltypes {params.celltypes_to_use} '
+        '--outfname {output.liver_extra_celltype_figure} '
         '>& {log}'
 
 rule real_data_evaluation:
