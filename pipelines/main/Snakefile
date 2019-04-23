@@ -32,6 +32,7 @@ rule all:
         cellassign_hgsc_evaluation='{outdir}/supplemental_figures/cellassign_hgsc_evaluation.pdf'.format(outdir=config['outdir']),
         cellassign_follicular_evaluation='{outdir}/supplemental_figures/cellassign_follicular_evaluation.pdf'.format(outdir=config['outdir']),
         liver_extra_celltype_figure='{outdir}/supplemental_figures/liver_extra_celltypes.pdf'.format(outdir=config['outdir']),
+        novel_extra_figure='{outdir}/supplemental_figures/simulation_novel_extra_celltypes.pdf'.format(outdir=config['outdir']),
         ## Supplemental tables
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
@@ -276,6 +277,23 @@ rule benchmarking_evaluation:
         'Rscript R/supplemental_figures/benchmarking_evaluation.R '
         '--benchmark_times {input.benchmark_times} '
         '--outfname {output.benchmarking_figure} '
+        '>& {log}'
+
+rule simulation_novel_extra_celltypes:
+    input:
+        deprob_result_dir=config['simulation_analysis_results']['novel_extra_dir'],
+    output:
+        novel_extra_figure='{outdir}/supplemental_figures/simulation_novel_extra_celltypes.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-simulation-novel-extra-celltypes',
+    log:
+        '{logdir}/logs/simulation_novel_extra_celltypes.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/simulation_novel_extra_celltypes.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/simulation_novel_extra_celltypes.R '
+        '--deprob_result_dir {input.deprob_result_dir} '
+        '--outfname {output.novel_extra_figure} '
         '>& {log}'
 
 rule liver_extra_celltypes:
