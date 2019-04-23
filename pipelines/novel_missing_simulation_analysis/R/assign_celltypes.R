@@ -74,7 +74,18 @@ all_groups <- sort(unique(sce$Group))
 
 counts(sce) <- as.matrix(counts(sce))
 
-markers_to_use <- select_markers(sce, 
+sce_mod <- sce %>% 
+  scater::filter(Group %in% marker_subset_types) %>% 
+  scater::mutate(Group = factor(Group))
+extra_cols <- setdiff(data_subset_types, marker_subset_types)
+if (length(extra_cols) > 0) {
+  rowData(sce_mod) <- rowData(sce_mod) %>%
+    as.data.frame %>%
+    dplyr::select(-one_of(paste0("DEFac", extra_cols))) %>%
+    DataFrame()
+}
+
+markers_to_use <- select_markers(sce_mod, 
                                  percentile_fc = fc_percentile, 
                                  percentile_meanexpr = expr_percentile, 
                                  frac_genes = frac_genes, 
