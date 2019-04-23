@@ -19,6 +19,15 @@ simulation_settings:
       - 3419
       - 1258
       - 6255
+      - 6812
+      - 1249
+      - 2159
+      - 8172
+      - 1205
+      - 6592
+      - 1021
+      - 5522
+      - 6124
   constants:
     num_cells: 1000
     num_groups: 6
@@ -120,16 +129,6 @@ assign_celltype_settings:
       marker_celltypes: 
         - Group1
         - Group2
-    novel5:
-      data_celltypes:
-        - Group1
-        - Group2
-        - Group3
-        - Group4
-        - Group5
-        - Group6
-      marker_celltypes: 
-        - Group1
     superset1:
       data_celltypes:
         - Group1
