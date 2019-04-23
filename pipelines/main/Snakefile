@@ -51,6 +51,7 @@ rule simulation_performance_figure:
         name='simulation-performance-figure',
         delta_deprobs=config['delta_deprobs'],
         deprob_methods=config['deprob_methods'],
+        method_description=config['method_description'],
     log:
         '{logdir}/logs/simulation_performance_figure.log'.format(logdir=config['logdir'])
     benchmark:
@@ -61,6 +62,7 @@ rule simulation_performance_figure:
         '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
         '--delta_deprobs {params.delta_deprobs} '
         '--deprob_methods {params.deprob_methods} '
+        '--method_description {params.method_description} '
         '--outfname {output.sim_performance_figure} '
         '>& {log}'
 
@@ -198,6 +200,7 @@ rule simulation_performance_b_cd8:
         name='suppfigure-simulation-performance-b-cd8',
         delta_deprobs=config['delta_deprobs_supp'],
         deprob_methods=config['deprob_methods'],
+        method_description=config['method_description'],
     log:
         '{logdir}/logs/simulation_performance_b_cd8.log'.format(logdir=config['logdir'])
     benchmark:
@@ -207,6 +210,7 @@ rule simulation_performance_b_cd8:
         '--deprob_result_dir {input.deprob_result_dir} '
         '--delta_deprobs {params.delta_deprobs} '
         '--deprob_methods {params.deprob_methods} '
+        '--method_description {params.method_description} '
         '--outfname {output.sim_performance_b_cd8} '
         '>& {log}'
 
@@ -218,6 +222,7 @@ rule wrong_marker_naivecd8_naivecd4:
         wrong_marker_figure='{outdir}/supplemental_figures/wrong_marker_naivecd8_naivecd4.pdf'.format(outdir=config['outdir'])
     params:
         name='suppfigure-wrong-marker-naivecd8-naivecd4',
+        method_description=config['method_description'],
     log:
         '{logdir}/logs/wrong_marker_naivecd8_naivecd4.log'.format(logdir=config['logdir'])
     benchmark:
@@ -226,6 +231,7 @@ rule wrong_marker_naivecd8_naivecd4:
         'Rscript R/supplemental_figures/wrong_marker_naive_cd4_naive_cd8.R '
         '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
         '--wrongmarker_result_dir2 {input.wrongmarker_result_dir2} '
+        '--method_description {params.method_description} '
         '--outfname {output.wrong_marker_figure} '
         '>& {log}'
 
@@ -249,6 +255,8 @@ rule benchmarking_evaluation:
 rule real_data_evaluation:
     input:
         koh_annotated=config['external_analysis_results']['koh_annotated'],
+        cellassign_fit=config['external_analysis_results']['koh_cellassign'],
+        scina_fit=config['external_analysis_results']['koh_scina'],
     output:
         real_data_evaluation_figure='{outdir}/supplemental_figures/real_data_evaluation.pdf'.format(outdir=config['outdir'])
     params:
@@ -261,6 +269,8 @@ rule real_data_evaluation:
     shell:
         'Rscript R/supplemental_figures/cellassign_real_data_evaluation.R '
         '--koh_annotated {input.koh_annotated} '
+        '--cellassign_fit {input.cellassign_fit} '
+        '--scina_fit {input.scina_fit} '
         '--dimreduce_type {params.dimreduce_type} '
         '--outfname {output.real_data_evaluation_figure} '
         '>& {log}'

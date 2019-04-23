@@ -284,6 +284,15 @@ cellassign:
     design_formula: ~\ patient\ +\ malignant_status_manual
     extra_opts: --shrinkage
     celltypes: all
+  follicular_lk_full_noother:
+    dataset: follicular
+    marker_list: ../../resources/marker_lists/follicular_merged_lk.yaml
+    include_other: FALSE
+    num_runs: 3
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: all
   follicular_broad:
     dataset: follicular
     marker_list: ../../resources/marker_lists/follicular_big_merged.yaml
@@ -293,10 +302,28 @@ cellassign:
     design_formula: ~\ patient
     extra_opts: --shrinkage
     celltypes: all
+  follicular_broad_noother:
+    dataset: follicular
+    marker_list: ../../resources/marker_lists/follicular_big_merged.yaml
+    include_other: FALSE
+    num_runs: 3
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: all
   follicular_lk_separate:
     dataset: follicular_bcell
     marker_list: ../../resources/marker_lists/follicular_lambda_kappa.yaml
     include_other: TRUE
+    num_runs: 3
+    B: 20
+    design_formula: ~\ patient
+    extra_opts: --shrinkage
+    celltypes: all
+  follicular_lk_separate_noother:
+    dataset: follicular_bcell
+    marker_list: ../../resources/marker_lists/follicular_lambda_kappa.yaml
+    include_other: FALSE
     num_runs: 3
     B: 20
     design_formula: ~\ patient
