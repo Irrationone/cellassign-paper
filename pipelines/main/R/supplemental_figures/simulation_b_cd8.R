@@ -23,6 +23,8 @@ parser$add_argument('--delta_deprobs', type='double', nargs ='+',
                     help="DE probs to show delta plots for.")
 parser$add_argument('--deprob_methods', type='character', nargs ='+',
                     help="Clustering methods to use for DE prob analysis.")
+parser$add_argument('--method_description', type='character', metavar='FILE',
+                    help="Method description")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for PDF plot")
 args <- parser$parse_args()
@@ -30,15 +32,37 @@ args <- parser$parse_args()
 deprob_result_dir <- args$deprob_result_dir
 delta_deprobs <- unlist(args$delta_deprobs)
 deprob_methods <- unlist(args$deprob_methods)
+method_description <- read_yaml(args$method_description)
+method_metadata <- plyr::rbind.fill(lapply(names(method_description), function(i) {
+  data.frame(method_type=i, clustering_method=method_description[[i]])
+}))
 
 categorical_palettes <- cat_palettes()
 factor_orderings <- factor_orders()
 
-clust_methods_palette <- categorical_palettes$clustering_methods[deprob_methods]
+clust_methods_palette <- categorical_palettes$method_types[df_as_map(method_metadata, deprob_methods, from = "clustering_method", to = "method_type")]
+names(clust_methods_palette) <- deprob_methods
 
 # DE prob figure
-de_eval_measures <- load_annotation_files(deprob_result_dir, pattern = "*_eval_measures.tsv")
-de_deltas <- load_annotation_files(deprob_result_dir, pattern = "*_delta_compare.tsv")
+# de_eval_measures <- load_annotation_files(deprob_result_dir, pattern = "*_eval_measures.tsv")
+deprob_result_files <- Sys.glob(file.path(deprob_result_dir, "evaluate", "*", "*", "*.tsv"))
+de_eval_measures <- plyr::rbind.fill(lapply(deprob_result_files, function(f) {
+  df <- fread(f)
+  if ("gene_set" %in% colnames(df)) {
+    return(df)
+  } else {
+    feature_type <- str_extract(f, "(markers|full)")
+    return(data.frame(fread(f), gene_set=feature_type))
+  }
+}))
+de_eval_measures <- de_eval_measures %>%
+  dplyr::left_join(method_metadata)
+
+# de_deltas <- load_annotation_files(deprob_result_dir, pattern = "*_delta_compare.tsv")
+delta_files <- Sys.glob(file.path(deprob_result_dir, "assign_celltypes_sce", "deltas", "*", "cellassign*.tsv"))
+de_deltas <- plyr::rbind.fill(lapply(delta_files, function(f) {
+  fread(f)
+}))
 
 ## Only use methods that were selected
 de_eval_measures <- de_eval_measures %>%
@@ -60,12 +84,14 @@ de_plots <- lapply(elist, function(gs) {
                                                                                                                                            "accuracy"),
                                                                                                                                          c("F1",
                                                                                                                                            "Accuracy")))
-  method_ordering <- (eval_measures_markers_de_melted %>% 
-                        dplyr::filter(de_prob == 0.35,
-                                      measure == "F1") %>%
-                        dplyr::group_by(clustering_method) %>%
-                        dplyr::summarise(mean_value=mean(value, na.rm=TRUE)) %>%
-                        dplyr::arrange(-mean_value))$clustering_method
+  method_ordering_df <- eval_measures_markers_de_melted %>% 
+    dplyr::filter(de_prob == 0.35,
+                  measure == "F1") %>%
+    dplyr::group_by(method_type, clustering_method) %>%
+    dplyr::summarise(mean_value=mean(value, na.rm=TRUE)) %>%
+    dplyr::arrange(method_type, -mean_value)
+  
+  method_ordering <- method_ordering_df$clustering_method
   
   df <- eval_measures_markers_de_melted %>%
     dplyr::mutate(clustering_method=factor(clustering_method, levels = method_ordering))
@@ -82,8 +108,13 @@ de_plots <- lapply(elist, function(gs) {
       
       pvals <- plyr::rbind.fill(lapply(cellassign_methods, function(m1) {
         res <- plyr::rbind.fill(lapply(other_methods, function(m2) {
-          wilcox_res <- wilcox.test(x_cast[,m1], x_cast[,m2], paired = TRUE)
-          return(data.frame(method1=m1, method2=m2, p.value=wilcox_res$p.value))
+          wilcox_res <- wilcox.test(x_cast[,as.character(m1)], x_cast[,as.character(m2)], paired = TRUE)
+          
+          # Get direction of significance
+          wilcox_res_greater <- wilcox.test(x_cast[,as.character(m1)], x_cast[,as.character(m2)], paired = TRUE, alternative = "greater")
+          
+          pval_max <- max(wilcox_res$p.value, wilcox_res_greater$p.value)
+          return(data.frame(method1=m1, method2=m2, p.value=pval_max))
         }))
         return(res)
       }))
@@ -118,11 +149,14 @@ de_plots <- lapply(elist, function(gs) {
     geom_text(data = paired_pvals_cast,
               aes(label=cellassign, x=clustering_method, y=-0.15),
               colour = clust_methods_palette["cellassign"]) + 
-    geom_text(data = paired_pvals_cast,
-              aes(label=cellassign_shrinkage, x=clustering_method, y=-0.22),
-              colour = clust_methods_palette["cellassign_shrinkage"]) + 
     coord_cartesian(ylim = c(0, 1), clip = 'off') + 
     theme(panel.spacing.y = unit(2, "lines"))
+  
+  change_indexes <- get_change_indexes(method_ordering_df$method_type)
+  for (x in change_indexes) {
+    marker_de_plot <- marker_de_plot + 
+      geom_vline(xintercept = x + 0.5, linetype = "dashed", alpha = 0.8)
+  }
   
   return(marker_de_plot)
 })
@@ -138,9 +172,9 @@ de_plot_full <- de_plots$full +
   scale_fill_manual(values = clust_methods_palette)
 
 
-de_plot_legend <- cellassign.utils::ggsimplelegend(names(clust_methods_palette),
-                                                   colour_mapping = unname(clust_methods_palette),
-                                                   legend_title = "Method", legend_rows = 2, fontsize = 7)
+de_plot_legend <- cellassign.utils::ggsimplelegend(names(categorical_palettes$method_types),
+                                                   colour_mapping = unname(categorical_palettes$method_types),
+                                                   legend_title = "Method type", legend_rows = 1, fontsize = 7)
 de_plot_legend <- cellassign.utils::extract_legend(de_plot_legend)
 
 whitespace_width <- 0.3
@@ -165,11 +199,10 @@ rvals <- compute_pvals_subsets(delta_table,
 
 rval_labels <- rvals %>%
   dplyr::group_by(de_prob) %>%
-  dplyr::summarise(r_label=as.character(as.expression(substitute(list(italic(R) == est1, italic(R[s]) == est2), list(est1 = format(estimate[clustering_method == "cellassign"], digits = 3),
-                                                                                                                     est2 = format(estimate[clustering_method == "cellassign_shrinkage"], digits = 3))))))
+  dplyr::summarise(r_label=as.character(as.expression(substitute(list(italic(R) == est1), list(est1 = format(estimate[clustering_method == "cellassign"], digits = 3))))))
 
 delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) + 
-  geom_point(aes(colour=clustering_method), alpha = 0.5) + 
+  geom_point(alpha = 0.5) + 
   theme_Publication() + 
   theme_nature() + 
   stripped_theme() +
@@ -180,14 +213,8 @@ delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) +
   ylab("Inferred logFC") + 
   guides(colour = FALSE) + 
   facet_wrap(~ de_prob, ncol = length(delta_deprobs)) + 
-  scale_colour_manual(values = clust_methods_palette) + 
   geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1, vjust = 1, parse = TRUE,
             size = 0.35*8)
-
-delta_plot_legend <- cellassign.utils::ggsimplelegend(unique(delta_table$clustering_method),
-                                                      colour_mapping = unname(clust_methods_palette[unique(delta_table$clustering_method)]),
-                                                      legend_title = "Method", legend_rows = 1, fontsize = 7)
-delta_plot_legend <- cellassign.utils::extract_legend(delta_plot_legend)
 
 # Final plot
 legend_row <- cowplot::plot_grid(de_plot_legend,
@@ -208,11 +235,10 @@ bottom_row <- cowplot::plot_grid(delta_plots,
 
 final_plot <- cowplot::plot_grid(de_plots_labeled, 
                                  bottom_row,
-                                 delta_plot_legend,
                                  labels = c('', ''), 
                                  ncol = 1, 
-                                 nrow = 3,
-                                 rel_heights = c(0.75, 0.25, 0.05))
+                                 nrow = 2,
+                                 rel_heights = c(0.75, 0.25))
 
 
 # Plot final plot

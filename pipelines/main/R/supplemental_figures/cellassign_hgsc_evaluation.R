@@ -81,7 +81,6 @@ hgsc_celltype_plots <- lapply(seq_along(annotation_labels), function(i) {
                       use_dimred = args$dimreduce_type,
                       colour_by = lab_col,
                       point_alpha = 0.2, 
-                      add_ticks = FALSE,
                       point_size = 0.9)
   p$layers[[1]]$aes_params$colour <- NULL
   p$layers[[1]]$aes_params$shape <- 16
@@ -133,8 +132,7 @@ marker_plots <- lapply(marker_genes, function(mgene) {
                       use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
                       point_alpha = 0.2,
-                      point_size = 0.9,
-                      add_ticks = FALSE)
+                      point_size = 0.9)
   p$layers[[1]]$aes_params$colour <- NULL
   p$layers[[1]]$aes_params$shape <- 16
   p$layers[[1]]$mapping$colour <- p$layers[[1]]$mapping$fill

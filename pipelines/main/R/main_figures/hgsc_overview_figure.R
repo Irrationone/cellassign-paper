@@ -50,7 +50,7 @@ categorical_palettes <- cat_palettes()
 
 # Plot of timepoint
 dr_site <- plotReducedDim(sce, use_dimred = args$dimreduce_type, 
-                          colour_by = "dataset", point_alpha = 0.4, add_ticks = FALSE)
+                          colour_by = "dataset", point_alpha = 0.4)
 dr_site <- dr_site + 
   guides(colour = FALSE,
          fill = FALSE) + 
@@ -73,8 +73,7 @@ sce_celltype_remapped <- sce %>%
 dr_celltype <- plotReducedDim(sce_celltype_remapped, 
                               use_dimred = args$dimreduce_type,
                               colour_by = "celltype",
-                              point_alpha = 0.4, 
-                              add_ticks = FALSE)
+                              point_alpha = 0.4)
 dr_celltype <- dr_celltype + 
   guides(colour = FALSE,
          fill = FALSE) + 
@@ -108,8 +107,7 @@ marker_plots <- lapply(marker_genes, function(mgene) {
                       use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
                       point_alpha = 0.2,
-                      point_size = 0.5,
-                      add_ticks = FALSE)
+                      point_size = 0.5)
   p$layers[[1]]$aes_params$colour <- NULL
   p$layers[[1]]$aes_params$shape <- 16
   p$layers[[1]]$mapping$colour <- p$layers[[1]]$mapping$fill
@@ -193,7 +191,7 @@ sce_epithelial <- sce %>%
   scater::filter(!is.na(epithelial_cluster))
 
 dr_epithelial_site <- plotReducedDim(sce_epithelial, use_dimred = args$dimreduce_type, 
-                                     colour_by = "dataset", point_alpha = 0.5, add_ticks = FALSE)
+                                     colour_by = "dataset", point_alpha = 0.5)
 dr_epithelial_site <- dr_epithelial_site + 
   guides(colour = FALSE,
          fill = FALSE) + 
@@ -212,8 +210,7 @@ dr_epithelial_site$layers[[1]]$mapping$colour <- dr_epithelial_site$layers[[1]]$
 dr_epithelial_cluster <- plotReducedDim(sce_epithelial,
                                         use_dimred = args$dimreduce_type,
                                         colour_by = "epithelial_cluster",
-                                        point_alpha = 0.5, 
-                                        add_ticks = FALSE)
+                                        point_alpha = 0.5)
 dr_epithelial_cluster <- dr_epithelial_cluster + 
   guides(colour = FALSE,
          fill = FALSE) + 
@@ -247,8 +244,7 @@ epithelial_marker_plots <- lapply(epithelial_marker_genes, function(mgene) {
                       use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
                       point_alpha = 0.4,
-                      point_size = 0.75,
-                      add_ticks = FALSE)
+                      point_size = 0.75)
   p$layers[[1]]$aes_params$colour <- NULL
   p$layers[[1]]$aes_params$shape <- 16
   p$layers[[1]]$mapping$colour <- p$layers[[1]]$mapping$fill

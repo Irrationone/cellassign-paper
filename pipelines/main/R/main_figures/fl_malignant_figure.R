@@ -82,8 +82,7 @@ proliferation_plots <- lapply(patients, function(pat) {
                         use_dimred = args$dimreduce_type,
                         colour_by = cellassign.utils::get_ensembl_id(mgene, sce_bcell_tmp),
                         point_alpha = 0.5,
-                        point_size = 0.75,
-                        add_ticks = FALSE)
+                        point_size = 0.75)
     p$layers[[1]]$aes_params$colour <- NULL
     p$layers[[1]]$aes_params$shape <- 16
     p$layers[[1]]$mapping$colour <- p$layers[[1]]$mapping$fill
@@ -115,8 +114,7 @@ bcell_timepoint_plots <- lapply(patients, function(pat) {
                                                                  patient == pat), 
                                     use_dimred = args$dimreduce_type, 
                                     colour_by = "timepoint",
-                                    point_alpha = 0.2, 
-                                    add_ticks = FALSE,
+                                    point_alpha = 0.2,
                                     point_size = 0.75)
   bcell_timepoint$layers[[1]]$aes_params$colour <- NULL
   bcell_timepoint$layers[[1]]$aes_params$shape <- 16
