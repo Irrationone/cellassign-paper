@@ -34,7 +34,7 @@ simulation_settings:
       - 1
     de_facloc: 0.04
     de_facscale: 0.02
-    de_nu: 1.1
+    de_nu: 1
     de_min: 1
     de_max: 1000
     batch_facloc: 1
