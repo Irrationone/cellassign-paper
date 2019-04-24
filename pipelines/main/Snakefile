@@ -341,7 +341,7 @@ rule liver_extra_celltypes:
         '--scina_fit_11_10 {input.scina_fit_11_10} '
         '--scina_fit_11_10_bc {input.scina_fit_11_10_bc} '
         '--dimreduce_type {params.dimreduce_type} '
-        '--celltypes {params.celltypes_to_use} '
+        '--celltypes {params.celltypes_to_subset} '
         '--outfname {output.liver_extra_celltype_figure} '
         '>& {log}'
 
