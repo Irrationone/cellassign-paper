@@ -34,15 +34,15 @@ parser$add_argument('--scina_fit_4', metavar='FILE', type='character',
                     help="SCINA fit to 4 cell types")
 parser$add_argument('--scina_fit_11', metavar='FILE', type='character',
                     help="SCINA fit to 11 cell types")
-parser$add_argument('--scina_fit_11_0.8', metavar='FILE', type='character',
+parser$add_argument('--scina_fit_11_80', metavar='FILE', type='character',
                     help="SCINA fit to 11 cell types, sensitivity of 0.8")
-parser$add_argument('--scina_fit_11_0.5', metavar='FILE', type='character',
+parser$add_argument('--scina_fit_11_50', metavar='FILE', type='character',
                     help="SCINA fit to 11 cell types, sensitivity of 0.5")
-parser$add_argument('--scina_fit_11_0.2', metavar='FILE', type='character',
+parser$add_argument('--scina_fit_11_20', metavar='FILE', type='character',
                     help="SCINA fit to 11 cell types, sensitivity of 0.2")
-parser$add_argument('--scina_fit_11_0.1', metavar='FILE', type='character',
+parser$add_argument('--scina_fit_11_10', metavar='FILE', type='character',
                     help="SCINA fit to 11 cell types, sensitivity of 0.1")
-parser$add_argument('--scina_fit_11_0.1_bc', metavar='FILE', type='character',
+parser$add_argument('--scina_fit_11_10_bc', metavar='FILE', type='character',
                     help="SCINA fit to 11 cell types, sensitivity of 0.1, batch correction")
 parser$add_argument('--dimreduce_type', type='character',
                     help="Type of reduced dimension plot", choices = c("UMAP", "PCA", "TSNE"))
@@ -63,11 +63,11 @@ model_fits <- list(
   'scina_fit_3'=readRDS(args$scina_fit_3),
   'scina_fit_4'=readRDS(args$scina_fit_4),
   'scina_fit_11'=readRDS(args$scina_fit_11),
-  'scina_fit_11_0.8'=readRDS(args$scina_fit_11_0.8),
-  'scina_fit_11_0.5'=readRDS(args$scina_fit_11_0.5),
-  'scina_fit_11_0.2'=readRDS(args$scina_fit_11_0.2),
-  'scina_fit_11_0.1'=readRDS(args$scina_fit_11_0.1),
-  'scina_fit_11_0.1_bc'=readRDS(args$scina_fit_11_0.1_bc)
+  'scina_fit_11_0.8'=readRDS(args$scina_fit_11_80),
+  'scina_fit_11_0.5'=readRDS(args$scina_fit_11_50),
+  'scina_fit_11_0.2'=readRDS(args$scina_fit_11_20),
+  'scina_fit_11_0.1'=readRDS(args$scina_fit_11_10),
+  'scina_fit_11_0.1_bc'=readRDS(args$scina_fit_11_10_bc)
 )
 
 categorical_palettes <- cat_palettes()
