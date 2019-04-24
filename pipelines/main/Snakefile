@@ -2,7 +2,7 @@
 configfile: 'config/revision1.yaml'
 
 #singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.12"
-singularity: "docker://alzhang/spectrum-master-rstudio:v1.4"
+singularity: "docker://alzhang/spectrum-master-rstudio:v1.5"
 
 rule all:
     input:
