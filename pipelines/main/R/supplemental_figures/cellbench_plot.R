@@ -59,39 +59,8 @@ colData(tian_3_celseq)$sample_id <- 'CELSeq2'
 colData(tian_3_Dropseq)$sample_id <- 'Dropseq'
 colData(tian_3_mixture)$sample_id <- 'mixture'
 
-merge_sces <- function(sces) {
-  coldata_union <- Reduce(union, lapply(sces, function(x) {
-    colnames(colData(x))
-  }))
-  
-  common_genes <- Reduce(intersect, lapply(sces, function(x) {
-    rownames(x)
-  }))
-  
-  sces <- lapply(sces, function(x) {
-    missing_cols <- setdiff(coldata_union, colnames(colData(x)))
-    rowdat_cols <- setdiff(colnames(rowData(x)), c("mean_counts", "log10_mean_counts",
-                                                   "n_cells_by_counts", "pct_dropout_by_counts", "total_counts",
-                                                   "log10_total_counts"))
-    rowData(x) <- rowData(x)[,rowdat_cols]
-    colData(x)[,missing_cols] <- NA
-    colData(x) <- colData(x)[,coldata_union]
-    x <- x[common_genes,]
-    return(x)
-  })
-  
-  sce <- Reduce(cbind, sces)
-  
-  # Recompute size factors
-  qclust <- quickCluster(sce, min.size = 30)
-  sce <- computeSumFactors(sce, clusters = qclust)
-  
-  sce$size_factor <- sizeFactors(sce)
-  return(sce)
-}
-
-sce_tian_pure <- merge_sces(list(tian_3_10x, tian_3_celseq, tian_3_Dropseq))
-sce_tian_mix <- merge_sces(list(tian_3_celseq, tian_3_mixture))
+sce_tian_pure <- readRDS(args$sce_pure_merged)
+sce_tian_mix <- readRDS(args$sce_mix_merged)
 
 sce_tian_pure$cellassign_class <- fit_tian_pure$cell_type
 

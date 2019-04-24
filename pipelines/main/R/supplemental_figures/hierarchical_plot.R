@@ -25,6 +25,8 @@ parser$add_argument('--sce_follicular', metavar='FILE', type = 'character',
                     help="SCE of FL")
 parser$add_argument('--sce_follicular_lk', metavar='FILE', type = 'character',
                     help="SCE of lambda-kappa on nonmalignant")
+parser$add_argument('--sce_fl_hgsc_merged', metavar='FILE', type = 'character',
+                    help="SCE of merged FL and HGSC")
 parser$add_argument('--fit_combined', metavar='FILE', type='character',
                     help="CellAssign fit to combined data")
 parser$add_argument('--fit_hgsc', metavar='FILE', type='character',
@@ -44,7 +46,10 @@ parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
 args <- parser$parse_args()
 
 sce_hgsc <- readRDS(args$sce_hgsc)
-sce_fl <- readRDS(args$sce_fl)
+sce_fl <- readRDS(args$sce_follicular)
+sce_follicular_hgsc_merged <- readRDS(args$sce_fl_hgsc_merged)
+sce_follicular_hgsc_merged <- sce_follicular_hgsc_merged %>%
+  scater::mutate(dataset = ifelse(str_detect(patient, "^VOA"), "HGSC", "FL"))
 
 categorical_palettes <- cat_palettes()
 combined_celltype_colours <- categorical_palettes$hgsc_fl_celltypes
@@ -59,46 +64,6 @@ sce_follicular_lk <- readRDS(args$sce_follicular_lk)
 fit_fl_noother <- readRDS(args$fit_fl_noother)
 fit_fl_hierarchical_top <- readRDS(args$fit_fl_hierarchical_top)
 fit_fl_hierarchical_bottom <- readRDS(args$fit_fl_hierarchical_bottom)
-
-merge_sces <- function(sces) {
-  coldata_union <- Reduce(union, lapply(sces, function(x) {
-    colnames(colData(x))
-  }))
-  
-  common_genes <- Reduce(intersect, lapply(sces, function(x) {
-    rownames(x)
-  }))
-  
-  sces <- lapply(sces, function(x) {
-    missing_cols <- setdiff(coldata_union, colnames(colData(x)))
-    rowdat_cols <- setdiff(colnames(rowData(x)), c("mean_counts", "log10_mean_counts",
-                                                   "n_cells_by_counts", "pct_dropout_by_counts", "total_counts",
-                                                   "log10_total_counts"))
-    rowData(x) <- rowData(x)[,rowdat_cols]
-    colData(x)[,missing_cols] <- NA
-    colData(x) <- colData(x)[,coldata_union]
-    x <- x[common_genes,]
-    return(x)
-  })
-  
-  sce <- Reduce(cbind, sces)
-  
-  # Recompute size factors
-  qclust <- quickCluster(sce, min.size = 30)
-  sce <- computeSumFactors(sce, clusters = qclust)
-  
-  sce$size_factor <- sizeFactors(sce)
-  return(sce)
-}
-
-sce_follicular_hgsc_merged <- merge_sces(list(sce_fl, sce_hgsc))
-sce_follicular_hgsc_merged <- normalize(sce_follicular_hgsc_merged)
-sce_follicular_hgsc_merged <- runPCA(sce_follicular_hgsc_merged, ntop = 1000, ncomponents = 50, exprs_values = "logcounts")
-sce_follicular_hgsc_merged <- runTSNE(sce_follicular_hgsc_merged, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
-sce_follicular_hgsc_merged <- runUMAP(sce_follicular_hgsc_merged, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
-
-sce_follicular_hgsc_merged <- sce_follicular_hgsc_merged %>%
-  scater::mutate(dataset = ifelse(str_detect(patient, "^VOA"), "HGSC", "FL"))
 
 sce_follicular_hgsc_merged$celltype_combined <- fit_combined$cell_type %>%
   plyr::mapvalues(from = c("B cells (lambda)", "B cells (kappa)", "other"), to = c("B cells", "B cells", "Unassigned"))
