@@ -429,7 +429,7 @@ rule liver_panglaodb:
         '--marker_types {params.marker_types} '
         '--cellassign_fit_liver {input.cellassign_fit_db} '
         '--dimreduce_type {params.dimreduce_type} '
-        '--outfname {output.liver_novel_celltype_figure} '
+        '--outfname {output.liver_panglaodb_figure} '
         '>& {log}'
 
 rule merge_cellbench_pure:
