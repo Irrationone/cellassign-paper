@@ -1,5 +1,5 @@
 
-configfile: 'config/v4.yaml'
+configfile: 'config/revision1.yaml'
 
 #singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.12"
 singularity: "docker://alzhang/spectrum-master-rstudio:v1.4"
