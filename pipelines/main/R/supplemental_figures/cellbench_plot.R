@@ -11,6 +11,7 @@ library(cowplot)
 library(Matrix)
 library(ggrastr)
 library(mclust)
+library(vegan)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -18,14 +19,10 @@ library(cellassign.utils)
 library(argparse)
 
 parser <- ArgumentParser(description = "CellBench plot")
-parser$add_argument('--sce_tian_3_10x', metavar='FILE', type='character',
-                    help="SCE of 10x data")
-parser$add_argument('--sce_tian_3_celseq', metavar='FILE', type = 'character',
-                    help="SCE of CELSeq2 data")
-parser$add_argument('--sce_tian_3_dropseq', metavar='FILE', type = 'character',
-                    help="SCE of Dropseq data")
-parser$add_argument('--sce_tian_3_mixture', metavar='FILE', type='character',
-                    help="SCE of CELSeq2 mixture")
+parser$add_argument('--sce_pure_merged', metavar='FILE', type='character',
+                    help="SCE of merged pure data")
+parser$add_argument('--sce_mix_merged', metavar='FILE', type = 'character',
+                    help="SCE of merged mixture data")
 parser$add_argument('--fit_tian_pure', metavar='FILE', type='character',
                     help="CellAssign fit to pure data")
 parser$add_argument('--fit_tian_20', metavar='FILE', type='character',
@@ -49,25 +46,10 @@ fit_tian50 <- readRDS(args$fit_tian_50)
 
 cell_lines <- unlist(args$cell_lines)
 
-tian_3_10x <- readRDS(args$sce_tian_3_10x)
-tian_3_celseq <- readRDS(args$sce_tian_3_celseq)
-tian_3_Dropseq <- readRDS(args$sce_tian_3_dropseq)
-tian_3_mixture <- readRDS(args$sce_tian_3_mixture)
-
-colData(tian_3_10x)$sample_id <- '10x'
-colData(tian_3_celseq)$sample_id <- 'CELSeq2'
-colData(tian_3_Dropseq)$sample_id <- 'Dropseq'
-colData(tian_3_mixture)$sample_id <- 'mixture'
-
 sce_tian_pure <- readRDS(args$sce_pure_merged)
 sce_tian_mix <- readRDS(args$sce_mix_merged)
 
 sce_tian_pure$cellassign_class <- fit_tian_pure$cell_type
-
-sce_tian_pure <- normalize(sce_tian_pure)
-sce_tian_pure <- runPCA(sce_tian_pure, ntop = 1000, ncomponents = 50, exprs_values = "logcounts")
-sce_tian_pure <- runTSNE(sce_tian_pure, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
-sce_tian_pure <- runUMAP(sce_tian_pure, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
 
 tian_celltype <- get_colour_palette(sce_tian_pure$cell_line)
 
@@ -148,7 +130,7 @@ cellbench_prob_plot <- ggplot(prob_df, aes(x=factor(num_cells), y=cellassign_pro
 
 entropies <- prob_df %>% 
   dplyr::group_by(cell_id, group, sample_id) %>% 
-  dplyr::summarise(pure=ifelse(max(num_cells) == 9, "Pure", "Mixture"), entropy=entropy.empirical(cellassign_prob))
+  dplyr::summarise(pure=ifelse(max(num_cells) == 9, "Pure", "Mixture"), entropy=vegan::diversity(cellassign_prob))
 
 pvals <- compute_pvals_subsets(entropies, 
                                facet_vars = c("group"), 

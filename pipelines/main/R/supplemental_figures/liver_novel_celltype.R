@@ -36,7 +36,7 @@ parser$add_argument('--scina_fit_novel1', metavar='FILE', type='character',
                     help="SCINA fit to 3 cell types")
 parser$add_argument('--scina_fit_novel8_raw', metavar='FILE', type='character',
                     help="SCINA fit to 4 cell types")
-parser$add_argument('--scina_fit_novel8_revised', metavar='FILE', type='character',
+parser$add_argument('--scina_fit_novel8', metavar='FILE', type='character',
                     help="SCINA fit to 11 cell types")
 parser$add_argument('--dimreduce_type', type='character',
                     help="Type of reduced dimension plot", choices = c("UMAP", "PCA", "TSNE"))
@@ -54,8 +54,6 @@ model_fits <- list(
   'scina_fit_novel1'=readRDS(args$scina_fit_novel1),
   'scina_fit_novel8_raw'=readRDS(args$scina_fit_novel8_raw),
   'scina_fit_novel8'=readRDS(args$scina_fit_novel8)
-  # 'cellassign_fit_panglaodb'=readRDS(args$cellassign_fit_panglaodb),
-  # 'scina_fit_panglaodb'=readRDS(args$scina_fit_panglaodb)
 )
 
 celltypes_used <- list(

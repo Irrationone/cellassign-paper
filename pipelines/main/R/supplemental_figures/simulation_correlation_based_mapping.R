@@ -10,6 +10,7 @@ library(scran)
 library(cowplot)
 library(pheatmap)
 library(Matrix)
+library(yaml)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -102,12 +103,17 @@ de_plots_combined <- lapply(c(deprob_result_dir1, deprob_result_dir2), function(
         
         pvals <- plyr::rbind.fill(lapply(cellassign_methods, function(m1) {
           res <- plyr::rbind.fill(lapply(other_methods, function(m2) {
-            wilcox_res <- wilcox.test(x_cast[,as.character(m1)], x_cast[,as.character(m2)], paired = TRUE)
-            
-            # Get direction of significance
-            wilcox_res_greater <- wilcox.test(x_cast[,as.character(m1)], x_cast[,as.character(m2)], paired = TRUE, alternative = "greater")
-            
-            pval_max <- max(wilcox_res$p.value, wilcox_res_greater$p.value)
+            pval_max <- tryCatch({
+              wilcox_res <- wilcox.test(x_cast[,as.character(m1)], x_cast[,as.character(m2)], paired = TRUE)
+              
+              # Get direction of significance
+              wilcox_res_greater <- wilcox.test(x_cast[,as.character(m1)], x_cast[,as.character(m2)], paired = TRUE, alternative = "greater")
+              
+              pval_max <- max(wilcox_res$p.value, wilcox_res_greater$p.value)
+              pval_max
+            }, error = function(e) {
+              1
+            })
             return(data.frame(method1=m1, method2=m2, p.value=pval_max))
           }))
           return(res)
