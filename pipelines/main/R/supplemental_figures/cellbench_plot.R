@@ -72,6 +72,11 @@ sample_plot <- plotReducedDim(sce_tian_pure, use_dimred = args$dimreduce_type, c
   theme_Publication() + 
   theme_nature()
 
+cont_table <- table(sce_tian_pure$cell_line, 
+                    sce_tian_pure$cellassign_class)
+acc <- sum(diag(cont_table))/sum(cont_table)
+micro_f1 <- microF1(cont_table)
+
 cellassign_plot <- plotReducedDim(sce_tian_pure, use_dimred = args$dimreduce_type, colour_by = "cellassign_class") + 
   xlab(paste0(args$dimreduce_type, "-1")) + 
   ylab(paste0(args$dimreduce_type, "-2")) + 
@@ -81,6 +86,10 @@ cellassign_plot <- plotReducedDim(sce_tian_pure, use_dimred = args$dimreduce_typ
   theme_bw() + 
   theme_Publication() + 
   theme_nature()
+
+plot_label <- paste0("Acc = ",  format(acc, digits = 3), "\n", "F1 = ", format(micro_f1, digits = 3))
+cellassign_plot <- cellassign_plot + annotate(geom = 'text', x = Inf, y = Inf, hjust = 1, vjust = 1.5, label = plot_label, parse = FALSE,
+                                              size = 2.5)
 
 ## SCE mix
 
@@ -152,8 +161,8 @@ entropy_plot <- ggplot(entropies, aes(x=pure, y=entropy)) +
   ggtitle("Number of markers")
 
 
-modality_plots <- cowplot::plot_grid(cell_line_plot, 
-                                     sample_plot, 
+modality_plots <- cowplot::plot_grid(sample_plot, 
+                                     cell_line_plot,
                                      cellassign_plot, 
                                      ncol = 3, 
                                      align = 'hv', 
