@@ -311,11 +311,11 @@ rule liver_extra_celltypes:
         scina_fit_3=config['liver_results']['scina_fit_3'],
         scina_fit_4=config['liver_results']['scina_fit_4'],
         scina_fit_11=config['liver_results']['scina_fit_11'],
-        scina_fit_11_0.8=config['liver_results']['scina_fit_11_0.8'],
-        scina_fit_11_0.5=config['liver_results']['scina_fit_11_0.5'],
-        scina_fit_11_0.2=config['liver_results']['scina_fit_11_0.2'],
-        scina_fit_11_0.1=config['liver_results']['scina_fit_11_0.1'],
-        scina_fit_11_0.1_bc=config['liver_results']['scina_fit_11_0.1_bc'],
+        scina_fit_11_80=config['liver_results']['scina_fit_11_0.8'],
+        scina_fit_11_50=config['liver_results']['scina_fit_11_0.5'],
+        scina_fit_11_20=config['liver_results']['scina_fit_11_0.2'],
+        scina_fit_11_10=config['liver_results']['scina_fit_11_0.1'],
+        scina_fit_11_10_bc=config['liver_results']['scina_fit_11_0.1_bc'],
     output:
         liver_extra_celltype_figure='{outdir}/supplemental_figures/liver_extra_celltypes.pdf'.format(outdir=config['outdir'])
     params:
@@ -335,11 +335,11 @@ rule liver_extra_celltypes:
         '--scina_fit_3 {input.scina_fit_3} '
         '--scina_fit_4 {input.scina_fit_4} '
         '--scina_fit_11 {input.scina_fit_11} '
-        '--scina_fit_11_0.8 {input.scina_fit_11_0.8} '
-        '--scina_fit_11_0.5 {input.scina_fit_11_0.5} '
-        '--scina_fit_11_0.2 {input.scina_fit_11_0.2} '
-        '--scina_fit_11_0.1 {input.scina_fit_11_0.1} '
-        '--scina_fit_11_0.1_bc {input.scina_fit_11_0.1_bc} '
+        '--scina_fit_11_80 {input.scina_fit_11_80} '
+        '--scina_fit_11_50 {input.scina_fit_11_50} '
+        '--scina_fit_11_20 {input.scina_fit_11_20} '
+        '--scina_fit_11_10 {input.scina_fit_11_10} '
+        '--scina_fit_11_10_bc {input.scina_fit_11_10_bc} '
         '--dimreduce_type {params.dimreduce_type} '
         '--celltypes {params.celltypes_to_use} '
         '--outfname {output.liver_extra_celltype_figure} '
