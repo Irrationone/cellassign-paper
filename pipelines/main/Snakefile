@@ -241,7 +241,7 @@ rule simulation_performance_correlation_mapping:
     shell:
         'Rscript R/supplemental_figures/simulation_correlation_based_mapping.R '
         '--deprob_result_dir1 {input.deprob_result_dir1} '
-        '--deprob_result_dir1 {input.deprob_result_dir2} '
+        '--deprob_result_dir2 {input.deprob_result_dir2} '
         '--deprob_methods {params.deprob_methods} '
         '--method_description {params.method_description} '
         '--outfname {output.sim_performance_correlation} '
