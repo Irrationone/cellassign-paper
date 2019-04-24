@@ -40,6 +40,10 @@ liver_plots:
     - Hepatocytes
     - Cholangiocytes
     - Mature\ B\ cells
+  novel_marker_celltypes:
+    - Hepatocytes
+    - Cholangiocytes
+    - Mature\ B\ cells
   celltypes_novel1:
     - Hepatocytes
     - Cholangiocytes

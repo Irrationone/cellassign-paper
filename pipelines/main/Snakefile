@@ -33,6 +33,7 @@ rule all:
         cellassign_follicular_evaluation='{outdir}/supplemental_figures/cellassign_follicular_evaluation.pdf'.format(outdir=config['outdir']),
         liver_extra_celltype_figure='{outdir}/supplemental_figures/liver_extra_celltypes.pdf'.format(outdir=config['outdir']),
         novel_extra_figure='{outdir}/supplemental_figures/simulation_novel_extra_celltypes.pdf'.format(outdir=config['outdir']),
+        liver_novel_celltype_figure='{outdir}/supplemental_figures/liver_novel_celltypes.pdf'.format(outdir=config['outdir']),
         ## Supplemental tables
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
@@ -337,6 +338,43 @@ rule liver_extra_celltypes:
         '--dimreduce_type {params.dimreduce_type} '
         '--celltypes {params.celltypes_to_use} '
         '--outfname {output.liver_extra_celltype_figure} '
+        '>& {log}'
+
+rule liver_novel_celltypes:
+    input:
+        sce_liver=config['liver_results']['sce_normalized'],
+        cellassign_fit_novel1=config['liver_results']['cellassign_fit_novel1'],
+        cellassign_fit_novel8_raw=config['liver_results']['cellassign_fit_novel8_raw'],
+        cellassign_fit_novel8=config['liver_results']['cellassign_fit_novel8'],
+        scina_fit_novel1=config['liver_results']['scina_fit_novel1'],
+        scina_fit_novel8_raw=config['liver_results']['scina_fit_novel8_raw'],
+        scina_fit_novel8=config['liver_results']['scina_fit_novel8'],
+    output:
+        liver_novel_celltype_figure='{outdir}/supplemental_figures/liver_novel_celltypes.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-liver-novel-celltypes',
+        dimreduce_type='TSNE',
+        marker_types=config['liver_plots']['novel_marker_celltypes'],
+        celltypes_novel1=config['liver_plots']['celltypes_novel1'],
+        celltypes_novel8=config['liver_plots']['celltypes_novel8'],
+    log:
+        '{logdir}/logs/liver_novel_celltypes.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/liver_novel_celltypes.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_novel_celltype.R '
+        '--sce_liver {input.sce_liver} '
+        '--marker_types {params.marker_types} '
+        '--celltypes_novel1 {params.celltypes_novel1} '
+        '--celltypes_novel8 {params.celltypes_novel8} '
+        '--cellassign_fit_novel1 {input.cellassign_fit_novel1} '
+        '--cellassign_fit_novel8_raw {input.cellassign_fit_novel8_raw} '
+        '--cellassign_fit_novel8 {input.cellassign_fit_novel8} '
+        '--scina_fit_novel1 {input.scina_fit_novel1} '
+        '--scina_fit_novel8_raw {input.scina_fit_novel8_raw} '
+        '--scina_fit_novel8 {input.scina_fit_novel8} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.liver_novel_celltype_figure} '
         '>& {log}'
 
 rule real_data_evaluation:
