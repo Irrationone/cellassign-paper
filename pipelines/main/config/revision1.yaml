@@ -68,7 +68,6 @@ liver_plots:
     - Hepatic\ Stellate\ Cells
     - Plasma\ cells
     - Erythroid\ cells
-    - Mature\ B\ cells
   panglaodb_celltypes:
     - Hepatocytes
     - Cholangiocytes
