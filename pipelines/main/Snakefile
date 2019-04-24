@@ -431,12 +431,49 @@ rule liver_panglaodb:
         '--outfname {output.liver_novel_celltype_figure} '
         '>& {log}'
 
-rule cellbench_plot:
+rule merge_cellbench_pure:
     input:
         sce_tian_3_10x=config['cellbench_results']['sce_tian_3_10x'],
         sce_tian_3_celseq=config['cellbench_results']['sce_tian_3_celseq'],
         sce_tian_3_dropseq=config['cellbench_results']['sce_tian_3_dropseq'],
+    output:
+        sce_pure_merged='{outdir}/supplemental_figures/sce_tian_pure_merged.rds'.format(outdir=config['workdir']),
+    params:
+        name='merge-cellbench-pure',
+    log:
+        '{logdir}/logs/merge_cellbench_pure.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/merge_cellbench_pure.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/merge_sces.R '
+        '--sces {input.sce_tian_3_10x} {input.sce_tian_3_celseq} {input.sce_tian_3_dropseq} '
+        '--sample_ids 10x CELSeq2 Dropseq '
+        '--outfname {output.sce_pure_merged} '
+        '>& {log}'
+
+rule merge_cellbench_mix:
+    input:
+        sce_tian_3_celseq=config['cellbench_results']['sce_tian_3_celseq'],
         sce_tian_3_mixture=config['cellbench_results']['sce_tian_3_mixture'],
+    output:
+        sce_mix_merged='{outdir}/supplemental_figures/sce_tian_mixture_merged.rds'.format(outdir=config['workdir']),
+    params:
+        name='merge-cellbench-mix',
+    log:
+        '{logdir}/logs/merge_cellbench_mix.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/merge_cellbench_mix.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/merge_sces.R '
+        '--sces {input.sce_tian_3_celseq} {input.sce_tian_3_mixture} '
+        '--sample_ids CELSeq2 mixture '
+        '--outfname {output.sce_mix_merged} '
+        '>& {log}'
+
+rule cellbench_plot:
+    input:
+        sce_mix_merged='{outdir}/supplemental_figures/sce_tian_mixture_merged.rds'.format(outdir=config['workdir']),
+        sce_pure_merged='{outdir}/supplemental_figures/sce_tian_pure_merged.rds'.format(outdir=config['workdir']),
         fit_tian_pure=config['cellbench_results']['fit_tian_pure'],
         fit_tian_20=config['cellbench_results']['fit_tian_20'],
         fit_tian_30=config['cellbench_results']['fit_tian_30'],
@@ -452,11 +489,9 @@ rule cellbench_plot:
     benchmark:
         '{logdir}/benchmarks/cellbench_plot.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/supplemental_figures/liver_external_db_plot.R '
-        '--sce_tian_3_10x {input.sce_tian_3_10x} '
-        '--sce_tian_3_celseq {input.sce_tian_3_celseq} '
-        '--sce_tian_3_dropseq {input.sce_tian_3_dropseq} '
-        '--sce_tian_3_mixture {input.sce_tian_3_mixture} '
+        'Rscript R/supplemental_figures/cellbench_plot.R '
+        '--sce_pure_merged {input.sce_pure_merged} '
+        '--sce_mix_merged {input.sce_mix_merged} '
         '--fit_tian_pure {input.fit_tian_pure} '
         '--fit_tian_20 {input.fit_tian_20} '
         '--fit_tian_30 {input.fit_tian_30} '
@@ -760,11 +795,31 @@ rule cellassign_follicular_evaluation:
         '--outfname {output.cellassign_follicular_evaluation} '
         '>& {log}'
 
+rule merge_sce_fl_hgsc:
+    input:
+        sce_fl=config['follicular_analysis_results']['sce_annotated'],
+        sce_hgsc=config['hgsc_analysis_results']['sce_annotated'],
+    output:
+        fl_hgsc_merged='{outdir}/supplemental_figures/sce_follicular_hgsc_merged.rds'.format(outdir=config['workdir']),
+    params:
+        name='merge-sce-fl-hgsc',
+    log:
+        '{logdir}/logs/merge_sce_fl_hgsc.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/merge_sce_fl_hgsc.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/merge_sces.R '
+        '--sces {input.sce_fl} {input.sce_hgsc} '
+        '--sample_ids fl hgsc '
+        '--outfname {output.fl_hgsc_merged} '
+        '>& {log}'
+
 rule cellassign_hierarchical:
     input:
         sce_hgsc=config['hgsc_analysis_results']['sce_annotated'],
         sce_fl=config['follicular_analysis_results']['sce_annotated'],
         sce_fl_lk=config['follicular_analysis_results']['sce_nonmalignant_bcell_annotated'],
+        sce_fl_hgsc_merged='{outdir}/supplemental_figures/sce_follicular_hgsc_merged.rds'.format(outdir=config['workdir']),
         fit_combined=config['hierarchical_fits']['fit_combined'],
         fit_fl=config['hierarchical_fits']['fit_fl'],
         fit_hgsc=config['hierarchical_fits']['fit_hgsc'],
@@ -785,6 +840,7 @@ rule cellassign_hierarchical:
         '--sce_hgsc {input.sce_hgsc} '
         '--sce_follicular {input.sce_fl} '
         '--sce_follicular_lk {input.sce_fl_lk} '
+        '--sce_fl_hgsc_merged {input.sce_fl_hgsc_merged} '
         '--fit_combined {input.fit_combined} '
         '--fit_hgsc {input.fit_hgsc} '
         '--fit_fl {input.fit_fl} '
