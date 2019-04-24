@@ -244,7 +244,7 @@ rule simulation_performance_correlation_mapping:
         '--deprob_result_dir1 {input.deprob_result_dir2} '
         '--deprob_methods {params.deprob_methods} '
         '--method_description {params.method_description} '
-        '--outfname {output.sim_performance_b_cd8} '
+        '--outfname {output.sim_performance_correlation} '
         '>& {log}'
 
 rule wrong_marker_naivecd8_naivecd4:
