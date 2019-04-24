@@ -148,6 +148,15 @@ hgsc_analysis_results:
     site_fgsea: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v3/differential_expression/fgsea/site
     epithelial_fgsea: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v3/differential_expression/fgsea/epithelial_clusters
 
+# Hierarchical fits
+hierarchical_fits:
+  fit_combined: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_hgsc_combined.rds
+  fit_hgsc: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/hgsc_celltype.rds
+  fit_fl: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_lk_full.rds
+  fit_fl_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_lk_full_noother.rds
+  fit_fl_top_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_broad_noother.rds
+  fit_fl_bottom_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_lk_separate_noother.rds
+
 # Shih analysis results
 shih_analysis_results:
   sce_normalized: /datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v3/sce_shih_normal_normalized.rds
