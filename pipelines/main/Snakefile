@@ -34,6 +34,7 @@ rule all:
         liver_extra_celltype_figure='{outdir}/supplemental_figures/liver_extra_celltypes.pdf'.format(outdir=config['outdir']),
         novel_extra_figure='{outdir}/supplemental_figures/simulation_novel_extra_celltypes.pdf'.format(outdir=config['outdir']),
         liver_novel_celltype_figure='{outdir}/supplemental_figures/liver_novel_celltypes.pdf'.format(outdir=config['outdir']),
+        liver_panglaodb_figure='{outdir}/supplemental_figures/liver_panglaodb_figure.pdf'.format(outdir=config['outdir']),
         ## Supplemental tables
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
@@ -377,6 +378,29 @@ rule liver_novel_celltypes:
         '--outfname {output.liver_novel_celltype_figure} '
         '>& {log}'
 
+rule liver_panglaodb:
+    input:
+        sce_liver=config['liver_results']['sce_normalized'],
+        cellassign_fit_db=config['liver_results']['cellassign_fit_panglaodb'],
+    output:
+        liver_panglaodb_figure='{outdir}/supplemental_figures/liver_panglaodb_figure.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-liver-panglaodb',
+        dimreduce_type='TSNE',
+        marker_types=config['liver_plots']['panglaodb_celltypes'],
+    log:
+        '{logdir}/logs/liver_panglaodb.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/liver_panglaodb.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_external_db_plot.R '
+        '--sce_liver {input.sce_liver} '
+        '--marker_types {params.marker_types} '
+        '--cellassign_fit_liver {input.cellassign_fit_db} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.liver_novel_celltype_figure} '
+        '>& {log}'
+
 rule real_data_evaluation:
     input:
         koh_annotated=config['external_analysis_results']['koh_annotated'],
@@ -670,7 +694,10 @@ rule cellassign_follicular_evaluation:
         '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.cellassign_follicular_evaluation} '
         '>& {log}'
-    
+
+rule cellassign_hgsc_fl_combined:
+    input:
+        
 
 
 ## Supplemental Tables

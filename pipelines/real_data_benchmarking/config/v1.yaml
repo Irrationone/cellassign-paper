@@ -11,7 +11,7 @@ datasets:
   tian_3_Dropseq: /datadrive/data/external/scrna/tian2018_qc/sce_sc_Dropseq_qc.rds
   tian_mixture3: /datadrive/data/external/scrna/tian2018_qc/sce_SC3_qc.rds
   follicular: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/sce_follicular_annotated_final.rds
-  follicular_bcell: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v4/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds
+  follicular_bcell: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds
   hgsc: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v2/sce_hgsc_annotated_final.rds
   koh: /datadrive/projects/cellassign-paper/data/koh_annotated/sce_koh_annotated_v1.rds
   koh_broad: /datadrive/projects/cellassign-paper/data/koh_annotated/sce_koh_annotated_broad.rds
