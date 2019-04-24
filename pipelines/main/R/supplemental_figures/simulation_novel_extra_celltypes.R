@@ -128,10 +128,10 @@ superset_plot <- ggplot(superset_df,
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.88)) + 
   xlab("Method") + ylab("Score") + 
   guides(fill = FALSE) + 
-  coord_cartesian(clip = 'off') + 
-  # geom_text(data = superset_pvals %>% dplyr::rename(clustering_method=method2) %>% dplyr::left_join(superset_df_extreme),
-  #           aes(label=symbol, x=clustering_method, y=min_measure-0.15*(1-min_measure)),
-  #           colour = clust_methods_palette["cellassign"]) + 
+  coord_cartesian(ylim = c(0, 1), clip = 'off') + 
+  geom_text(data = superset_pvals %>% dplyr::rename(clustering_method=method2) %>% dplyr::left_join(superset_df_extreme),
+            aes(label=symbol, x=clustering_method, y=-0.15),
+            colour = clust_methods_palette["cellassign"]) +
   theme(panel.spacing.y = unit(2, "lines")) + 
   scale_fill_manual(values = clust_methods_palette) + 
   guides(fill = FALSE) + 
