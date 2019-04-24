@@ -36,6 +36,8 @@ rule all:
         liver_novel_celltype_figure='{outdir}/supplemental_figures/liver_novel_celltypes.pdf'.format(outdir=config['outdir']),
         liver_panglaodb_figure='{outdir}/supplemental_figures/liver_panglaodb_figure.pdf'.format(outdir=config['outdir']),
         cellassign_hierarchical='{outdir}/supplemental_figures/cellassign_hierarchical_plot.pdf'.format(outdir=config['outdir']),
+        cellbench_figure='{outdir}/supplemental_figures/cellbench_plot.pdf'.format(outdir=config['outdir']),
+        liver_all_celltype_figure='{outdir}/supplemental_figures/liver_all_celltypes.pdf'.format(outdir=config['outdir']),
         ## Supplemental tables
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
@@ -379,6 +381,33 @@ rule liver_novel_celltypes:
         '--outfname {output.liver_novel_celltype_figure} '
         '>& {log}'
 
+rule liver_all_celltypes:
+    input:
+        sce_liver=config['liver_results']['sce_normalized'],
+        cellassign_fit_raw=config['liver_results']['cellassign_fit_all_raw'],
+        cellassign_fit_revised=config['liver_results']['cellassign_fit_all_revised'],
+        scina_fit_raw=config['liver_results']['scina_fit_all_raw'],
+        scina_fit_revised=config['liver_results']['scina_fit_all_revised'],
+    output:
+        liver_all_celltype_figure='{outdir}/supplemental_figures/liver_all_celltypes.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-liver-all-celltypes',
+        dimreduce_type='TSNE',
+    log:
+        '{logdir}/logs/liver_all_celltypes.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/liver_all_celltypes.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_all_celltypes.R '
+        '--sce_liver {input.sce_liver} '
+        '--cellassign_fit_raw {input.cellassign_fit_raw} '
+        '--cellassign_fit_revised {input.cellassign_fit_revised} '
+        '--scina_fit_raw {input.scina_fit_raw} '
+        '--scina_fit_revised {input.scina_fit_revised} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.liver_all_celltype_figure} '
+        '>& {log}'
+
 rule liver_panglaodb:
     input:
         sce_liver=config['liver_results']['sce_normalized'],
@@ -400,6 +429,41 @@ rule liver_panglaodb:
         '--cellassign_fit_liver {input.cellassign_fit_db} '
         '--dimreduce_type {params.dimreduce_type} '
         '--outfname {output.liver_novel_celltype_figure} '
+        '>& {log}'
+
+rule cellbench_plot:
+    input:
+        sce_tian_3_10x=config['cellbench_results']['sce_tian_3_10x'],
+        sce_tian_3_celseq=config['cellbench_results']['sce_tian_3_celseq'],
+        sce_tian_3_dropseq=config['cellbench_results']['sce_tian_3_dropseq'],
+        sce_tian_3_mixture=config['cellbench_results']['sce_tian_3_mixture'],
+        fit_tian_pure=config['cellbench_results']['fit_tian_pure'],
+        fit_tian_20=config['cellbench_results']['fit_tian_20'],
+        fit_tian_30=config['cellbench_results']['fit_tian_30'],
+        fit_tian_50=config['cellbench_results']['fit_tian_50'],
+    output:
+        cellbench_figure='{outdir}/supplemental_figures/cellbench_plot.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-cellbench-plot',
+        dimreduce_type='TSNE',
+        cell_lines=config['cellbench_config']['cell_lines'],
+    log:
+        '{logdir}/logs/cellbench_plot.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/cellbench_plot.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_external_db_plot.R '
+        '--sce_tian_3_10x {input.sce_tian_3_10x} '
+        '--sce_tian_3_celseq {input.sce_tian_3_celseq} '
+        '--sce_tian_3_dropseq {input.sce_tian_3_dropseq} '
+        '--sce_tian_3_mixture {input.sce_tian_3_mixture} '
+        '--fit_tian_pure {input.fit_tian_pure} '
+        '--fit_tian_20 {input.fit_tian_20} '
+        '--fit_tian_30 {input.fit_tian_30} '
+        '--fit_tian_50 {input.fit_tian_50} '
+        '--cell_lines {params.cell_lines} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.cellbench_figure} '
         '>& {log}'
 
 rule real_data_evaluation:

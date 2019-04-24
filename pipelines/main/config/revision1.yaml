@@ -65,6 +65,22 @@ liver_plots:
     - Erythroid\ cells
     - Mature\ B\ cells
 
+cellbench_results:
+  fit_tian_pure: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure.rds
+  fit_tian_20: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_20markers.rds
+  fit_tian_30: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_30markers.rds
+  fit_tian_50: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_50markers.rds
+  sce_tian_3_10x: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v1/sce_normalized/tian_3_10x.rds
+  sce_tian_3_celseq: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v1/sce_normalized/tian_3_CELseq2.rds
+  sce_tian_3_dropseq: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v1/sce_normalized/tian_3_Dropseq.rds
+  sce_tian_3_mixture: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v2/sce_normalized/tian_mixture3.rds
+
+cellbench_config:
+  cell_lines:
+    - H1975
+    - H2228
+    - HCC827
+
 delta_deprobs:
   - 0.15
   - 0.45
