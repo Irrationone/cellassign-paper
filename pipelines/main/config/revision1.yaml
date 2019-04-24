@@ -30,7 +30,7 @@ liver_results:
   ## Novel data results
   cellassign_fit_novel1: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_4data_3markers.rds
   cellassign_fit_novel8_raw: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_alldata_3markers.rds
-  cellassign_fit_novel8: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_4data_3markers_revised.rds
+  cellassign_fit_novel8: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_alldata_3markers_revised.rds
   scina_fit_novel1: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_4data_3markers.rds
   scina_fit_novel8_raw: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_alldata_3markers.rds
   scina_fit_novel8: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_alldata_3markers_revised.rds
