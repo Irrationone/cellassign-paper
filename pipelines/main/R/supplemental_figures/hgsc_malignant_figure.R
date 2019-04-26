@@ -38,7 +38,7 @@ categorical_palettes <- cat_palettes()
 gradient_colours <- scrna_expression_gradient()
 
 sce_epithelial <- sce %>%
-  scater::filter(!is.na(epithelial_cluster))
+  scater::filter(!is.na(epithelial_cluster) & Epithelial.cells..broad. >= 0.95)
 
 # FGSEA plots
 

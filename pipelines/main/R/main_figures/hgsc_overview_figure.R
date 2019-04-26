@@ -188,7 +188,7 @@ fgsea_site_pathway_plot <- ggplot(epithelial_site_fgsea_filtered %>%
 # Unsupervised clustering plot for epithelial clusters
 
 sce_epithelial <- sce %>%
-  scater::filter(!is.na(epithelial_cluster))
+  scater::filter(!is.na(epithelial_cluster) & Epithelial.cells..broad. >= 0.95)
 
 dr_epithelial_site <- plotReducedDim(sce_epithelial, use_dimred = args$dimreduce_type, 
                                      colour_by = "dataset", point_alpha = 0.5)

@@ -27,8 +27,6 @@ parser$add_argument('--fit_tian_pure', metavar='FILE', type='character',
                     help="CellAssign fit to pure data")
 parser$add_argument('--fit_tian_20', metavar='FILE', type='character',
                     help="CellAssign fit to mixture, with 20 marker genes")
-parser$add_argument('--fit_tian_30', metavar='FILE', type='character',
-                    help="CellAssign fit to mixture, with 30 marker genes")
 parser$add_argument('--fit_tian_50', metavar='FILE', type='character',
                     help="CellAssign fit to mixture, with 50 marker genes")
 parser$add_argument('--cell_lines', type='character', nargs = '+',
@@ -41,7 +39,6 @@ args <- parser$parse_args()
 
 fit_tian_pure <- readRDS(args$fit_tian_pure)
 fit_tian20 <- readRDS(args$fit_tian_20)
-fit_tian30 <- readRDS(args$fit_tian_30)
 fit_tian50 <- readRDS(args$fit_tian_50)
 
 cell_lines <- unlist(args$cell_lines)
@@ -98,7 +95,7 @@ for (cl in cell_lines) {
   colData(sce_tian_mix)[,cl][sce_tian_mix$cell_line != cl] <- 0
 }
 
-fit_objects <- list('20'=fit_tian20, '30'=fit_tian30, '50'=fit_tian50)
+fit_objects <- list('20'=fit_tian20, '50'=fit_tian50)
 cellassign_probs <- plyr::rbind.fill(lapply(seq_along(fit_objects), function(i) {
   fit <- fit_objects[[i]]
   gammas <- reshape2::melt(fit$mle_params$gamma) %>%

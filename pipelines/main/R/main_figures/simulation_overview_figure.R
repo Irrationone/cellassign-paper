@@ -14,6 +14,7 @@ library(cowplot)
 library(pheatmap)
 library(Matrix)
 library(yaml)
+library(ggbeeswarm)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -23,21 +24,39 @@ library(argparse)
 parser <- ArgumentParser(description = "Create simulation figure.")
 parser$add_argument('--deprob_result_dir', metavar='DIR', type='character',
                     help="Path to simulation result directory for DE prob")
-parser$add_argument('--wrongmarker_result_dir', metavar = 'DIR', type = 'character',
-                    help="Path to simulation result directory for wrong marker")
-parser$add_argument('--delta_deprobs', type='double', nargs ='+',
-                    help="DE probs to show delta plots for.")
+parser$add_argument('--novel_extra_result_dir', metavar='DIR', type='character',
+                    help="Path to simulation result directory for novel/extra celltype analysis")
+parser$add_argument('--sce_liver', metavar='FILE', type='character',
+                    help="SCE for liver")
+parser$add_argument('--liver_marker_types', type='character', nargs = '+',
+                    help="Celltypes with marker genes")
+parser$add_argument('--sce_mix_merged', metavar='FILE', type = 'character',
+                    help="SCE of merged mixture data")
+parser$add_argument('--fit_tian', metavar='FILE', type='character',
+                    help="CellAssign fit to CellBench mixture")
+parser$add_argument('--cell_lines', type='character', nargs = '+',
+                    help="Cell lines to use")
 parser$add_argument('--deprob_methods', type='character', nargs ='+',
                     help="Clustering methods to use for DE prob analysis.")
 parser$add_argument('--method_description', type='character', metavar='FILE',
                     help="Method description")
+parser$add_argument('--dimreduce_type', type='character',
+                    help="Dimreduce type", choices = c("PCA", "TSNE", "UMAP"))
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for PDF plot")
 args <- parser$parse_args()
 
 deprob_result_dir <- args$deprob_result_dir
-wrongmarker_result_dir <- args$wrongmarker_result_dir
-delta_deprobs <- unlist(args$delta_deprobs)
+novel_extra_result_dir <- args$novel_extra_result_dir
+cellassign_fit_novel8 <- readRDS(args$cellassign_fit_novel8)
+liver_marker_types <- unlist(args$liver_marker_types)
+sce_liver <- readRDS(args$sce_liver)
+
+fit_tian <- readRDS(args$fit_tian)
+cell_lines <- unlist(args$cell_lines)
+
+sce_tian_mix <- readRDS(args$sce_mix_merged)
+
 deprob_methods <- unlist(args$deprob_methods)
 method_description <- read_yaml(args$method_description)
 method_metadata <- plyr::rbind.fill(lapply(names(method_description), function(i) {
@@ -47,6 +66,8 @@ method_metadata <- plyr::rbind.fill(lapply(names(method_description), function(i
 categorical_palettes <- cat_palettes()
 factor_orderings <- factor_orders()
 
+liver_celltype_palette <- categorical_palettes$liver_celltypes
+liver_celltype_palette <- c(liver_celltype_palette, 'Unassigned'='gray60')
 
 clust_methods_palette <- categorical_palettes$method_types[df_as_map(method_metadata, deprob_methods, from = "clustering_method", to = "method_type")]
 names(clust_methods_palette) <- deprob_methods
@@ -67,10 +88,10 @@ de_eval_measures <- de_eval_measures %>%
   dplyr::left_join(method_metadata)
 
 #de_deltas <- load_annotation_files(deprob_result_dir, pattern = "*_delta_compare.tsv")
-delta_files <- Sys.glob(file.path(deprob_result_dir, "assign_celltypes_sce", "deltas", "*", "cellassign*.tsv"))
-de_deltas <- plyr::rbind.fill(lapply(delta_files, function(f) {
-  fread(f)
-}))
+# delta_files <- Sys.glob(file.path(deprob_result_dir, "assign_celltypes_sce", "deltas", "*", "cellassign*.tsv"))
+# de_deltas <- plyr::rbind.fill(lapply(delta_files, function(f) {
+#   fread(f)
+# }))
 
 ## Only use methods that were selected
 de_eval_measures <- de_eval_measures %>%
@@ -191,7 +212,7 @@ de_plot_full <- de_plots$full +
   scale_fill_manual(values = clust_methods_palette)
 
 
-whitespace_width <- 0.3
+whitespace_width <- 0.4
 rel_width <- 1 - whitespace_width
 texts <- paste(c("p<0.001", "p<0.01", "p<0.05"), c("***", "**", "*"), sep = ":")
 significance_legend <- gridExtra::arrangeGrob(grobs = lapply(texts, function(x) grid::textGrob(x, gp = grid::gpar(fontsize = 8))), layout_matrix = rbind(c(NA, 1:3, NA)),
@@ -204,88 +225,257 @@ de_plot_legend <- cellassign.utils::ggsimplelegend(names(categorical_palettes$me
                                                    legend_title = "Method type", legend_rows = 1, fontsize = 7)
 de_plot_legend <- cellassign.utils::extract_legend(de_plot_legend)
 
-# Delta plots
 
-delta_table <- de_deltas %>% 
-  dplyr::filter(de_prob %in% delta_deprobs) %>%
-  dplyr::mutate(de_prob = paste0("DE prob = ", de_prob))
+# Novel extra celltypes
 
-rvals <- compute_pvals_subsets(delta_table,
-                               facet_vars = c("de_prob", "clustering_method"),
-                               formula = ~ true_delta + inferred_delta,
-                               corfun = cor.test,
-                               output = "estimate")
-
-rval_labels <- rvals %>%
-  dplyr::group_by(de_prob) %>%
-  dplyr::summarise(r_label=as.character(as.expression(substitute(list(italic(R) == est1), list(est1 = format(estimate[clustering_method == "cellassign"], digits = 3))))))
-
-delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) + 
-  geom_point(alpha = 0.5) + 
-  theme_bw() +
-  theme_Publication() + 
-  theme_nature() + 
-  stripped_theme() +
-  geom_abline(slope = 1, intercept = 0) + 
-  scale_x_continuous(expand = c(0,0.05)) + 
-  scale_y_continuous(expand = c(0,0.05)) + 
-  xlab("True logFC") + 
-  ylab("Inferred logFC") + 
-  guides(colour = FALSE) + 
-  facet_wrap(~ de_prob, ncol = length(delta_deprobs)) +  
-  geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1.05, vjust = 1.2, parse = TRUE,
-            size = 0.35*8)
-
-
-# Wrong marker figure
-# wm_eval_measures <- load_annotation_files(wrongmarker_result_dir, pattern = "*_eval_measures.tsv")
-
-wrongmarker_de_files <- Sys.glob(file.path(wrongmarker_result_dir, "evaluate", "celltypes", "*", "cellassign*.tsv"))
-wm_eval_measures <- plyr::rbind.fill(lapply(wrongmarker_de_files, function(f) {
-  fread(f)
+novel_extra_result_files <- Sys.glob(file.path(novel_extra_result_dir, "evaluate", "celltypes", "*", "*.tsv"))
+novel_extra_eval_measures <- plyr::rbind.fill(lapply(novel_extra_result_files, function(f) {
+  df <- fread(f)
+  if ("gene_set" %in% colnames(df)) {
+    return(df)
+  } else {
+    feature_type <- str_extract(f, "(markers|full)")
+    return(data.frame(fread(f), gene_set=feature_type))
+  }
 }))
 
+novel_extra_eval_measures_melted <- novel_extra_eval_measures %>% 
+  reshape2::melt(measure.vars = c("micro_f1",
+                                  "accuracy"), 
+                 variable.name = "measure", value.name = "value") %>% 
+  dplyr::mutate_(.dots = setNames(list(lazyeval::interp(~factor(x), 
+                                                        x = as.name("de_prob"))), "xval")) %>% 
+  dplyr::mutate(measure = plyr::mapvalues(measure, 
+                                          c("micro_f1",
+                                            "accuracy"),
+                                          c("F1",
+                                            "Accuracy")))
 
-wm_plots <- plot_simulation_performance(wm_eval_measures %>%
-                                          dplyr::filter(max_genes == 5), 
-                                        measures = c("micro_f1",
-                                                     "accuracy"),
-                                        display_measure_names = c("F1",
-                                                                  "Accuracy"),
-                                        x_var = "wrong_marker_proportion")
+novel_df <- novel_extra_eval_measures_melted %>%
+  dplyr::filter(n_data_types >= n_marker_types) %>%
+  dplyr::mutate(n_unknown_types=n_data_types - n_marker_types)
 
-wm_plot_cellassign <- wm_plots$cellassign + 
-  xlab("Proportion of incorrect entries in rho") + 
+superset_df <- novel_extra_eval_measures_melted %>%
+  dplyr::filter(n_data_types <= n_marker_types) %>%
+  dplyr::mutate(n_extra_types=n_marker_types - n_data_types)
+
+compute_pvals <- function(x) {
+  x_cast <- reshape2::dcast(x, 
+                            formula = seed ~ clustering_method, 
+                            value.var = "value")
+  clustering_methods <- setdiff(colnames(x_cast), "seed")
+  cellassign_methods <- clustering_methods[str_detect(clustering_methods, "cellassign")]
+  other_methods <- setdiff(clustering_methods, cellassign_methods)
+  
+  pvals <- plyr::rbind.fill(lapply(cellassign_methods, function(m1) {
+    res <- plyr::rbind.fill(lapply(other_methods, function(m2) {
+      wilcox_res <- wilcox.test(x_cast[,as.character(m1)], x_cast[,as.character(m2)], paired = TRUE)
+      
+      # Get direction of significance
+      wilcox_res_greater <- wilcox.test(x_cast[,as.character(m1)], x_cast[,as.character(m2)], paired = TRUE, alternative = "greater")
+      
+      pval_max <- max(wilcox_res$p.value, wilcox_res_greater$p.value)
+      return(data.frame(method1=m1, method2=m2, p.value=pval_max))
+    }))
+    return(res)
+  }))
+  return(pvals)
+}
+
+novel_pvals <- novel_df %>%
+  plyr::ddply(plyr:::.(measure, n_unknown_types), function(x) compute_pvals(x)) %>%
+  dplyr::mutate(p.adjust = p.adjust(p.value, method = 'fdr'),
+                symbol=c("***", "**", "*", "")[.bincode(p.adjust, c(0, 1e-3, 1e-2, 0.05, 1))])
+
+superset_pvals <- superset_df %>%
+  plyr::ddply(plyr:::.(measure, n_extra_types), function(x) compute_pvals(x)) %>%
+  dplyr::mutate(p.adjust = p.adjust(p.value, method = 'fdr'),
+                symbol=c("***", "**", "*", "")[.bincode(p.adjust, c(0, 1e-3, 1e-2, 0.05, 1))])
+
+
+novel_min_val <- max(0, min(novel_df$value) - 0.02)
+novel_plot <- ggplot(novel_df, 
+                     aes(x = clustering_method, y = value, fill = clustering_method)) + 
+  geom_boxplot(outlier.size = -1) + 
+  geom_jitter(position = position_jitter(width = 0.2, height = 0), alpha = 0.4, size = 1) + 
+  theme_bw() + theme_Publication() + 
+  theme_nature() + stripped_theme() + facet_grid(measure~n_unknown_types) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.88)) + 
+  xlab("Method") + ylab("Score") + 
   guides(fill = FALSE) + 
-  scale_fill_manual(values = clust_methods_palette)
+  geom_text(data = novel_pvals %>% dplyr::rename(clustering_method=method2),
+            aes(label=symbol, x=clustering_method, y=novel_min_val-0.15*(1-novel_min_val)),
+            colour = clust_methods_palette["cellassign"]) + 
+  coord_cartesian(ylim = c(novel_min_val, 1), clip = 'off') + 
+  theme(panel.spacing.y = unit(2, "lines")) + 
+  scale_fill_manual(values = clust_methods_palette) + 
+  guides(fill = FALSE) + 
+  ggtitle("Number of unknown cell types (out of 6)")
+
+superset_min_val <- max(0, min(superset_df$value) - 0.02)
+superset_plot <- ggplot(superset_df, 
+                        aes(x = clustering_method, y = value, fill = clustering_method)) + 
+  geom_boxplot(outlier.size = -1) + 
+  geom_jitter(position = position_jitter(width = 0.2, height = 0), alpha = 0.4, size = 1) + 
+  theme_bw() + theme_Publication() + 
+  theme_nature() + stripped_theme() + facet_grid(measure~n_extra_types, scales = "free_y") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.88)) + 
+  xlab("Method") + ylab("Score") + 
+  guides(fill = FALSE) + 
+  coord_cartesian(ylim = c(superset_min_val, 1), clip = 'off') + 
+  geom_text(data = superset_pvals %>% dplyr::rename(clustering_method=method2) %>% dplyr::left_join(superset_df_extreme),
+            aes(label=symbol, x=clustering_method, y=superset_min_val-0.15*(1-superset_min_val)),
+            colour = clust_methods_palette["cellassign"]) +
+  theme(panel.spacing.y = unit(2, "lines")) + 
+  scale_fill_manual(values = clust_methods_palette) + 
+  guides(fill = FALSE) + 
+  ggtitle("Number of removed cell types in the data (out of 6)")
+
+
+## Liver celltypes 
+
+celltypes <- cellassign_fit_novel8$cell_type %>%
+  plyr::mapvalues("other", "Unassigned")
+
+ground_truth_celltypes <- sce_liver$celltype
+ground_truth_celltypes[!ground_truth_celltypes %in% liver_marker_types] <- "Unassigned"
+
+celltype_levels <- sort(unique(c(ground_truth_celltypes, celltypes)))
+cont_table <- table(factor(ground_truth_celltypes, levels = celltype_levels), 
+                    factor(celltypes, levels = celltype_levels))
+acc <- sum(diag(cont_table))/sum(cont_table)
+micro_f1 <- microF1(cont_table)
+plot_label <- paste0("Acc = ",  format(acc, digits = 3), "\n", "F1 = ", format(micro_f1, digits = 3))
+  
+sce_liver$assigned_cluster <- celltypes
+
+liver_novel_plot <- plotReducedDim(sce_liver,
+                                   use_dimred = args$dimreduce_type,
+                                   colour_by = "assigned_cluster",
+                                   point_alpha = 0.4, 
+                                   point_size = 1.5)
+liver_novel_plot <- liver_novel_plot + 
+  guides(colour = FALSE,
+         shape = FALSE) + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  scale_fill_manual(values = liver_celltype_palette) + 
+  guides(fill = FALSE) + 
+  ggtitle("CellAssign (reduced markers)") + 
+  annotate(geom = 'text', x = Inf, y = Inf, hjust = 1, vjust = 1.5, label = plot_label, parse = FALSE,
+           size = 2.5)
+
+master_label_plot <- plotReducedDim(sce_liver,
+                                    use_dimred = args$dimreduce_type,
+                                    colour_by = "celltype",
+                                    point_alpha = 0.4, 
+                                    point_size = 1.5) +
+  guides(colour = FALSE,
+         shape = FALSE) + 
+  xlab(paste0(args$dimreduce_type, "-1")) + 
+  ylab(paste0(args$dimreduce_type, "-2")) + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  scale_fill_manual(values = liver_celltype_palette) + 
+  guides(fill = FALSE) + 
+  ggtitle("Cell type")
+
+celltype_legend <- cellassign.utils::ggsimplelegend(names(liver_celltype_palette),
+                                                    colour_mapping = unname(liver_celltype_palette),
+                                                    legend_title = "Celltype", legend_rows = 3, fontsize = 7)
+celltype_legend <- cellassign.utils::extract_legend(celltype_legend)
+
+
+
+
+## CellBench data
+
+for (cl in cell_lines) {
+  colData(sce_tian_mix)[,cl][sce_tian_mix$cell_line == cl] <- 9
+  colData(sce_tian_mix)[,cl][sce_tian_mix$cell_line != cl] <- 0
+}
+
+cellassign_probs <- reshape2::melt(fit_tian$mle_params$gamma) %>%
+  dplyr::rename(cell_id=Var1, cell_line=Var2, cellassign_prob=value)
+
+true_probs <- colData(sce_tian_mix)[,c("sample_id", cell_lines)] %>%
+  as.data.frame %>%
+  dplyr::mutate(cell_id=1:n()) %>%
+  reshape2::melt(id.vars = c("cell_id", "sample_id"), variable.name = "cell_line", value.name = "num_cells")
+
+valid_cells <- true_probs %>%
+  dplyr::group_by(sample_id, cell_id) %>%
+  dplyr::summarise(total_cells=sum(num_cells)) %>%
+  dplyr::ungroup() %>%
+  dplyr::filter(total_cells == "9")
+
+prob_df <- true_probs %>%
+  dplyr::left_join(cellassign_probs) %>%
+  dplyr::filter(cell_id %in% valid_cells$cell_id,
+                sample_id == "mixture") %>%
+  dplyr::mutate(clustering_method = "cellassign")
+
+## CellBench probability plot
+cellbench_prob_plot <- ggplot(prob_df, aes(x=factor(num_cells), y=cellassign_prob)) + 
+  geom_boxplot(alpha = 0.7, width = 0.5, outlier.size = -1, aes(fill = clustering_method)) + 
+  geom_quasirandom(alpha = 0.2, width = 0.25) + 
+  theme_bw() + 
+  theme_Publication() + 
+  theme_nature() + 
+  facet_wrap(~ cell_line, ncol = 1) + 
+  stripped_theme(strip_face = "bold") + 
+  guides(fill = FALSE) + 
+  scale_fill_manual(values = clust_methods_palette) + 
+  xlab("# cells in 9-cell barcode") + 
+  ylab("CellAssign probability") + 
+  theme(plot.margin = unit(c(5, 5, 5, 5), "mm"))
+
 
 
 # Final plot
 legend_row <- cowplot::plot_grid(de_plot_legend,
                                  significance_legend,
                                  ncol = 2, 
-                                 rel_widths = c(0.67, 0.33))
-
-de_plots_labeled <- cowplot::plot_grid(de_plot_full, de_plot_markers, #de_plot_legend,
-                                       legend_row,
-                                       labels = c('a', 'b', ''),
-                                       ncol = 1,
-                                       nrow = 3,
-                                       rel_heights = c(1, 1, 0.05))
-
-bottom_row <- cowplot::plot_grid(delta_plots, wm_plot_cellassign,
-                                 labels = c('c', 'd'),
-                                 ncol = 2,
-                                 nrow = 1,
                                  rel_widths = c(0.5, 0.5))
 
-final_plot <- cowplot::plot_grid(de_plots_labeled, 
-                                 bottom_row,
-                                 labels = c('', '', ''), 
-                                 ncol = 1, 
-                                 nrow = 2,
-                                 rel_heights = c(0.75, 0.25))
+novel_superset_row <- cowplot::plot_grid(superset_plot,
+                                         novel_plot,
+                                         ncol = 2,
+                                         labels = c('b', 'c'))
 
+de_plot_rows <- cowplot::plot_grid(de_plot_full, #de_plot_legend,
+                                 novel_superset_row,
+                                 legend_row,
+                                 labels = c('a', '', ''),
+                                 ncol = 1,
+                                 nrow = 3,
+                                 rel_heights = c(1, 1, 0.1))
+
+
+liver_plots <- cowplot::plot_grid(master_label_plot,
+                                  liver_novel_plot,
+                                  ncol = 2, 
+                                  labels = c('d', 'e'))
+
+liver_labeled <- cowplot::plot_grid(liver_plots,
+                                    celltype_legend,
+                                    nrow = 2, 
+                                    rel_heights = c(0.75, 0.25))
+
+lower_row <- cowplot::plot_grid(liver_labeled,
+                                cellbench_prob_plot,
+                                labels = c('', 'f'),
+                                ncol = 2, 
+                                rel_widths = c(0.5, 0.5))
+
+final_plot <- cowplot::plot_grid(de_plot_rows,
+                                 lower_row,
+                                 nrow = 2,
+                                 rel_heights = c(0.7, 0.3))
 
 # Plot final plot
 pdf(args$outfname, width = 10, height = 13, useDingbats = FALSE)

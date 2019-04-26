@@ -30,8 +30,6 @@ parser$add_argument('--cellassign_fit_novel1', metavar='FILE', type='character',
                     help="CellAssign fit to 3 cell types")
 parser$add_argument('--cellassign_fit_novel8_raw', metavar='FILE', type='character',
                     help="CellAssign fit to 4 cell types")
-parser$add_argument('--cellassign_fit_novel8', metavar='FILE', type='character',
-                    help="CellAssign fit to 4 cell types")
 parser$add_argument('--scina_fit_novel1', metavar='FILE', type='character',
                     help="SCINA fit to 3 cell types")
 parser$add_argument('--scina_fit_novel8_raw', metavar='FILE', type='character',
@@ -50,7 +48,6 @@ marker_types <- unlist(args$marker_types)
 model_fits <- list(
   'cellassign_fit_novel1'=readRDS(args$cellassign_fit_novel1),
   'cellassign_fit_novel8_raw'=readRDS(args$cellassign_fit_novel8_raw),
-  'cellassign_fit_novel8'=readRDS(args$cellassign_fit_novel8),
   'scina_fit_novel1'=readRDS(args$scina_fit_novel1),
   'scina_fit_novel8_raw'=readRDS(args$scina_fit_novel8_raw),
   'scina_fit_novel8'=readRDS(args$scina_fit_novel8)
@@ -59,7 +56,6 @@ model_fits <- list(
 celltypes_used <- list(
   'cellassign_fit_novel1'=unlist(args$celltypes_novel1),
   'cellassign_fit_novel8_raw'=unlist(args$celltypes_novel8),
-  'cellassign_fit_novel8'=unlist(args$celltypes_novel8),
   'scina_fit_novel1'=unlist(args$celltypes_novel1),
   'scina_fit_novel8_raw'=unlist(args$celltypes_novel8),
   'scina_fit_novel8'=unlist(args$celltypes_novel8)
@@ -73,7 +69,6 @@ liver_celltype_palette <- c(liver_celltype_palette, 'Unassigned'='gray60')
 
 plot_titles <- c("CellAssign (+ NK cells)",
                  "CellAssign (all cells)",
-                 "CellAssign (all cells, revised markers)",
                  "SCINA (+ NK cells)",
                  "SCINA (all cells)",
                  "SCINA (all cells, revised markers)")
@@ -156,7 +151,7 @@ celltype_legend <- cellassign.utils::extract_legend(celltype_legend)
 complete_plotlist <- c(list(master_label_plot), celltype_plots)
 combined_plots <- cowplot::plot_grid(plotlist = complete_plotlist,
                                      labels = letters[1:length(complete_plotlist)],
-                                     nrow = 3,
+                                     nrow = 2,
                                      ncol = 3)
 
 final_plot <- cowplot::plot_grid(combined_plots,
@@ -167,7 +162,7 @@ final_plot <- cowplot::plot_grid(combined_plots,
 
 
 # Plot final plot
-pdf(args$outfname, width = 10, height = 14, useDingbats = FALSE)
+pdf(args$outfname, width = 10, height = 7, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

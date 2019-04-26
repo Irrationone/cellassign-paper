@@ -129,10 +129,15 @@ bcell_timepoint_plots <- lapply(patients, function(pat) {
     theme_bw() + 
     theme_Publication() + 
     theme_nature() + 
-    scale_colour_manual(values = categorical_palettes$timepoint)
+    scale_colour_manual(values = categorical_palettes$timepoint) 
   return(bcell_timepoint)
 })
 names(bcell_timepoint_plots) <- patients
+
+## Clip axis -- only for visualization
+bcell_timepoint_plots[[2]] <- bcell_timepoint_plots[[2]] + 
+  xlim(c(NA, 3)) + 
+  ylim(c(NA, -3))
 
 # Cell cycle pairplots
 

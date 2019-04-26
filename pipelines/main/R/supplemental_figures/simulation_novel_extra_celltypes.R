@@ -95,11 +95,6 @@ superset_pvals <- superset_df %>%
   dplyr::mutate(p.adjust = p.adjust(p.value, method = 'fdr'),
                 symbol=c("***", "**", "*", "")[.bincode(p.adjust, c(0, 1e-3, 1e-2, 0.05, 1))])
 
-superset_df_extreme <- superset_df %>%
-  dplyr::group_by(measure) %>%
-  dplyr::summarise(min_measure=min(value)) %>%
-  dplyr::ungroup()
-
 novel_plot <- ggplot(novel_df, 
                          aes(x = clustering_method, y = value, fill = clustering_method)) + 
   geom_boxplot(outlier.size = -1) + 
