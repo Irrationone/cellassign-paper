@@ -12,6 +12,7 @@ library(pheatmap)
 library(Matrix)
 library(ggrastr)
 library(mclust)
+library(lmerTest)
 
 library(scrna.utils)
 library(scrna.sceutils)
@@ -188,8 +189,12 @@ prob_df <- broad_merged %>%
   plyr::rbind.fill(deep_merged)
 
 
-eq <- substitute(italic(R)^2~"="~r2, 
-                 list(r2 = format(with(prob_df, cor(prob_hierarchical, prob_full)^2), digits = 3)))
+mod <- lmer(prob_hierarchical ~ prob_full + (1|type), data = prob_df)
+pval <- unname(summary(mod)$coefficients[,5]['prob_full'])
+
+eq <- substitute(italic(R)^2~"="~r2~", "~italic(P)~"="~p, 
+                 list(r2 = format(with(prob_df, cor(prob_hierarchical, prob_full)^2), digits = 3),
+                      p = format(pval, digits = 3)))
 eq <- as.character(as.expression(eq))
 
 prob_plot_hierarchical <- ggplot(prob_df, aes(x=prob_hierarchical, y=prob_full)) + 
