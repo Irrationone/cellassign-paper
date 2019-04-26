@@ -1,6 +1,7 @@
 Marker gene:
   - cellassign
   - scina
+  - scina_0.1
 Unsupervised:
   - densitycut
   - dynamicTreeCut
