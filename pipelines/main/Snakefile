@@ -39,6 +39,7 @@ rule all:
         cellassign_hierarchical='{outdir}/supplemental_figures/cellassign_hierarchical_plot.pdf'.format(outdir=config['outdir']),
         cellbench_figure='{outdir}/supplemental_figures/cellbench_plot.pdf'.format(outdir=config['outdir']),
         liver_all_celltype_figure='{outdir}/supplemental_figures/liver_all_celltypes.pdf'.format(outdir=config['outdir']),
+        liver_marker_expression_figure='{outdir}/supplemental_figures/liver_marker_expression.pdf'.format(outdir=config['outdir']),
         ## Supplemental tables
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
@@ -430,6 +431,29 @@ rule liver_panglaodb:
         '--cellassign_fit_liver {input.cellassign_fit_db} '
         '--dimreduce_type {params.dimreduce_type} '
         '--outfname {output.liver_panglaodb_figure} '
+        '>& {log}'
+
+rule liver_marker_expression:
+    input:
+        sce_liver=config['liver_results']['sce_normalized'],
+    output:
+        liver_marker_expression_figure='{outdir}/supplemental_figures/liver_marker_expression.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-liver-marker-expression',
+        dimreduce_type='TSNE',
+        marker_types=config['liver_plots']['markers_t_b'],
+        expr_threshold=config['winsorized_expression']['markers'],
+    log:
+        '{logdir}/logs/liver_marker_expression.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/liver_marker_expression.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_marker_genes.R '
+        '--sce_liver {input.sce_liver} '
+        '--marker_types {params.marker_types} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--winsorized_expression_threshold {params.expr_threshold} '
+        '--outfname {output.liver_marker_expression_figure} '
         '>& {log}'
 
 rule merge_cellbench_pure:

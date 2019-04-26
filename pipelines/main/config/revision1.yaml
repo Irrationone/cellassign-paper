@@ -71,6 +71,12 @@ liver_plots:
   panglaodb_celltypes:
     - Hepatocytes
     - Cholangiocytes
+  markers_t_b:
+    - MS4A1
+    - IGHD
+    - CD52
+    - LTB
+
 
 cellbench_results:
   fit_tian_pure: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure.rds
