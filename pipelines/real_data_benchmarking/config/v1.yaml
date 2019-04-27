@@ -454,6 +454,27 @@ cellassign:
     design_formula: none
     extra_opts: --shrinkage
     celltypes: all
+  hgsc_alldata_3types:
+    dataset: hgsc
+    marker_list: ../../resources/marker_lists/hgsc_big_3types.yaml
+    include_other: TRUE
+    num_runs: 3
+    B: 20
+    design_formula: none
+    extra_opts: --shrinkage
+    celltypes: all
+  hgsc_3data_alltypes:
+    dataset: hgsc
+    marker_list: ../../resources/marker_lists/hgsc_big.yaml
+    include_other: TRUE
+    num_runs: 3
+    B: 20
+    design_formula: none
+    extra_opts: --shrinkage
+    celltypes: 
+      - Epithelial\ cells
+      - Endothelial\ cells
+      - Monocyte/Macrophage
 
 # TODO: SCINA portion
 scina:
