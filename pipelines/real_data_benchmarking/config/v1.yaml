@@ -415,19 +415,7 @@ cellassign:
   koh_3data_3markers:
     dataset: koh
     marker_list: ../../resources/marker_lists/koh_markers_3types.yaml
-    include_other: FALSE
-    num_runs: 3
-    B: 20
-    design_formula: none
-    extra_opts: --shrinkage
-    celltypes:
-      - hESC
-      - ESMT
-      - DLL1pPXM
-  koh_3data_4markers:
-    dataset: koh
-    marker_list: ../../resources/marker_lists/koh_markers_4types.yaml
-    include_other: FALSE
+    include_other: TRUE
     num_runs: 3
     B: 20
     design_formula: none
@@ -439,7 +427,7 @@ cellassign:
   koh_3data_allmarkers:
     dataset: koh
     marker_list: ../../resources/marker_lists/koh_markers.yaml
-    include_other: FALSE
+    include_other: TRUE
     num_runs: 3
     B: 20
     design_formula: none
@@ -448,23 +436,19 @@ cellassign:
       - hESC
       - ESMT
       - DLL1pPXM
-  koh_4data_3markers:
-    dataset: koh
-    marker_list: ../../resources/marker_lists/koh_markers_3types.yaml
-    include_other: FALSE
-    num_runs: 3
-    B: 20
-    design_formula: none
-    extra_opts: --shrinkage
-    celltypes:
-      - hESC
-      - ESMT
-      - DLL1pPXM
-      - D5CntrlDrmmtm
   koh_alldata_3markers:
     dataset: koh
     marker_list: ../../resources/marker_lists/koh_markers_3types.yaml
-    include_other: FALSE
+    include_other: TRUE
+    num_runs: 3
+    B: 20
+    design_formula: none
+    extra_opts: --shrinkage
+    celltypes: all
+  koh_alldata_3markers_full:
+    dataset: koh
+    marker_list: ../../resources/marker_lists/koh_markers_3types_full.yaml
+    include_other: TRUE
     num_runs: 3
     B: 20
     design_formula: none
@@ -734,17 +718,6 @@ scina:
       - hESC
       - ESMT
       - DLL1pPXM
-  koh_3data_4markers:
-    dataset: koh
-    marker_list: ../../resources/marker_lists/koh_markers_4types.yaml
-    allow_unknown: 1
-    sensitivity_cutoff: 1
-    rm_overlap: 0
-    extra_opts: ""
-    celltypes:
-      - hESC
-      - ESMT
-      - DLL1pPXM
   koh_3data_allmarkers:
     dataset: koh
     marker_list: ../../resources/marker_lists/koh_markers.yaml
@@ -800,21 +773,17 @@ scina:
       - hESC
       - ESMT
       - DLL1pPXM
-  koh_4data_3markers:
+  koh_alldata_3markers:
     dataset: koh
     marker_list: ../../resources/marker_lists/koh_markers_3types.yaml
     allow_unknown: 1
     sensitivity_cutoff: 1
     rm_overlap: 0
     extra_opts: ""
-    celltypes:
-      - hESC
-      - ESMT
-      - DLL1pPXM
-      - D5CntrlDrmmtm
-  koh_alldata_3markers:
+    celltypes: all
+  koh_alldata_3markers_full:
     dataset: koh
-    marker_list: ../../resources/marker_lists/koh_markers_3types.yaml
+    marker_list: ../../resources/marker_lists/koh_markers_3types_full.yaml
     allow_unknown: 1
     sensitivity_cutoff: 1
     rm_overlap: 0
