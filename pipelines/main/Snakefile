@@ -15,7 +15,7 @@ rule all:
         ## Supplemental figures
         sim_performance_b_cd8='{outdir}/supplemental_figures/sim_performance_b_cd8.pdf'.format(outdir=config['outdir']),
         sim_performance_correlation='{outdir}/supplemental_figures/sim_performance_correlation.pdf'.format(outdir=config['outdir']),
-        wrong_marker_figure='{outdir}/supplemental_figures/wrong_marker_naivecd8_naivecd4.pdf'.format(outdir=config['outdir']),
+        sim_performance_naive_cd4_naive_cd8_figure='{outdir}/supplemental_figures/sim_performance_naivecd8_naivecd4.pdf'.format(outdir=config['outdir']),
         benchmarking_figure='{outdir}/supplemental_figures/benchmarking_evaluation.pdf'.format(outdir=config['outdir']),
         real_data_evaluation_figure='{outdir}/supplemental_figures/real_data_evaluation.pdf'.format(outdir=config['outdir']),
         fl_markers_figure='{outdir}/supplemental_figures/fl_markers_supplemental.pdf'.format(outdir=config['outdir']),
@@ -33,7 +33,6 @@ rule all:
         cellassign_hgsc_evaluation='{outdir}/supplemental_figures/cellassign_hgsc_evaluation.pdf'.format(outdir=config['outdir']),
         cellassign_follicular_evaluation='{outdir}/supplemental_figures/cellassign_follicular_evaluation.pdf'.format(outdir=config['outdir']),
         liver_extra_celltype_figure='{outdir}/supplemental_figures/liver_extra_celltypes.pdf'.format(outdir=config['outdir']),
-        novel_extra_figure='{outdir}/supplemental_figures/simulation_novel_extra_celltypes.pdf'.format(outdir=config['outdir']),
         liver_novel_celltype_figure='{outdir}/supplemental_figures/liver_novel_celltypes.pdf'.format(outdir=config['outdir']),
         liver_panglaodb_figure='{outdir}/supplemental_figures/liver_panglaodb_figure.pdf'.format(outdir=config['outdir']),
         cellassign_hierarchical='{outdir}/supplemental_figures/cellassign_hierarchical_plot.pdf'.format(outdir=config['outdir']),
@@ -54,14 +53,19 @@ rule all:
 rule simulation_performance_figure:
     input:
         deprob_result_dir=config['simulation_analysis_results']['deprob_result_dir'],
-        wrongmarker_result_dir=config['simulation_analysis_results']['wrongmarker_result_dir'],
+        novel_extra_result_dir=config['simulation_analysis_results']['novel_extra_dir'],
+        sce_liver=config['liver_results']['sce_normalized'],
+        sce_mix_merged='{outdir}/supplemental_figures/sce_tian_mixture_merged.rds'.format(outdir=config['workdir']),
+        fit_tian=config['cellbench_results']['fit_tian_30'],
     output:
         sim_performance_figure='{outdir}/figures/sim_performance_figure.pdf'.format(outdir=config['outdir'])
     params:
         name='simulation-performance-figure',
-        delta_deprobs=config['delta_deprobs'],
         deprob_methods=config['deprob_methods'],
         method_description=config['method_description'],
+        liver_marker_types=config['liver_plots']['novel_marker_celltypes'],
+        cell_lines=config['cellbench_config']['cell_lines'],
+        dimreduce_type='UMAP',
     log:
         '{logdir}/logs/simulation_performance_figure.log'.format(logdir=config['logdir'])
     benchmark:
@@ -69,10 +73,15 @@ rule simulation_performance_figure:
     shell:
         'Rscript R/main_figures/simulation_overview_figure.R '
         '--deprob_result_dir {input.deprob_result_dir} '
-        '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
-        '--delta_deprobs {params.delta_deprobs} '
+        '--novel_extra_result_dir {input.novel_extra_result_dir} '
+        '--sce_liver {input.sce_liver} '
+        '--sce_mix_merged {input.sce_mix_merged} '
+        '--fit_tian {input.fit_tian} '
         '--deprob_methods {params.deprob_methods} '
         '--method_description {params.method_description} '
+        '--cell_lines {params.cell_lines} '
+        '--liver_marker_types {params.liver_marker_types} '
+        '--dimreduce_type {params.dimreduce_type} '
         '--outfname {output.sim_performance_figure} '
         '>& {log}'
 
@@ -204,6 +213,7 @@ rule hgsc_overview_figure:
 rule simulation_performance_b_cd8:
     input:
         deprob_result_dir=config['simulation_analysis_results']['deprob_result_b_cd8_dir'],
+        wrongmarker_result_dir=config['simulation_analysis_results']['wrongmarker_result_dir'],
     output:
         sim_performance_b_cd8='{outdir}/supplemental_figures/sim_performance_b_cd8.pdf'.format(outdir=config['outdir'])
     params:
@@ -218,6 +228,7 @@ rule simulation_performance_b_cd8:
     shell:
         'Rscript R/supplemental_figures/simulation_b_cd8.R '
         '--deprob_result_dir {input.deprob_result_dir} '
+        '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
         '--delta_deprobs {params.delta_deprobs} '
         '--deprob_methods {params.deprob_methods} '
         '--method_description {params.method_description} '
@@ -248,25 +259,29 @@ rule simulation_performance_correlation_mapping:
         '--outfname {output.sim_performance_correlation} '
         '>& {log}'
 
-rule wrong_marker_naivecd8_naivecd4:
+rule simulation_performance_naivecd8_naivecd4:
     input:
+        deprob_result_dir=config['simulation_analysis_results']['deprob_result_dir'],
         wrongmarker_result_dir=config['simulation_analysis_results']['wrongmarker_result_naivecd8_naivecd4_dir'],
         wrongmarker_result_dir2=config['simulation_analysis_results']['wrongmarker_result_naivecd8_naivecd4_20marker_dir'],
     output:
-        wrong_marker_figure='{outdir}/supplemental_figures/wrong_marker_naivecd8_naivecd4.pdf'.format(outdir=config['outdir'])
+        sim_performance_naivecd8_naivecd4_figure='{outdir}/supplemental_figures/sim_performance_naivecd8_naivecd4.pdf'.format(outdir=config['outdir'])
     params:
-        name='suppfigure-wrong-marker-naivecd8-naivecd4',
+        name='suppfigure-simulation-performance-naivecd8-naivecd4',
         method_description=config['method_description'],
+        delta_deprobs=config['delta_deprobs'],
     log:
-        '{logdir}/logs/wrong_marker_naivecd8_naivecd4.log'.format(logdir=config['logdir'])
+        '{logdir}/logs/simulation_performance_naivecd8_naivecd4.log'.format(logdir=config['logdir'])
     benchmark:
-        '{logdir}/benchmarks/wrong_marker_naivecd8_naivecd4.txt'.format(logdir=config['logdir'])
+        '{logdir}/benchmarks/simulation_performance_naivecd8_naivecd4.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/supplemental_figures/wrong_marker_naive_cd4_naive_cd8.R '
+        'Rscript R/supplemental_figures/simulation_naive_cd4_naive_cd8.R '
+        '--deprob_result_dir {input.deprob_result_dir} '
         '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
         '--wrongmarker_result_dir2 {input.wrongmarker_result_dir2} '
         '--method_description {params.method_description} '
-        '--outfname {output.wrong_marker_figure} '
+        '--delta_deprobs {params.delta_deprobs} '
+        '--outfname {output.sim_performance_naivecd8_naivecd4_figure} '
         '>& {log}'
 
 rule benchmarking_evaluation:
@@ -284,23 +299,6 @@ rule benchmarking_evaluation:
         'Rscript R/supplemental_figures/benchmarking_evaluation.R '
         '--benchmark_times {input.benchmark_times} '
         '--outfname {output.benchmarking_figure} '
-        '>& {log}'
-
-rule simulation_novel_extra_celltypes:
-    input:
-        deprob_result_dir=config['simulation_analysis_results']['novel_extra_dir'],
-    output:
-        novel_extra_figure='{outdir}/supplemental_figures/simulation_novel_extra_celltypes.pdf'.format(outdir=config['outdir'])
-    params:
-        name='suppfigure-simulation-novel-extra-celltypes',
-    log:
-        '{logdir}/logs/simulation_novel_extra_celltypes.log'.format(logdir=config['logdir'])
-    benchmark:
-        '{logdir}/benchmarks/simulation_novel_extra_celltypes.txt'.format(logdir=config['logdir'])
-    shell:
-        'Rscript R/supplemental_figures/simulation_novel_extra_celltypes.R '
-        '--deprob_result_dir {input.deprob_result_dir} '
-        '--outfname {output.novel_extra_figure} '
         '>& {log}'
 
 rule liver_extra_celltypes:
@@ -321,7 +319,7 @@ rule liver_extra_celltypes:
         liver_extra_celltype_figure='{outdir}/supplemental_figures/liver_extra_celltypes.pdf'.format(outdir=config['outdir'])
     params:
         name='suppfigure-liver-extra-celltypes',
-        dimreduce_type='TSNE',
+        dimreduce_type='UMAP',
         celltypes_to_subset=config['liver_plots']['extra_markers_celltypes'],
     log:
         '{logdir}/logs/liver_extra_celltypes.log'.format(logdir=config['logdir'])
@@ -351,7 +349,6 @@ rule liver_novel_celltypes:
         sce_liver=config['liver_results']['sce_normalized'],
         cellassign_fit_novel1=config['liver_results']['cellassign_fit_novel1'],
         cellassign_fit_novel8_raw=config['liver_results']['cellassign_fit_novel8_raw'],
-        cellassign_fit_novel8=config['liver_results']['cellassign_fit_novel8'],
         scina_fit_novel1=config['liver_results']['scina_fit_novel1'],
         scina_fit_novel8_raw=config['liver_results']['scina_fit_novel8_raw'],
         scina_fit_novel8=config['liver_results']['scina_fit_novel8'],
@@ -359,7 +356,7 @@ rule liver_novel_celltypes:
         liver_novel_celltype_figure='{outdir}/supplemental_figures/liver_novel_celltypes.pdf'.format(outdir=config['outdir'])
     params:
         name='suppfigure-liver-novel-celltypes',
-        dimreduce_type='TSNE',
+        dimreduce_type='UMAP',
         marker_types=config['liver_plots']['novel_marker_celltypes'],
         celltypes_novel1=config['liver_plots']['celltypes_novel1'],
         celltypes_novel8=config['liver_plots']['celltypes_novel8'],
@@ -375,7 +372,6 @@ rule liver_novel_celltypes:
         '--celltypes_novel8 {params.celltypes_novel8} '
         '--cellassign_fit_novel1 {input.cellassign_fit_novel1} '
         '--cellassign_fit_novel8_raw {input.cellassign_fit_novel8_raw} '
-        '--cellassign_fit_novel8 {input.cellassign_fit_novel8} '
         '--scina_fit_novel1 {input.scina_fit_novel1} '
         '--scina_fit_novel8_raw {input.scina_fit_novel8_raw} '
         '--scina_fit_novel8 {input.scina_fit_novel8} '
@@ -394,7 +390,7 @@ rule liver_all_celltypes:
         liver_all_celltype_figure='{outdir}/supplemental_figures/liver_all_celltypes.pdf'.format(outdir=config['outdir'])
     params:
         name='suppfigure-liver-all-celltypes',
-        dimreduce_type='TSNE',
+        dimreduce_type='UMAP',
     log:
         '{logdir}/logs/liver_all_celltypes.log'.format(logdir=config['logdir'])
     benchmark:
@@ -418,7 +414,7 @@ rule liver_panglaodb:
         liver_panglaodb_figure='{outdir}/supplemental_figures/liver_panglaodb_figure.pdf'.format(outdir=config['outdir'])
     params:
         name='suppfigure-liver-panglaodb',
-        dimreduce_type='TSNE',
+        dimreduce_type='UMAP',
         marker_types=config['liver_plots']['panglaodb_celltypes'],
     log:
         '{logdir}/logs/liver_panglaodb.log'.format(logdir=config['logdir'])
@@ -440,7 +436,7 @@ rule liver_marker_expression:
         liver_marker_expression_figure='{outdir}/supplemental_figures/liver_marker_expression.pdf'.format(outdir=config['outdir'])
     params:
         name='suppfigure-liver-marker-expression',
-        dimreduce_type='TSNE',
+        dimreduce_type='UMAP',
         marker_types=config['liver_plots']['markers_t_b'],
         expr_threshold=config['winsorized_expression']['markers'],
     log:
@@ -501,7 +497,6 @@ rule cellbench_plot:
         sce_pure_merged='{outdir}/supplemental_figures/sce_tian_pure_merged.rds'.format(outdir=config['workdir']),
         fit_tian_pure=config['cellbench_results']['fit_tian_pure'],
         fit_tian_20=config['cellbench_results']['fit_tian_20'],
-        fit_tian_30=config['cellbench_results']['fit_tian_30'],
         fit_tian_50=config['cellbench_results']['fit_tian_50'],
     output:
         cellbench_figure='{outdir}/supplemental_figures/cellbench_plot.pdf'.format(outdir=config['outdir'])
@@ -519,7 +514,6 @@ rule cellbench_plot:
         '--sce_mix_merged {input.sce_mix_merged} '
         '--fit_tian_pure {input.fit_tian_pure} '
         '--fit_tian_20 {input.fit_tian_20} '
-        '--fit_tian_30 {input.fit_tian_30} '
         '--fit_tian_50 {input.fit_tian_50} '
         '--cell_lines {params.cell_lines} '
         '--dimreduce_type {params.dimreduce_type} '
@@ -851,6 +845,9 @@ rule cellassign_hierarchical:
         fit_fl_noother=config['hierarchical_fits']['fit_fl_noother'],
         fit_fl_top=config['hierarchical_fits']['fit_fl_top_noother'],
         fit_fl_bottom=config['hierarchical_fits']['fit_fl_bottom_noother'],
+        fit_koh_noother=config['hierarchical_fits']['koh_cellassign_noother'],
+        fit_koh_top=config['hierarchical_fits']['koh_cellassign_top'],
+        fit_koh_bottom=config['hierarchical_fits']['koh_cellassign_bottom'],
     output:
         cellassign_hierarchical='{outdir}/supplemental_figures/cellassign_hierarchical_plot.pdf'.format(outdir=config['outdir'])
     params:
@@ -872,6 +869,9 @@ rule cellassign_hierarchical:
         '--fit_fl_noother {input.fit_fl_noother} '
         '--fit_fl_hierarchical_top {input.fit_fl_top} '
         '--fit_fl_hierarchical_bottom {input.fit_fl_bottom} '
+        '--fit_koh {input.fit_koh_noother} '
+        '--fit_koh_hierarchical_top {input.fit_koh_top} '
+        '--fit_koh_hierarchical_bottom {input.fit_koh_bottom} '
         '--dimreduce_type {params.dimreduce_type} '
         '--outfname {output.cellassign_hierarchical} '
         '>& {log}'

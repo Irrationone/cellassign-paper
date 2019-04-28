@@ -185,6 +185,9 @@ hierarchical_fits:
   fit_fl_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_lk_full_noother.rds
   fit_fl_top_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_broad_noother.rds
   fit_fl_bottom_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_lk_separate_noother.rds
+  koh_cellassign_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/koh_full.rds
+  koh_cellassign_top: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/koh_high.rds
+  koh_cellassign_bottom: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/koh_low.rds
 
 # Shih analysis results
 shih_analysis_results:
