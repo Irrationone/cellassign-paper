@@ -272,6 +272,7 @@ rule simulation_performance_naivecd8_naivecd4:
         name='suppfigure-simulation-performance-naivecd8-naivecd4',
         method_description=config['method_description'],
         delta_deprobs=config['delta_deprobs'],
+        deprob_methods=config['deprob_methods'],
     log:
         '{logdir}/logs/simulation_performance_naivecd8_naivecd4.log'.format(logdir=config['logdir'])
     benchmark:
@@ -283,6 +284,7 @@ rule simulation_performance_naivecd8_naivecd4:
         '--wrongmarker_result_dir2 {input.wrongmarker_result_dir2} '
         '--method_description {params.method_description} '
         '--delta_deprobs {params.delta_deprobs} '
+        '--deprob_methods {params.deprob_methods} '
         '--outfname {output.sim_performance_naivecd8_naivecd4_figure} '
         '>& {log}'
 
