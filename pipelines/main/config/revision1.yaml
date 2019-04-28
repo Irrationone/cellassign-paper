@@ -77,6 +77,35 @@ liver_plots:
     - CD52
     - LTB
 
+liver_analysis_settings:
+  marker_lists:
+    alltypes_raw:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_alltypes.yaml
+      include_other: TRUE
+    alltypes_revised:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_alltypes_revised2.yaml
+      include_other: TRUE
+    3types_revised: 
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_3types_revised.yaml
+      include_other: TRUE
+    panglaodb_canonical:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/liver_panglaodb_human_canonical_revised.yaml
+      include_other: TRUE
+
+fl_hgsc_combined_settings:
+  marker_lists:
+    fl_hgsc_combined:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/follicular_hgsc_combined.yaml
+      include_other: TRUE
+
+cellbench_settings:
+  marker_lists:
+    tian_20:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/tian_20_73_markers.yaml
+    tian_30:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/tian_30_73_markers.yaml
+    tian_50:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/tian_50_73_markers.yaml
 
 cellbench_results:
   fit_tian_pure: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure.rds
@@ -188,6 +217,7 @@ hierarchical_fits:
   koh_cellassign_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/koh_full.rds
   koh_cellassign_top: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/koh_high.rds
   koh_cellassign_bottom: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/koh_low.rds
+
 
 # Shih analysis results
 shih_analysis_results:

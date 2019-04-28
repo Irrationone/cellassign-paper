@@ -920,13 +920,18 @@ rule marker_gene_matrices_table:
         follicular_gene_list_specific=config['follicular_analysis_settings']['marker_lists']['big']['path'],
         follicular_gene_list_lambda_kappa=config['follicular_analysis_settings']['marker_lists']['lambdakappa']['path'],
         hgsc_gene_list=config['hgsc_analysis_settings']['marker_lists']['small']['path'],
+        fl_hgsc_gene_list=config['fl_hgsc_combined_settings']['marker_lists']['fl_hgsc_combined']['path'],
+        mcparland_alltypes_raw_gene_list=config['liver_analysis_settings']['marker_lists']['alltypes_raw']['path'],
+        mcparland_alltypes_revised_gene_list=config['liver_analysis_settings']['marker_lists']['alltypes_revised']['path'],
+        mcparland_3types_revised=config['liver_analysis_settings']['marker_lists']['3types_revised']['path'],
+        panglaodb_canonical=config['liver_analysis_settings']['marker_lists']['panglaodb_canonical']['path'],
+        cellbench_gene_list_20=config['cellbench_settings']['marker_lists']['tian_20']['path'],
+        cellbench_gene_list_30=config['cellbench_settings']['marker_lists']['tian_30']['path'],
+        cellbench_gene_list_50=config['cellbench_settings']['marker_lists']['tian_50']['path'],
     output:
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
     params:
         name='supptable-marker-gene-matrices',
-        follicular_specific_other=config['follicular_analysis_settings']['marker_lists']['big']['include_other'],
-        follicular_lk_other=config['follicular_analysis_settings']['marker_lists']['lambdakappa']['include_other'],
-        hgsc_other=config['hgsc_analysis_settings']['marker_lists']['small']['include_other'],
     log:
         '{logdir}/logs/marker_gene_matrices_table.log'.format(logdir=config['logdir'])
     benchmark:
@@ -936,10 +941,15 @@ rule marker_gene_matrices_table:
         '--koh_rho {input.koh_rho} '
         '--follicular_gene_list_specific {input.follicular_gene_list_specific} '
         '--follicular_gene_list_lambda_kappa {input.follicular_gene_list_lambda_kappa} '
-        '--follicular_specific_other {params.follicular_specific_other} '
-        '--follicular_lk_other {params.follicular_lk_other} '
         '--hgsc_gene_list {input.hgsc_gene_list} '
-        '--hgsc_other {params.hgsc_other} '
+        '--hgsc_follicular_gene_list_combined {input.fl_hgsc_gene_list} '
+        '--mcparland_gene_list_raw {input.mcparland_alltypes_raw_gene_list} '
+        '--mcparland_gene_list_revised {input.mcparland_alltypes_revised_gene_list} '
+        '--mcparland_gene_list_3types_revised {input.mcparland_3types_revised} '
+        '--liver_panglaodb_gene_list {input.panglaodb_canonical} '
+        '--cellbench_gene_list_20 {input.cellbench_gene_list_20} '
+        '--cellbench_gene_list_30 {input.cellbench_gene_list_30} '
+        '--cellbench_gene_list_50 {input.cellbench_gene_list_50} '
         '--outfname {output.marker_gene_matrix_table} '
         '>& {log}'
 
