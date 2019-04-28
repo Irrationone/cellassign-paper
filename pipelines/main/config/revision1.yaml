@@ -136,6 +136,7 @@ delta_deprobs_supp:
 deprob_methods:
   - cellassign
   - scina
+  - scina_0.1
   - densitycut
   - dynamicTreeCut
   - phenograph
