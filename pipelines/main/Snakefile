@@ -57,6 +57,7 @@ rule simulation_performance_figure:
         sce_liver=config['liver_results']['sce_normalized'],
         sce_mix_merged='{outdir}/supplemental_figures/sce_tian_mixture_merged.rds'.format(outdir=config['workdir']),
         fit_tian=config['cellbench_results']['fit_tian_30'],
+        cellassign_fit_novel8=config['liver_results']['cellassign_fit_novel8'],
     output:
         sim_performance_figure='{outdir}/figures/sim_performance_figure.pdf'.format(outdir=config['outdir'])
     params:
@@ -75,6 +76,7 @@ rule simulation_performance_figure:
         '--deprob_result_dir {input.deprob_result_dir} '
         '--novel_extra_result_dir {input.novel_extra_result_dir} '
         '--sce_liver {input.sce_liver} '
+        '--cellassign_fit_novel8 {input.cellassign_fit_novel8} '
         '--sce_mix_merged {input.sce_mix_merged} '
         '--fit_tian {input.fit_tian} '
         '--deprob_methods {params.deprob_methods} '
