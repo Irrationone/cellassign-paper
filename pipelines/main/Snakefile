@@ -439,7 +439,7 @@ rule liver_marker_expression:
     params:
         name='suppfigure-liver-marker-expression',
         dimreduce_type='UMAP',
-        marker_types=config['liver_plots']['markers_t_b'],
+        marker_genes=config['liver_plots']['markers_t_b'],
         expr_threshold=config['winsorized_expression']['markers'],
     log:
         '{logdir}/logs/liver_marker_expression.log'.format(logdir=config['logdir'])
@@ -447,8 +447,8 @@ rule liver_marker_expression:
         '{logdir}/benchmarks/liver_marker_expression.txt'.format(logdir=config['logdir'])
     shell:
         'Rscript R/supplemental_figures/liver_marker_genes.R '
-        '--sce_liver {input.sce_liver} '
-        '--marker_types {params.marker_types} '
+        '--sce {input.sce_liver} '
+        '--marker_genes {params.marker_genes} '
         '--dimreduce_type {params.dimreduce_type} '
         '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.liver_marker_expression_figure} '
@@ -847,6 +847,7 @@ rule cellassign_hierarchical:
         fit_fl_noother=config['hierarchical_fits']['fit_fl_noother'],
         fit_fl_top=config['hierarchical_fits']['fit_fl_top_noother'],
         fit_fl_bottom=config['hierarchical_fits']['fit_fl_bottom_noother'],
+        sce_koh=config['external_analysis_results']['koh_annotated'],
         fit_koh_noother=config['hierarchical_fits']['koh_cellassign_noother'],
         fit_koh_top=config['hierarchical_fits']['koh_cellassign_top'],
         fit_koh_bottom=config['hierarchical_fits']['koh_cellassign_bottom'],
@@ -871,6 +872,7 @@ rule cellassign_hierarchical:
         '--fit_fl_noother {input.fit_fl_noother} '
         '--fit_fl_hierarchical_top {input.fit_fl_top} '
         '--fit_fl_hierarchical_bottom {input.fit_fl_bottom} '
+        '--sce_koh {input.sce_koh} '
         '--fit_koh {input.fit_koh_noother} '
         '--fit_koh_hierarchical_top {input.fit_koh_top} '
         '--fit_koh_hierarchical_bottom {input.fit_koh_bottom} '
