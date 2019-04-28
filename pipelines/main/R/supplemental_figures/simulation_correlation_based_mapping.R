@@ -147,7 +147,7 @@ de_plots_combined <- lapply(c(deprob_result_dir1, deprob_result_dir2), function(
       xlab("Method") + ylab("Score") + 
       guides(fill = FALSE) + 
       geom_text(data = paired_pvals_cast,
-                aes(label=cellassign, x=clustering_method, y=-0.15),
+                aes(label=cellassign, x=clustering_method, y=-0.2),
                 colour = clust_methods_palette["cellassign"]) + 
       coord_cartesian(ylim = c(0, 1), clip = 'off') + 
       theme(panel.spacing.y = unit(2, "lines"))

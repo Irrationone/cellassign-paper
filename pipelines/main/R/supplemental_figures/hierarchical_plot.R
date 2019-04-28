@@ -40,6 +40,8 @@ parser$add_argument('--fit_fl_hierarchical_top', metavar='FILE', type='character
                     help="CellAssign fit to FL data (hierarchical, top, no other)")
 parser$add_argument('--fit_fl_hierarchical_bottom', metavar='FILE', type='character',
                     help="CellAssign fit to FL data (hierarchical, bottom, no other)")
+parser$add_argument('--sce_koh', metavar='FILE', type='character',
+                    help="SCE for Koh data")
 parser$add_argument('--fit_koh', metavar='FILE', type='character',
                     help="CellAssign fit to Koh data (full, no other)")
 parser$add_argument('--fit_koh_hierarchical_top', metavar='FILE', type='character',
@@ -54,6 +56,7 @@ args <- parser$parse_args()
 
 sce_hgsc <- readRDS(args$sce_hgsc)
 sce_fl <- readRDS(args$sce_follicular)
+sce_koh <- readRDS(args$sce_koh)
 sce_follicular_hgsc_merged <- readRDS(args$sce_fl_hgsc_merged)
 sce_follicular_hgsc_merged <- sce_follicular_hgsc_merged %>%
   scater::mutate(dataset = ifelse(str_detect(patient, "^VOA"), "HGSC", "FL"))
@@ -312,7 +315,7 @@ hgsc_fl_legend_row <- cowplot::plot_grid(cohort_legend,
 combined_hgsc_fl_plots <- cowplot::plot_grid(hgsc_fl_dimred_plots[[1]],
                                              hgsc_fl_dimred_plots[[2]],
                                              cohort_plot,
-                                             prob_plot_hierarchical,
+                                             prob_plot_hierarchical_fl,
                                              labels = c('a', 'b', 'c', 'd'),
                                              nrow = 2,
                                              ncol = 2)
@@ -336,7 +339,7 @@ final_plot <- cowplot::plot_grid(combined_hgsc_fl_plots,
 
 
 # Plot final plot
-pdf(args$outfname, width = 10, height = 11.2, useDingbats = FALSE)
+pdf(args$outfname, width = 10, height = 14, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

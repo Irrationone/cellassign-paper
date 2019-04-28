@@ -30,6 +30,8 @@ parser$add_argument('--sce_liver', metavar='FILE', type='character',
                     help="SCE for liver")
 parser$add_argument('--liver_marker_types', type='character', nargs = '+',
                     help="Celltypes with marker genes")
+parser$add_argument('--cellassign_fit_novel8', metavar='FILE', type='character',
+                    help="CellAssign novel liver fit")
 parser$add_argument('--sce_mix_merged', metavar='FILE', type = 'character',
                     help="SCE of merged mixture data")
 parser$add_argument('--fit_tian', metavar='FILE', type='character',
@@ -323,7 +325,7 @@ superset_plot <- ggplot(superset_df,
   xlab("Method") + ylab("Score") + 
   guides(fill = FALSE) + 
   coord_cartesian(ylim = c(superset_min_val, 1), clip = 'off') + 
-  geom_text(data = superset_pvals %>% dplyr::rename(clustering_method=method2) %>% dplyr::left_join(superset_df_extreme),
+  geom_text(data = superset_pvals %>% dplyr::rename(clustering_method=method2),
             aes(label=symbol, x=clustering_method, y=superset_min_val-0.15*(1-superset_min_val)),
             colour = clust_methods_palette["cellassign"]) +
   theme(panel.spacing.y = unit(2, "lines")) + 
@@ -421,7 +423,7 @@ prob_df <- true_probs %>%
 
 ## CellBench probability plot
 cellbench_prob_plot <- ggplot(prob_df, aes(x=factor(num_cells), y=cellassign_prob)) + 
-  geom_boxplot(alpha = 0.7, width = 0.5, outlier.size = -1, aes(fill = clustering_method)) + 
+  geom_boxplot(width = 0.5, outlier.size = -1, aes(fill = clustering_method)) + 
   geom_quasirandom(alpha = 0.2, width = 0.25) + 
   theme_bw() + 
   theme_Publication() + 

@@ -107,6 +107,12 @@ proliferation_plots <- lapply(patients, function(pat) {
 })
 names(proliferation_plots) <- patients
 
+proliferation_plots$FL2001 <- lapply(proliferation_plots$FL2001, function(p) {
+  p <- p + 
+    xlim(c(NA, 3)) + 
+    ylim(c(NA, -3))
+  return(p)
+})
 
 # B cell dr figures
 bcell_timepoint_plots <- lapply(patients, function(pat) {

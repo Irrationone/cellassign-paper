@@ -162,12 +162,14 @@ modality_plots <- cowplot::plot_grid(sample_plot,
                                      cell_line_plot,
                                      cellassign_plot, 
                                      ncol = 3, 
+                                     labels = c('a', 'b', 'c'),
                                      align = 'hv', 
                                      axis = 'tblr')
 
 final_plot <- cowplot::plot_grid(modality_plots,
                                  cellbench_prob_plot,
                                  entropy_plot,
+                                 labels = c('', 'd', 'e'),
                                  nrow = 3,
                                  rel_heights = c(1, 1.2, 1))
 

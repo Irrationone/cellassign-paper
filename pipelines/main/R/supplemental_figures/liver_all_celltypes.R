@@ -139,7 +139,7 @@ final_plot <- cowplot::plot_grid(cowplot::plot_grid(master_label_plot, labels = 
 
 
 # Plot final plot
-pdf(args$outfname, width = 10, height = 12, useDingbats = FALSE)
+pdf(args$outfname, width = 9, height = 12, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 

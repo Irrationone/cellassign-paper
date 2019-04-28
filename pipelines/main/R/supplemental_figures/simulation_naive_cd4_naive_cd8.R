@@ -26,6 +26,8 @@ parser$add_argument('--wrongmarker_result_dir', metavar = 'DIR', type = 'charact
                     help="Path to simulation result directory for wrong marker")
 parser$add_argument('--wrongmarker_result_dir2', metavar = 'DIR', type = 'character',
                     help="Path to simulation result directory for wrong marker (with 20 genes per type)")
+parser$add_argument('--deprob_methods', type='character', nargs ='+',
+                    help="Clustering methods to use for DE prob analysis.")
 parser$add_argument('--method_description', type='character', metavar='FILE',
                     help="Method description")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
@@ -34,6 +36,7 @@ args <- parser$parse_args()
 
 deprob_result_dir <- args$deprob_result_dir
 delta_deprobs <- unlist(args$delta_deprobs)
+deprob_methods <- unlist(args$deprob_methods)
 
 wrongmarker_result_dir <- args$wrongmarker_result_dir
 wrongmarker_result_dir2 <- args$wrongmarker_result_dir2
@@ -45,10 +48,8 @@ method_metadata <- plyr::rbind.fill(lapply(names(method_description), function(i
 categorical_palettes <- cat_palettes()
 factor_orderings <- factor_orders()
 
-clust_methods_palette <- categorical_palettes$method_types[df_as_map(method_metadata, "cellassign", from = "clustering_method", to = "method_type")]
-names(clust_methods_palette) <- "cellassign"
-
-clust_methods_palette <- categorical_palettes$clustering_methods
+clust_methods_palette <- categorical_palettes$method_types[df_as_map(method_metadata, deprob_methods, from = "clustering_method", to = "method_type")]
+names(clust_methods_palette) <- deprob_methods
 
 # DE prob figure
 
@@ -65,7 +66,6 @@ de_eval_measures <- plyr::rbind.fill(lapply(deprob_result_files, function(f) {
 de_eval_measures <- de_eval_measures %>%
   dplyr::left_join(method_metadata)
 
-de_deltas <- load_annotation_files(deprob_result_dir, pattern = "*_delta_compare.tsv")
 delta_files <- Sys.glob(file.path(deprob_result_dir, "assign_celltypes_sce", "deltas", "*", "cellassign*.tsv"))
 de_deltas <- plyr::rbind.fill(lapply(delta_files, function(f) {
   fread(f)
@@ -165,7 +165,7 @@ de_plots <- lapply(elist, function(gs) {
     xlab("Method") + ylab("Score") + 
     guides(fill = FALSE) + 
     geom_text(data = paired_pvals_cast,
-              aes(label=cellassign, x=clustering_method, y=-0.15),
+              aes(label=cellassign, x=clustering_method, y=-0.22),
               colour = clust_methods_palette["cellassign"]) + 
     coord_cartesian(ylim = c(0, 1), clip = 'off') + 
     theme(panel.spacing.y = unit(2, "lines"))
