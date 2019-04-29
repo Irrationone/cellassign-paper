@@ -1039,12 +1039,52 @@ rule compile_stats:
         de_site=config['hgsc_analysis_results']['differential_expression']['site'],
         de_site_fgsea=config['hgsc_analysis_results']['differential_expression']['site_fgsea'],
         de_site_epithelial=config['hgsc_analysis_results']['differential_expression']['epithelial_fgsea'],
+        sce_liver=config['liver_results']['sce_normalized'],
+        cellassign_liver_3markers_3types=config['liver_results']['cellassign_fit_3'],
+        cellassign_liver_4markers_3types=config['liver_results']['cellassign_fit_4'],
+        cellassign_liver_allmarkers_3types=config['liver_results']['cellassign_fit_11'],
+        cellassign_liver_3markers_4types=config['liver_results']['cellassign_fit_novel1'],
+        cellassign_liver_3markers_alltypes_raw=config['liver_results']['cellassign_fit_novel8_raw'],
+        cellassign_liver_3markers_alltypes=config['liver_results']['cellassign_fit_novel8'],
+        scina_liver_3markers_3types=config['liver_results']['scina_fit_3'],
+        scina_liver_4markers_3types=config['liver_results']['scina_fit_4'],
+        scina_liver_allmarkers_3types=config['liver_results']['scina_fit_11'],
+        scina_liver_allmarkers_3types_point1=config['liver_results']['scina_fit_11_0.1'],
+        scina_liver_3markers_4types=config['liver_results']['scina_fit_novel1'],
+        scina_liver_3markers_alltypes_raw=config['liver_results']['scina_fit_novel8_raw'],
+        scina_liver_3markers_alltypes=config['liver_results']['scina_fit_novel8'],
+        cellassign_liver_panglaodb=config['liver_results']['cellassign_fit_panglaodb'],
+        sce_pure_merged='{outdir}/supplemental_figures/sce_tian_pure_merged.rds'.format(outdir=config['workdir']),
+        sce_pure_10x=config['cellbench_results']['sce_tian_3_10x'],
+        sce_pure_celseq=config['cellbench_results']['sce_tian_3_celseq'],
+        sce_pure_dropseq=config['cellbench_results']['sce_tian_3_dropseq'],
+        sce_mix_merged='{outdir}/supplemental_figures/sce_tian_mixture_merged.rds'.format(outdir=config['workdir']),
+        cellassign_tian_pure_merged=config['cellbench_results']['fit_tian_pure'],
+        cellassign_tian_pure_10x=config['cellbench_results']['fit_tian_pure_10x'],
+        cellassign_tian_pure_celseq=config['cellbench_results']['fit_tian_pure_celseq'],
+        cellassign_tian_pure_dropseq=config['cellbench_results']['fit_tian_pure_dropseq'],
+        cellassign_tian_mix=config['cellbench_results']['fit_tian_50'],
+        sce_fl_hgsc_merged='{outdir}/supplemental_figures/sce_follicular_hgsc_merged.rds'.format(outdir=config['workdir']),
+        cellassign_fl_hgsc=config['hierarchical_fits']['fit_combined'],
+        cellassign_fl_combination=config['hierarchical_fits']['fit_fl'],
+        cellassign_hgsc_combination=config['hierarchical_fits']['fit_hgsc'],
+        cellassign_fl_noother=config['hierarchical_fits']['fit_fl_noother'],
+        cellassign_fl_top=config['hierarchical_fits']['fit_fl_top_noother'],
+        cellassign_fl_bottom=config['hierarchical_fits']['fit_fl_bottom_noother'],
+        cellassign_koh_noother=config['hierarchical_fits']['fit_koh_noother'],
+        cellassign_koh_top=config['hierarchical_fits']['fit_koh_top_noother'],
+        cellassign_koh_bottom=config['hierarchical_fits']['fit_koh_bottom_noother'],
     output:
         stats='{outdir}/stats/stats.tex'.format(outdir=config['outdir']),
     params:
         name='compile-stats',
         delta_deprobs=config['delta_deprobs'],
+        method_description=config['method_description'],
         follicular_tcell_labels=config['follicular_celltype_labels']['tcell'],
+        liver_3_celltypes=config['liver_plots']['novel_marker_celltypes'],
+        liver_4_celltypes=config['liver_plots']['celltypes_novel1'],
+        liver_all_celltypes=config['liver_plots']['celltypes_novel8'],
+        liver_panglaodb_markers=config['liver_analysis_settings']['marker_lists']['panglaodb_canonical'],
     log:
         '{logdir}/logs/compile_stats.log'.format(logdir=config['logdir'])
     benchmark:
@@ -1058,6 +1098,7 @@ rule compile_stats:
         '--follicular_tcell_labels {params.follicular_tcell_labels} '
         '--patient_progression {input.patient_events} '
         '--deprob_result_dir {input.deprob_result_dir_naivecd8_naivecd4} '
+        '--method_description {params.method_description} '
         '--delta_deprobs {params.delta_deprobs} '
         '--sce_follicular_nonmalignant_bcell {input.sce_nonmalignant_b} '
         '--cellassign_lambda_kappa {input.cellassign_lambda_kappa_result} '
@@ -1071,6 +1112,45 @@ rule compile_stats:
         '--de_site {input.de_site} '
         '--de_site_fgsea {input.de_site_fgsea} '
         '--de_epithelial {input.de_site_epithelial} '
+        '--sce_liver {input.sce_liver} '
+        '--cellassign_liver_3markers_3types {input.cellassign_liver_3markers_3types} '
+        '--cellassign_liver_4markers_3types {input.cellassign_liver_4markers_3types} '
+        '--cellassign_liver_allmarkers_3types {input.cellassign_liver_allmarkers_3types} '
+        '--cellassign_liver_3markers_4types {input.cellassign_liver_3markers_4types} '
+        '--cellassign_liver_3markers_alltypes_raw {input.cellassign_liver_3markers_alltypes_raw} '
+        '--cellassign_liver_3markers_alltypes {input.cellassign_liver_3markers_alltypes} '
+        '--scina_liver_3markers_3types {input.scina_liver_3markers_3types} '
+        '--scina_liver_4markers_3types {input.scina_liver_4markers_3types} '
+        '--scina_liver_allmarkers_3types {input.scina_liver_allmarkers_3types} '
+        '--scina_liver_allmarkers_3types_point1 {input.scina_liver_allmarkers_3types_point1} '
+        '--scina_liver_3markers_4types {input.scina_liver_3markers_4types} '
+        '--scina_liver_3markers_alltypes_raw {input.scina_liver_3markers_alltypes_raw} '
+        '--scina_liver_3markers_alltypes {input.scina_liver_3markers_alltypes} '
+        '--cellassign_liver_panglaodb {input.cellassign_liver_panglaodb} '
+        '--sce_pure_merged {input.sce_pure_merged} '
+        '--sce_pure_10x {input.sce_pure_10x} '
+        '--sce_pure_celseq {input.sce_pure_celseq} '
+        '--sce_pure_dropseq {input.sce_pure_dropseq} '
+        '--sce_mix_merged {input.sce_mix_merged} '
+        '--cellassign_tian_pure_merged {input.cellassign_tian_pure_merged} '
+        '--cellassign_tian_pure_10x {input.cellassign_tian_pure_10x} '
+        '--cellassign_tian_pure_celseq {input.cellassign_tian_pure_celseq} '
+        '--cellassign_tian_pure_dropseq {input.cellassign_tian_pure_dropseq} '
+        '--cellassign_tian_mix {input.cellassign_tian_mix} '
+        '--sce_fl_hgsc_merged {input.sce_fl_hgsc_merged} '
+        '--cellassign_fl_hgsc {input.cellassign_fl_hgsc} '
+        '--cellassign_fl_combination {input.cellassign_fl_combination} '
+        '--cellassign_hgsc_combination {input.cellassign_hgsc_combination} '
+        '--cellassign_fl_noother {input.cellassign_fl_noother} '
+        '--cellassign_fl_top {input.cellassign_fl_top} '
+        '--cellassign_fl_bottom {input.cellassign_fl_bottom} '
+        '--cellassign_koh_noother {input.cellassign_koh_noother} '
+        '--cellassign_koh_top {input.cellassign_koh_top} '
+        '--cellassign_koh_bottom {input.cellassign_koh_bottom} '
+        '--liver_3_celltypes {params.liver_3_celltypes} '
+        '--liver_4_celltypes {params.liver_4_celltypes} '
+        '--liver_all_celltypes {params.liver_all_celltypes} '
+        '--liver_panglaodb_markers {params.liver_panglaodb_markers} '
         '--outfname {output.stats} '
         '>& {log}'
     

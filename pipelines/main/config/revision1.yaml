@@ -109,6 +109,9 @@ cellbench_settings:
 
 cellbench_results:
   fit_tian_pure: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure.rds
+  fit_tian_pure_10x: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure_10x.rds
+  fit_tian_pure_celseq: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure_CELseq2.rds
+  fit_tian_pure_dropseq: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure_Dropseq.rds
   fit_tian_20: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_20markers.rds
   fit_tian_30: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_30markers.rds
   fit_tian_50: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_50markers.rds
