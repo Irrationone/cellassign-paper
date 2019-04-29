@@ -5,6 +5,7 @@ TODO.txt
 .snakemake/
 .singularity/
 test/
+manuscript/
 .cache/
 .Rproj
 data/

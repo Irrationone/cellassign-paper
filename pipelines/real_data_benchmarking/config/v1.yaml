@@ -259,7 +259,37 @@ cellassign:
       - tian_3_10x
       - tian_3_CELseq2
       - tian_3_Dropseq
-    marker_list: ../../resources/marker_lists/tian_50_73_markers.yaml
+    marker_list: ../../resources/marker_lists/tian_73_73_markers.yaml
+    include_other: FALSE
+    num_runs: 3
+    B: 20
+    design_formula: ~\ path
+    extra_opts: --shrinkage
+    celltypes: all
+  tian_pure_10x:
+    dataset:
+      - tian_3_10x
+    marker_list: ../../resources/marker_lists/tian_73_73_markers.yaml
+    include_other: FALSE
+    num_runs: 3
+    B: 20
+    design_formula: ~\ path
+    extra_opts: --shrinkage
+    celltypes: all
+  tian_pure_CELseq2:
+    dataset:
+      - tian_3_CELseq2
+    marker_list: ../../resources/marker_lists/tian_73_73_markers.yaml
+    include_other: FALSE
+    num_runs: 3
+    B: 20
+    design_formula: ~\ path
+    extra_opts: --shrinkage
+    celltypes: all
+  tian_pure_Dropseq:
+    dataset:
+      - tian_3_Dropseq
+    marker_list: ../../resources/marker_lists/tian_73_73_markers.yaml
     include_other: FALSE
     num_runs: 3
     B: 20
