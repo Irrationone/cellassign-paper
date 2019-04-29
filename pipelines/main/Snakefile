@@ -501,6 +501,7 @@ rule cellbench_plot:
         sce_pure_merged='{outdir}/supplemental_figures/sce_tian_pure_merged.rds'.format(outdir=config['workdir']),
         fit_tian_pure=config['cellbench_results']['fit_tian_pure'],
         fit_tian_20=config['cellbench_results']['fit_tian_20'],
+        fit_tian_30=config['cellbench_results']['fit_tian_30'],
         fit_tian_50=config['cellbench_results']['fit_tian_50'],
     output:
         cellbench_figure='{outdir}/supplemental_figures/cellbench_plot.pdf'.format(outdir=config['outdir'])
@@ -518,6 +519,7 @@ rule cellbench_plot:
         '--sce_mix_merged {input.sce_mix_merged} '
         '--fit_tian_pure {input.fit_tian_pure} '
         '--fit_tian_20 {input.fit_tian_20} '
+        '--fit_tian_30 {input.fit_tian_30} '
         '--fit_tian_50 {input.fit_tian_50} '
         '--cell_lines {params.cell_lines} '
         '--dimreduce_type {params.dimreduce_type} '
