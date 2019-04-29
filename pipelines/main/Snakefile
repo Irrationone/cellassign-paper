@@ -1071,9 +1071,9 @@ rule compile_stats:
         cellassign_fl_noother=config['hierarchical_fits']['fit_fl_noother'],
         cellassign_fl_top=config['hierarchical_fits']['fit_fl_top_noother'],
         cellassign_fl_bottom=config['hierarchical_fits']['fit_fl_bottom_noother'],
-        cellassign_koh_noother=config['hierarchical_fits']['fit_koh_noother'],
-        cellassign_koh_top=config['hierarchical_fits']['fit_koh_top_noother'],
-        cellassign_koh_bottom=config['hierarchical_fits']['fit_koh_bottom_noother'],
+        cellassign_koh_noother=config['hierarchical_fits']['koh_cellassign_noother'],
+        cellassign_koh_top=config['hierarchical_fits']['koh_cellassign_top'],
+        cellassign_koh_bottom=config['hierarchical_fits']['koh_cellassign_bottom'],
     output:
         stats='{outdir}/stats/stats.tex'.format(outdir=config['outdir']),
     params:
