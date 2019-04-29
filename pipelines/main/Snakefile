@@ -1084,7 +1084,7 @@ rule compile_stats:
         liver_3_celltypes=config['liver_plots']['novel_marker_celltypes'],
         liver_4_celltypes=config['liver_plots']['celltypes_novel1'],
         liver_all_celltypes=config['liver_plots']['celltypes_novel8'],
-        liver_panglaodb_markers=config['liver_analysis_settings']['marker_lists']['panglaodb_canonical'],
+        liver_panglaodb_markers=config['liver_analysis_settings']['marker_lists']['panglaodb_canonical']['path'],
     log:
         '{logdir}/logs/compile_stats.log'.format(logdir=config['logdir'])
     benchmark:
