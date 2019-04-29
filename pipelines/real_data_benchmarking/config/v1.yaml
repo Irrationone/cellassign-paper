@@ -273,7 +273,7 @@ cellassign:
     include_other: FALSE
     num_runs: 3
     B: 20
-    design_formula: ~\ path
+    design_formula: none
     extra_opts: --shrinkage
     celltypes: all
   tian_pure_CELseq2:
@@ -283,7 +283,7 @@ cellassign:
     include_other: FALSE
     num_runs: 3
     B: 20
-    design_formula: ~\ path
+    design_formula: none
     extra_opts: --shrinkage
     celltypes: all
   tian_pure_Dropseq:
@@ -293,7 +293,7 @@ cellassign:
     include_other: FALSE
     num_runs: 3
     B: 20
-    design_formula: ~\ path
+    design_formula: none
     extra_opts: --shrinkage
     celltypes: all
   follicular_lk_full:
