@@ -1076,6 +1076,8 @@ rule compile_stats:
         cellassign_koh_noother=config['hierarchical_fits']['koh_cellassign_noother'],
         cellassign_koh_top=config['hierarchical_fits']['koh_cellassign_top'],
         cellassign_koh_bottom=config['hierarchical_fits']['koh_cellassign_bottom'],
+        cellassign_koh=config['external_analysis_results']['koh_cellassign'],
+        scina_koh=config['external_analysis_results']['koh_scina'],
     output:
         stats='{outdir}/stats/stats.tex'.format(outdir=config['outdir']),
     params:
@@ -1153,6 +1155,8 @@ rule compile_stats:
         '--liver_4_celltypes {params.liver_4_celltypes} '
         '--liver_all_celltypes {params.liver_all_celltypes} '
         '--liver_panglaodb_markers {params.liver_panglaodb_markers} '
+        '--cellassign_koh {input.cellassign_koh} '
+        '--scina_koh {input.scina_koh} '
         '--outfname {output.stats} '
         '>& {log}'
     
