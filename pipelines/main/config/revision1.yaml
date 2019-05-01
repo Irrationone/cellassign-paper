@@ -106,6 +106,8 @@ cellbench_settings:
       path: /datadrive/projects/cellassign-paper/resources/marker_lists/tian_30_73_markers.yaml
     tian_50:
       path: /datadrive/projects/cellassign-paper/resources/marker_lists/tian_50_73_markers.yaml
+    tian_73:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/tian_73_73_markers.yaml
 
 cellbench_results:
   fit_tian_pure: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure.rds

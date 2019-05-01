@@ -934,6 +934,7 @@ rule marker_gene_matrices_table:
         cellbench_gene_list_20=config['cellbench_settings']['marker_lists']['tian_20']['path'],
         cellbench_gene_list_30=config['cellbench_settings']['marker_lists']['tian_30']['path'],
         cellbench_gene_list_50=config['cellbench_settings']['marker_lists']['tian_50']['path'],
+        cellbench_gene_list_73=config['cellbench_settings']['marker_lists']['tian_73']['path'],
     output:
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
     params:
@@ -956,6 +957,7 @@ rule marker_gene_matrices_table:
         '--cellbench_gene_list_20 {input.cellbench_gene_list_20} '
         '--cellbench_gene_list_30 {input.cellbench_gene_list_30} '
         '--cellbench_gene_list_50 {input.cellbench_gene_list_50} '
+        '--cellbench_gene_list_73 {input.cellbench_gene_list_73} '
         '--outfname {output.marker_gene_matrix_table} '
         '>& {log}'
 
