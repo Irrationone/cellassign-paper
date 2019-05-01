@@ -10,7 +10,7 @@ rule all:
         fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir']),
         sim_performance_figure='{outdir}/figures/sim_performance_figure.pdf'.format(outdir=config['outdir']),
         fl_nonmalignant_figure='{outdir}/figures/fl_nonmalignant_figure.pdf'.format(outdir=config['outdir']),
-        fl_malignant_figure='{outdir}/figures/fl_malignant_figure.pdf'.format(outdir=config['outdir']),
+        #fl_malignant_figure='{outdir}/figures/fl_malignant_figure.pdf'.format(outdir=config['outdir']),
         hgsc_overview_figure='{outdir}/figures/hgsc_overview_figure.pdf'.format(outdir=config['outdir']),
         ## Supplemental figures
         sim_performance_b_cd8='{outdir}/supplemental_figures/sim_performance_b_cd8.pdf'.format(outdir=config['outdir']),
