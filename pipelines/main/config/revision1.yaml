@@ -1,0 +1,270 @@
+# Directories
+workdir: '/datadrive/projects/cellassign-paper/results/scratch/main/v13'
+outdir: '/datadrive/projects/cellassign-paper/results/outputs/main/v13'
+logdir: '/datadrive/projects/cellassign-paper/results/logs/main/v13'
+
+# Simulation results
+simulation_analysis_results:
+  deprob_result_dir: /datadrive/projects/cellassign-paper/results/outputs/simulation_analysis_v2/naive_cd4_vs_naive_cd8_fixed
+  wrongmarker_result_dir: /datadrive/projects/cellassign-paper/results/outputs/simulation_analysis_v2/b_vs_cd8_wrong_markers
+  deprob_result_b_cd8_dir: /datadrive/projects/cellassign-paper/results/outputs/simulation_analysis_v2/b_vs_cd8_fixed
+  wrongmarker_result_naivecd8_naivecd4_dir: /datadrive/projects/cellassign-paper/results/outputs/simulation_analysis_v2/naive_cd4_vs_naive_cd8_wrong_markers
+  wrongmarker_result_naivecd8_naivecd4_20marker_dir: /datadrive/projects/cellassign-paper/results/outputs/simulation_analysis_v2/naive_cd4_vs_naive_cd8_wrong_markers_20
+  novel_extra_dir: /datadrive/projects/cellassign-paper/results/outputs/novel_missing_simulation_analysis/custom_params
+
+method_description: /datadrive/projects/cellassign-paper/pipelines/main/config/method_description.yaml
+
+liver_results:
+  sce_normalized: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v2/sce_normalized/mcparland_liver_umap_100neighbours_2p5mindist.rds
+  cellassign_fit_3: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_3data_3markers.rds
+  cellassign_fit_4: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_3data_4markers.rds
+  cellassign_fit_11: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_3data_allmarkers.rds
+  scina_fit_3: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_3markers.rds
+  scina_fit_4: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_4markers.rds
+  scina_fit_11: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers.rds
+  scina_fit_11_0.8: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.8.rds
+  scina_fit_11_0.5: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.5.rds
+  scina_fit_11_0.2: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.2.rds
+  scina_fit_11_0.1: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.1.rds
+  scina_fit_11_0.1_bc: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_3data_allmarkers_0.1_bc.rds
+  ## Novel data results
+  cellassign_fit_novel1: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_4data_3markers.rds
+  cellassign_fit_novel8_raw: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_alldata_3markers.rds
+  cellassign_fit_novel8: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_alldata_3markers_revised.rds
+  scina_fit_novel1: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_4data_3markers.rds
+  scina_fit_novel8_raw: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_alldata_3markers.rds
+  scina_fit_novel8: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_alldata_3markers_revised.rds
+  ## PanglaoDB
+  cellassign_fit_panglaodb: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_panglaodb_canonical_revised.rds
+  ## All celltypes
+  cellassign_fit_all_raw: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_alldata_allmarkers.rds
+  cellassign_fit_all_revised: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/liver_alldata_allmarkers_revised2.rds
+  scina_fit_all_raw: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_alldata_allmarkers.rds
+  scina_fit_all_revised: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/liver_alldata_allmarkers_revised2.rds
+
+liver_plots:
+  extra_markers_celltypes:
+    - Hepatocytes
+    - Cholangiocytes
+    - Mature\ B\ cells
+  novel_marker_celltypes:
+    - Hepatocytes
+    - Cholangiocytes
+    - Mature\ B\ cells
+  celltypes_novel1:
+    - Hepatocytes
+    - Cholangiocytes
+    - Mature\ B\ cells
+    - NK\ cells
+  celltypes_novel8:
+    - Hepatocytes
+    - Cholangiocytes
+    - Mature\ B\ cells
+    - NK\ cells
+    - Macrophages
+    - ab\ T\ cells
+    - LSECs
+    - gd\ T\ cells
+    - Hepatic\ Stellate\ Cells
+    - Plasma\ cells
+    - Erythroid\ cells
+  panglaodb_celltypes:
+    - Hepatocytes
+    - Cholangiocytes
+  markers_t_b:
+    - MS4A1
+    - IGHD
+    - CD52
+    - LTB
+
+liver_analysis_settings:
+  marker_lists:
+    alltypes_raw:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_alltypes.yaml
+      include_other: TRUE
+    alltypes_revised:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_alltypes_revised2.yaml
+      include_other: TRUE
+    3types_revised: 
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/liver_mcparland_3types_revised.yaml
+      include_other: TRUE
+    panglaodb_canonical:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/liver_panglaodb_human_canonical_revised.yaml
+      include_other: TRUE
+
+fl_hgsc_combined_settings:
+  marker_lists:
+    fl_hgsc_combined:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/follicular_hgsc_combined.yaml
+      include_other: TRUE
+
+cellbench_settings:
+  marker_lists:
+    tian_20:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/tian_20_73_markers.yaml
+    tian_30:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/tian_30_73_markers.yaml
+    tian_50:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/tian_50_73_markers.yaml
+    tian_73:
+      path: /datadrive/projects/cellassign-paper/resources/marker_lists/tian_73_73_markers.yaml
+
+cellbench_results:
+  fit_tian_pure: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure.rds
+  fit_tian_pure_10x: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure_10x.rds
+  fit_tian_pure_celseq: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure_CELseq2.rds
+  fit_tian_pure_dropseq: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_pure_Dropseq.rds
+  fit_tian_20: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_20markers.rds
+  fit_tian_30: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_30markers.rds
+  fit_tian_50: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/tian_50markers.rds
+  sce_tian_3_10x: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v1/sce_normalized/tian_3_10x.rds
+  sce_tian_3_celseq: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v1/sce_normalized/tian_3_CELseq2.rds
+  sce_tian_3_dropseq: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v1/sce_normalized/tian_3_Dropseq.rds
+  sce_tian_3_mixture: /datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v2/sce_normalized/tian_mixture3.rds
+
+cellbench_config:
+  cell_lines:
+    - H1975
+    - H2228
+    - HCC827
+
+delta_deprobs:
+  - 0.15
+  - 0.25
+  - 0.35
+  - 0.45
+
+delta_deprobs_supp:
+  - 0.05
+  - 0.35
+
+deprob_methods:
+  - cellassign
+  - scina
+  - scina_0.1
+  - densitycut
+  - dynamicTreeCut
+  - phenograph
+  - SC3
+  - scmap
+  - seurat_0.4
+  - seurat_0.8
+  - seurat_1.2
+  - Zheng_cor
+
+eval_measures_to_report:
+  - accuracy
+  - micro_f1
+
+# Benchmarking results
+benchmarking_results:
+  timing_results: /datadrive/projects/cellassign-paper/results/outputs/benchmarking/v2/cellassign_times_summary.tsv
+
+# External analysis results
+external_analysis_results:
+  koh_annotated: /datadrive/projects/cellassign-paper/results/outputs/external/v1/koh/sce_annotated.rds
+  koh_cellassign: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/koh_full.rds
+  koh_scina: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/scina/koh_full.rds
+  koh_rho: /datadrive/projects/cellassign-paper/results/scratch/external/v1/koh/cellassign_rho.tsv
+
+# Follicular settings
+follicular_analysis_settings:
+  marker_lists:
+    small: 
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_small.yaml'
+      include_other: TRUE
+    big: 
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_big_merged.yaml'
+      include_other: TRUE
+    lambdakappa:
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/follicular_lambda_kappa.yaml'
+      include_other: TRUE
+
+# Follicular analysis results
+follicular_analysis_results:
+  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/sce_follicular_annotated_final.rds
+  sce_raw: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v5/sce_follicular.rds
+  sce_tcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/sce_annotated_subset/sce_follicular_tcells.rds
+  sce_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/sce_annotated_subset/sce_follicular_bcells.rds
+  sce_nonmalignant_bcell_annotated: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/sce_annotated_subset/sce_follicular_nonmalignant_bcells.rds
+  scvis_merged: /datadrive/projects/cellassign-paper/results/scratch/follicular_analysis/v5/sce_follicular_RLN_merged.rds
+  cellassign_specific_result: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/specific_assignments.rds
+  cellassign_lambda_kappa_result: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/lambda_kappa_assignments.rds
+  differential_expression: 
+    cytotoxic: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/differential_expression/ReactomePA/timepoint/cytotoxic
+    timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/differential_expression/ReactomePA/timepoint
+    malignant_timepoint: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/differential_expression/ReactomePA/malignant_timepoint
+    timepoint_fgsea: /datadrive/projects/cellassign-paper/results/outputs/follicular_analysis/v5/differential_expression/fgsea/timepoint
+
+# HGSC settings
+hgsc_analysis_settings:
+  marker_lists:
+    small:
+      path: '/datadrive/projects/cellassign-paper/resources/marker_lists/hgsc_small.yaml'
+      include_other: TRUE
+
+# HGSC analysis results
+hgsc_analysis_results:
+  sce_annotated: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v3/sce_hgsc_annotated_final.rds
+  sce_raw: /datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v3/sce_hgsc.rds
+  differential_expression: 
+    site: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v3/differential_expression/ReactomePA/site
+    site_fgsea: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v3/differential_expression/fgsea/site
+    epithelial_fgsea: /datadrive/projects/cellassign-paper/results/outputs/hgsc_analysis/v3/differential_expression/fgsea/epithelial_clusters
+
+# Hierarchical fits
+hierarchical_fits:
+  fit_combined: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_hgsc_combined.rds
+  fit_hgsc: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/hgsc_celltype.rds
+  fit_fl: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_lk_full.rds
+  fit_fl_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_lk_full_noother.rds
+  fit_fl_top_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_broad_noother.rds
+  fit_fl_bottom_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/follicular_lk_separate_noother.rds
+  koh_cellassign_noother: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/koh_full.rds
+  koh_cellassign_top: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/koh_high.rds
+  koh_cellassign_bottom: /datadrive/projects/cellassign-paper/results/outputs/real_data_benchmarking/v2/cellassign/koh_low.rds
+
+
+# Shih analysis results
+shih_analysis_results:
+  sce_normalized: /datadrive/projects/cellassign-paper/results/scratch/hgsc_analysis/v3/sce_shih_normal_normalized.rds
+
+# Dimensionality reduction type to plot
+plot_dimreduce_type: 'UMAP'
+
+# Follicular celltype labels
+follicular_celltype_labels:
+  tcell:
+    - 'Tfh'
+    - 'CD4\ T\ cells'
+    - 'Cytotoxic\ T\ cells'
+  bcell:
+    - 'B\ cells'
+    - 'B\ cells\ \(malignant\)'
+
+# Follicular metadata
+follicular_metadata:
+  patient_progression_file: "/datadrive/projects/cellassign-paper/metadata/patient_progression.tsv"
+
+# External data
+external:
+  azizi_s4: "/datadrive/projects/cellassign-paper/resources/external/azizi2018/Table_S4.xls"
+
+# Winsorized expression thresholds
+winsorized_expression:
+  markers: 3
+  lambda_kappa: 6
+  proliferation: 3
+  hgsc_markers: 4
+  hgsc_epithelial_cluster_markers: 3
+  hgsc_hla_markers: 8
+  hgsc_hypoxia_markers: 4
+  hgsc_supplemental_markers: 4
+  shih_normal_markers: 4
+  hgsc_evaluation: 4
+  follicular_evaluation: 4
+
+# Supptable settings
+supptable_settings:
+  de:
+    padj_threshold: 0.05

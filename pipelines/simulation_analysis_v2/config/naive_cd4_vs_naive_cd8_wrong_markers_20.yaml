@@ -1,0 +1,69 @@
+workdir: ../../results/scratch/simulation_analysis_v2/naive_cd4_vs_naive_cd8_wrong_markers_20
+outdir: ../../results/outputs/simulation_analysis_v2/naive_cd4_vs_naive_cd8_wrong_markers_20
+logdir: ../../results/logs/simulation_analysis_v2/naive_cd4_vs_naive_cd8_wrong_markers_20
+
+
+simulation_settings:
+  variables:
+    de_prob:
+      - 0.25
+    down_prob:
+      - 0.5
+    seed:
+      - 8123
+      - 3143
+      - 8423
+      - 1719
+      - 5011
+      - 1594
+      - 3419
+      - 1258
+      - 6255
+  constants:
+    num_cells: 1500
+    num_groups: 3
+    group_probs:
+      - 0.33
+      - 0.33 
+      - 0.34
+    num_batches: 1
+    batch_probs:
+      - 1
+    de_facloc: 0.028
+    de_facscale: 0.015
+    de_nu: 1.35
+    de_min: 1
+    de_max: 1000
+    batch_facloc: 1
+    batch_facscale: 1
+    base_params: ../cellassign-sim-comparison/data/sce_t4k_params.rds
+
+cluster_settings:
+  dimreduce_method: PCA
+  clustering_methods:
+  conda_env: r-tensorflow
+  fc_percentile: 0.95
+  expr_percentile: 0.9
+  frac_genes: 1
+  max_genes: 
+    - 15
+  test_proportion: 1
+
+assign_celltype_settings:
+  methods:
+    - cellassign
+  conda_env: r-tensorflow
+  fc_percentile: 0.95
+  expr_percentile: 0.9
+  frac_genes: 1
+  max_genes: 
+    - 20
+  wrong_marker_proportion: 
+    - 0
+    - 0.1
+    - 0.2
+    - 0.3
+    - 0.4
+    - 0.5
+    - 0.6
+  test_proportion: 1

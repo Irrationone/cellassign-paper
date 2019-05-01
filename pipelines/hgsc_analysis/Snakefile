@@ -1,6 +1,7 @@
-configfile: "config/v1.yaml"
+configfile: "config/revision1.yaml"
 
-singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.6"
+# singularity: "docker://alzhang/scrna-analysis-follicular-3.5:v1.6"
+singularity: "docker://alzhang/spectrum-master-rstudio:v1.4"
 
 rule all:
     input:

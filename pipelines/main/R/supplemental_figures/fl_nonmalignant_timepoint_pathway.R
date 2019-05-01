@@ -61,10 +61,10 @@ legend_vals <- lapply(pathway_tables, function(x) {
   return(list(padj=res$p.adjust, size=res$Count))
 })
 
-padj_limits <- c(min(sapply(legend_vals, function(x) x$padj)),
-                 max(sapply(legend_vals, function(x) x$padj)))
-size_limits <- c(min(sapply(legend_vals, function(x) x$size)),
-                 max(sapply(legend_vals, function(x) x$size)))
+padj_limits <- c(min(unlist(sapply(legend_vals, function(x) x$padj))),
+                 max(unlist(sapply(legend_vals, function(x) x$padj))))
+size_limits <- c(min(unlist(sapply(legend_vals, function(x) x$size))),
+                 max(unlist(sapply(legend_vals, function(x) x$size))))
 
 fl1018_cytotoxic_up_plot <- plot_pathway_network(de_result$FL1018$cytotoxic$pathway$up %>%
                                                    filter_pathway_result(), shorten_names = TRUE,

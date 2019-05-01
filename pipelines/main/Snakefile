@@ -1,7 +1,8 @@
 
-configfile: 'config/v4.yaml'
+configfile: 'config/revision1.yaml'
 
-singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.12"
+#singularity: "docker://alzhang/scrna-analysis-main-3.5:v1.12"
+singularity: "docker://alzhang/spectrum-master-rstudio:v1.6"
 
 rule all:
     input:
@@ -9,11 +10,12 @@ rule all:
         fl_overview_figure='{outdir}/figures/fl_overview_figure.pdf'.format(outdir=config['outdir']),
         sim_performance_figure='{outdir}/figures/sim_performance_figure.pdf'.format(outdir=config['outdir']),
         fl_nonmalignant_figure='{outdir}/figures/fl_nonmalignant_figure.pdf'.format(outdir=config['outdir']),
-        fl_malignant_figure='{outdir}/figures/fl_malignant_figure.pdf'.format(outdir=config['outdir']),
+        #fl_malignant_figure='{outdir}/figures/fl_malignant_figure.pdf'.format(outdir=config['outdir']),
         hgsc_overview_figure='{outdir}/figures/hgsc_overview_figure.pdf'.format(outdir=config['outdir']),
         ## Supplemental figures
         sim_performance_b_cd8='{outdir}/supplemental_figures/sim_performance_b_cd8.pdf'.format(outdir=config['outdir']),
-        wrong_marker_figure='{outdir}/supplemental_figures/wrong_marker_naivecd8_naivecd4.pdf'.format(outdir=config['outdir']),
+        sim_performance_correlation='{outdir}/supplemental_figures/sim_performance_correlation.pdf'.format(outdir=config['outdir']),
+        sim_performance_naive_cd4_naive_cd8_figure='{outdir}/supplemental_figures/sim_performance_naivecd8_naivecd4.pdf'.format(outdir=config['outdir']),
         benchmarking_figure='{outdir}/supplemental_figures/benchmarking_evaluation.pdf'.format(outdir=config['outdir']),
         real_data_evaluation_figure='{outdir}/supplemental_figures/real_data_evaluation.pdf'.format(outdir=config['outdir']),
         fl_markers_figure='{outdir}/supplemental_figures/fl_markers_supplemental.pdf'.format(outdir=config['outdir']),
@@ -30,6 +32,13 @@ rule all:
         hgsc_malignant_cluster_de='{outdir}/supplemental_figures/hgsc_malignant_cluster_de.pdf'.format(outdir=config['outdir']),
         cellassign_hgsc_evaluation='{outdir}/supplemental_figures/cellassign_hgsc_evaluation.pdf'.format(outdir=config['outdir']),
         cellassign_follicular_evaluation='{outdir}/supplemental_figures/cellassign_follicular_evaluation.pdf'.format(outdir=config['outdir']),
+        liver_extra_celltype_figure='{outdir}/supplemental_figures/liver_extra_celltypes.pdf'.format(outdir=config['outdir']),
+        liver_novel_celltype_figure='{outdir}/supplemental_figures/liver_novel_celltypes.pdf'.format(outdir=config['outdir']),
+        liver_panglaodb_figure='{outdir}/supplemental_figures/liver_panglaodb_figure.pdf'.format(outdir=config['outdir']),
+        cellassign_hierarchical='{outdir}/supplemental_figures/cellassign_hierarchical_plot.pdf'.format(outdir=config['outdir']),
+        cellbench_figure='{outdir}/supplemental_figures/cellbench_plot.pdf'.format(outdir=config['outdir']),
+        liver_all_celltype_figure='{outdir}/supplemental_figures/liver_all_celltypes.pdf'.format(outdir=config['outdir']),
+        liver_marker_expression_figure='{outdir}/supplemental_figures/liver_marker_expression.pdf'.format(outdir=config['outdir']),
         ## Supplemental tables
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
@@ -44,13 +53,20 @@ rule all:
 rule simulation_performance_figure:
     input:
         deprob_result_dir=config['simulation_analysis_results']['deprob_result_dir'],
-        wrongmarker_result_dir=config['simulation_analysis_results']['wrongmarker_result_dir'],
+        novel_extra_result_dir=config['simulation_analysis_results']['novel_extra_dir'],
+        sce_liver=config['liver_results']['sce_normalized'],
+        sce_mix_merged='{outdir}/supplemental_figures/sce_tian_mixture_merged.rds'.format(outdir=config['workdir']),
+        fit_tian=config['cellbench_results']['fit_tian_30'],
+        cellassign_fit_novel8=config['liver_results']['cellassign_fit_novel8'],
     output:
         sim_performance_figure='{outdir}/figures/sim_performance_figure.pdf'.format(outdir=config['outdir'])
     params:
         name='simulation-performance-figure',
-        delta_deprobs=config['delta_deprobs'],
         deprob_methods=config['deprob_methods'],
+        method_description=config['method_description'],
+        liver_marker_types=config['liver_plots']['novel_marker_celltypes'],
+        cell_lines=config['cellbench_config']['cell_lines'],
+        dimreduce_type='UMAP',
     log:
         '{logdir}/logs/simulation_performance_figure.log'.format(logdir=config['logdir'])
     benchmark:
@@ -58,9 +74,16 @@ rule simulation_performance_figure:
     shell:
         'Rscript R/main_figures/simulation_overview_figure.R '
         '--deprob_result_dir {input.deprob_result_dir} '
-        '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
-        '--delta_deprobs {params.delta_deprobs} '
+        '--novel_extra_result_dir {input.novel_extra_result_dir} '
+        '--sce_liver {input.sce_liver} '
+        '--cellassign_fit_novel8 {input.cellassign_fit_novel8} '
+        '--sce_mix_merged {input.sce_mix_merged} '
+        '--fit_tian {input.fit_tian} '
         '--deprob_methods {params.deprob_methods} '
+        '--method_description {params.method_description} '
+        '--cell_lines {params.cell_lines} '
+        '--liver_marker_types {params.liver_marker_types} '
+        '--dimreduce_type {params.dimreduce_type} '
         '--outfname {output.sim_performance_figure} '
         '>& {log}'
 
@@ -192,12 +215,14 @@ rule hgsc_overview_figure:
 rule simulation_performance_b_cd8:
     input:
         deprob_result_dir=config['simulation_analysis_results']['deprob_result_b_cd8_dir'],
+        wrongmarker_result_dir=config['simulation_analysis_results']['wrongmarker_result_dir'],
     output:
         sim_performance_b_cd8='{outdir}/supplemental_figures/sim_performance_b_cd8.pdf'.format(outdir=config['outdir'])
     params:
         name='suppfigure-simulation-performance-b-cd8',
         delta_deprobs=config['delta_deprobs_supp'],
         deprob_methods=config['deprob_methods'],
+        method_description=config['method_description'],
     log:
         '{logdir}/logs/simulation_performance_b_cd8.log'.format(logdir=config['logdir'])
     benchmark:
@@ -205,28 +230,62 @@ rule simulation_performance_b_cd8:
     shell:
         'Rscript R/supplemental_figures/simulation_b_cd8.R '
         '--deprob_result_dir {input.deprob_result_dir} '
+        '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
         '--delta_deprobs {params.delta_deprobs} '
         '--deprob_methods {params.deprob_methods} '
+        '--method_description {params.method_description} '
         '--outfname {output.sim_performance_b_cd8} '
         '>& {log}'
 
-rule wrong_marker_naivecd8_naivecd4:
+rule simulation_performance_correlation_mapping:
     input:
+        deprob_result_dir1=config['simulation_analysis_results']['deprob_result_b_cd8_dir'],
+        deprob_result_dir2=config['simulation_analysis_results']['deprob_result_dir'],
+    output:
+        sim_performance_correlation='{outdir}/supplemental_figures/sim_performance_correlation.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-simulation-performance-correlation',
+        delta_deprobs=config['delta_deprobs_supp'],
+        deprob_methods=config['deprob_methods'],
+        method_description=config['method_description'],
+    log:
+        '{logdir}/logs/simulation_performance_correlation_mapping.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/simulation_performance_correlation_mapping.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/simulation_correlation_based_mapping.R '
+        '--deprob_result_dir1 {input.deprob_result_dir1} '
+        '--deprob_result_dir2 {input.deprob_result_dir2} '
+        '--deprob_methods {params.deprob_methods} '
+        '--method_description {params.method_description} '
+        '--outfname {output.sim_performance_correlation} '
+        '>& {log}'
+
+rule simulation_performance_naivecd8_naivecd4:
+    input:
+        deprob_result_dir=config['simulation_analysis_results']['deprob_result_dir'],
         wrongmarker_result_dir=config['simulation_analysis_results']['wrongmarker_result_naivecd8_naivecd4_dir'],
         wrongmarker_result_dir2=config['simulation_analysis_results']['wrongmarker_result_naivecd8_naivecd4_20marker_dir'],
     output:
-        wrong_marker_figure='{outdir}/supplemental_figures/wrong_marker_naivecd8_naivecd4.pdf'.format(outdir=config['outdir'])
+        sim_performance_naivecd8_naivecd4_figure='{outdir}/supplemental_figures/sim_performance_naivecd8_naivecd4.pdf'.format(outdir=config['outdir'])
     params:
-        name='suppfigure-wrong-marker-naivecd8-naivecd4',
+        name='suppfigure-simulation-performance-naivecd8-naivecd4',
+        method_description=config['method_description'],
+        delta_deprobs=config['delta_deprobs'],
+        deprob_methods=config['deprob_methods'],
     log:
-        '{logdir}/logs/wrong_marker_naivecd8_naivecd4.log'.format(logdir=config['logdir'])
+        '{logdir}/logs/simulation_performance_naivecd8_naivecd4.log'.format(logdir=config['logdir'])
     benchmark:
-        '{logdir}/benchmarks/wrong_marker_naivecd8_naivecd4.txt'.format(logdir=config['logdir'])
+        '{logdir}/benchmarks/simulation_performance_naivecd8_naivecd4.txt'.format(logdir=config['logdir'])
     shell:
-        'Rscript R/supplemental_figures/wrong_marker_naive_cd4_naive_cd8.R '
+        'Rscript R/supplemental_figures/simulation_naive_cd4_naive_cd8.R '
+        '--deprob_result_dir {input.deprob_result_dir} '
         '--wrongmarker_result_dir {input.wrongmarker_result_dir} '
         '--wrongmarker_result_dir2 {input.wrongmarker_result_dir2} '
-        '--outfname {output.wrong_marker_figure} '
+        '--method_description {params.method_description} '
+        '--delta_deprobs {params.delta_deprobs} '
+        '--deprob_methods {params.deprob_methods} '
+        '--outfname {output.sim_performance_naivecd8_naivecd4_figure} '
         '>& {log}'
 
 rule benchmarking_evaluation:
@@ -246,9 +305,232 @@ rule benchmarking_evaluation:
         '--outfname {output.benchmarking_figure} '
         '>& {log}'
 
+rule liver_extra_celltypes:
+    input:
+        sce_liver=config['liver_results']['sce_normalized'],
+        cellassign_fit_3=config['liver_results']['cellassign_fit_3'],
+        cellassign_fit_4=config['liver_results']['cellassign_fit_4'],
+        cellassign_fit_11=config['liver_results']['cellassign_fit_11'],
+        scina_fit_3=config['liver_results']['scina_fit_3'],
+        scina_fit_4=config['liver_results']['scina_fit_4'],
+        scina_fit_11=config['liver_results']['scina_fit_11'],
+        scina_fit_11_80=config['liver_results']['scina_fit_11_0.8'],
+        scina_fit_11_50=config['liver_results']['scina_fit_11_0.5'],
+        scina_fit_11_20=config['liver_results']['scina_fit_11_0.2'],
+        scina_fit_11_10=config['liver_results']['scina_fit_11_0.1'],
+        scina_fit_11_10_bc=config['liver_results']['scina_fit_11_0.1_bc'],
+    output:
+        liver_extra_celltype_figure='{outdir}/supplemental_figures/liver_extra_celltypes.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-liver-extra-celltypes',
+        dimreduce_type='UMAP',
+        celltypes_to_subset=config['liver_plots']['extra_markers_celltypes'],
+    log:
+        '{logdir}/logs/liver_extra_celltypes.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/liver_extra_celltypes.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_extra_celltype.R '
+        '--sce_liver {input.sce_liver} '
+        '--cellassign_fit_3 {input.cellassign_fit_3} '
+        '--cellassign_fit_4 {input.cellassign_fit_4} '
+        '--cellassign_fit_11 {input.cellassign_fit_11} '
+        '--scina_fit_3 {input.scina_fit_3} '
+        '--scina_fit_4 {input.scina_fit_4} '
+        '--scina_fit_11 {input.scina_fit_11} '
+        '--scina_fit_11_80 {input.scina_fit_11_80} '
+        '--scina_fit_11_50 {input.scina_fit_11_50} '
+        '--scina_fit_11_20 {input.scina_fit_11_20} '
+        '--scina_fit_11_10 {input.scina_fit_11_10} '
+        '--scina_fit_11_10_bc {input.scina_fit_11_10_bc} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--celltypes {params.celltypes_to_subset} '
+        '--outfname {output.liver_extra_celltype_figure} '
+        '>& {log}'
+
+rule liver_novel_celltypes:
+    input:
+        sce_liver=config['liver_results']['sce_normalized'],
+        cellassign_fit_novel1=config['liver_results']['cellassign_fit_novel1'],
+        cellassign_fit_novel8_raw=config['liver_results']['cellassign_fit_novel8_raw'],
+        scina_fit_novel1=config['liver_results']['scina_fit_novel1'],
+        scina_fit_novel8_raw=config['liver_results']['scina_fit_novel8_raw'],
+        scina_fit_novel8=config['liver_results']['scina_fit_novel8'],
+    output:
+        liver_novel_celltype_figure='{outdir}/supplemental_figures/liver_novel_celltypes.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-liver-novel-celltypes',
+        dimreduce_type='UMAP',
+        marker_types=config['liver_plots']['novel_marker_celltypes'],
+        celltypes_novel1=config['liver_plots']['celltypes_novel1'],
+        celltypes_novel8=config['liver_plots']['celltypes_novel8'],
+    log:
+        '{logdir}/logs/liver_novel_celltypes.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/liver_novel_celltypes.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_novel_celltype.R '
+        '--sce_liver {input.sce_liver} '
+        '--marker_types {params.marker_types} '
+        '--celltypes_novel1 {params.celltypes_novel1} '
+        '--celltypes_novel8 {params.celltypes_novel8} '
+        '--cellassign_fit_novel1 {input.cellassign_fit_novel1} '
+        '--cellassign_fit_novel8_raw {input.cellassign_fit_novel8_raw} '
+        '--scina_fit_novel1 {input.scina_fit_novel1} '
+        '--scina_fit_novel8_raw {input.scina_fit_novel8_raw} '
+        '--scina_fit_novel8 {input.scina_fit_novel8} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.liver_novel_celltype_figure} '
+        '>& {log}'
+
+rule liver_all_celltypes:
+    input:
+        sce_liver=config['liver_results']['sce_normalized'],
+        cellassign_fit_raw=config['liver_results']['cellassign_fit_all_raw'],
+        cellassign_fit_revised=config['liver_results']['cellassign_fit_all_revised'],
+        scina_fit_raw=config['liver_results']['scina_fit_all_raw'],
+        scina_fit_revised=config['liver_results']['scina_fit_all_revised'],
+    output:
+        liver_all_celltype_figure='{outdir}/supplemental_figures/liver_all_celltypes.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-liver-all-celltypes',
+        dimreduce_type='UMAP',
+    log:
+        '{logdir}/logs/liver_all_celltypes.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/liver_all_celltypes.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_all_celltypes.R '
+        '--sce_liver {input.sce_liver} '
+        '--cellassign_fit_raw {input.cellassign_fit_raw} '
+        '--cellassign_fit_revised {input.cellassign_fit_revised} '
+        '--scina_fit_raw {input.scina_fit_raw} '
+        '--scina_fit_revised {input.scina_fit_revised} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.liver_all_celltype_figure} '
+        '>& {log}'
+
+rule liver_panglaodb:
+    input:
+        sce_liver=config['liver_results']['sce_normalized'],
+        cellassign_fit_db=config['liver_results']['cellassign_fit_panglaodb'],
+    output:
+        liver_panglaodb_figure='{outdir}/supplemental_figures/liver_panglaodb_figure.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-liver-panglaodb',
+        dimreduce_type='UMAP',
+        marker_types=config['liver_plots']['panglaodb_celltypes'],
+    log:
+        '{logdir}/logs/liver_panglaodb.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/liver_panglaodb.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_external_db_plot.R '
+        '--sce_liver {input.sce_liver} '
+        '--marker_types {params.marker_types} '
+        '--cellassign_fit_liver {input.cellassign_fit_db} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.liver_panglaodb_figure} '
+        '>& {log}'
+
+rule liver_marker_expression:
+    input:
+        sce_liver=config['liver_results']['sce_normalized'],
+    output:
+        liver_marker_expression_figure='{outdir}/supplemental_figures/liver_marker_expression.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-liver-marker-expression',
+        dimreduce_type='UMAP',
+        marker_genes=config['liver_plots']['markers_t_b'],
+        expr_threshold=config['winsorized_expression']['markers'],
+    log:
+        '{logdir}/logs/liver_marker_expression.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/liver_marker_expression.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/liver_marker_genes.R '
+        '--sce {input.sce_liver} '
+        '--marker_genes {params.marker_genes} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--winsorized_expression_threshold {params.expr_threshold} '
+        '--outfname {output.liver_marker_expression_figure} '
+        '>& {log}'
+
+rule merge_cellbench_pure:
+    input:
+        sce_tian_3_10x=config['cellbench_results']['sce_tian_3_10x'],
+        sce_tian_3_celseq=config['cellbench_results']['sce_tian_3_celseq'],
+        sce_tian_3_dropseq=config['cellbench_results']['sce_tian_3_dropseq'],
+    output:
+        sce_pure_merged='{outdir}/supplemental_figures/sce_tian_pure_merged.rds'.format(outdir=config['workdir']),
+    params:
+        name='merge-cellbench-pure',
+    log:
+        '{logdir}/logs/merge_cellbench_pure.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/merge_cellbench_pure.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/merge_sces.R '
+        '--sces {input.sce_tian_3_10x} {input.sce_tian_3_celseq} {input.sce_tian_3_dropseq} '
+        '--sample_ids 10x CELSeq2 Dropseq '
+        '--outfname {output.sce_pure_merged} '
+        '>& {log}'
+
+rule merge_cellbench_mix:
+    input:
+        sce_tian_3_celseq=config['cellbench_results']['sce_tian_3_celseq'],
+        sce_tian_3_mixture=config['cellbench_results']['sce_tian_3_mixture'],
+    output:
+        sce_mix_merged='{outdir}/supplemental_figures/sce_tian_mixture_merged.rds'.format(outdir=config['workdir']),
+    params:
+        name='merge-cellbench-mix',
+    log:
+        '{logdir}/logs/merge_cellbench_mix.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/merge_cellbench_mix.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/merge_sces.R '
+        '--sces {input.sce_tian_3_celseq} {input.sce_tian_3_mixture} '
+        '--sample_ids CELSeq2 mixture '
+        '--outfname {output.sce_mix_merged} '
+        '>& {log}'
+
+rule cellbench_plot:
+    input:
+        sce_mix_merged='{outdir}/supplemental_figures/sce_tian_mixture_merged.rds'.format(outdir=config['workdir']),
+        sce_pure_merged='{outdir}/supplemental_figures/sce_tian_pure_merged.rds'.format(outdir=config['workdir']),
+        fit_tian_pure=config['cellbench_results']['fit_tian_pure'],
+        fit_tian_20=config['cellbench_results']['fit_tian_20'],
+        fit_tian_30=config['cellbench_results']['fit_tian_30'],
+        fit_tian_50=config['cellbench_results']['fit_tian_50'],
+    output:
+        cellbench_figure='{outdir}/supplemental_figures/cellbench_plot.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-cellbench-plot',
+        dimreduce_type='TSNE',
+        cell_lines=config['cellbench_config']['cell_lines'],
+    log:
+        '{logdir}/logs/cellbench_plot.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/cellbench_plot.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/cellbench_plot.R '
+        '--sce_pure_merged {input.sce_pure_merged} '
+        '--sce_mix_merged {input.sce_mix_merged} '
+        '--fit_tian_pure {input.fit_tian_pure} '
+        '--fit_tian_20 {input.fit_tian_20} '
+        '--fit_tian_30 {input.fit_tian_30} '
+        '--fit_tian_50 {input.fit_tian_50} '
+        '--cell_lines {params.cell_lines} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.cellbench_figure} '
+        '>& {log}'
+
 rule real_data_evaluation:
     input:
         koh_annotated=config['external_analysis_results']['koh_annotated'],
+        cellassign_fit=config['external_analysis_results']['koh_cellassign'],
+        scina_fit=config['external_analysis_results']['koh_scina'],
     output:
         real_data_evaluation_figure='{outdir}/supplemental_figures/real_data_evaluation.pdf'.format(outdir=config['outdir'])
     params:
@@ -261,6 +543,8 @@ rule real_data_evaluation:
     shell:
         'Rscript R/supplemental_figures/cellassign_real_data_evaluation.R '
         '--koh_annotated {input.koh_annotated} '
+        '--cellassign_fit {input.cellassign_fit} '
+        '--scina_fit {input.scina_fit} '
         '--dimreduce_type {params.dimreduce_type} '
         '--outfname {output.real_data_evaluation_figure} '
         '>& {log}'
@@ -535,7 +819,71 @@ rule cellassign_follicular_evaluation:
         '--winsorized_expression_threshold {params.expr_threshold} '
         '--outfname {output.cellassign_follicular_evaluation} '
         '>& {log}'
-    
+
+rule merge_sce_fl_hgsc:
+    input:
+        sce_fl=config['follicular_analysis_results']['sce_annotated'],
+        sce_hgsc=config['hgsc_analysis_results']['sce_annotated'],
+    output:
+        fl_hgsc_merged='{outdir}/supplemental_figures/sce_follicular_hgsc_merged.rds'.format(outdir=config['workdir']),
+    params:
+        name='merge-sce-fl-hgsc',
+    log:
+        '{logdir}/logs/merge_sce_fl_hgsc.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/merge_sce_fl_hgsc.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/merge_sces.R '
+        '--sces {input.sce_fl} {input.sce_hgsc} '
+        '--sample_ids fl hgsc '
+        '--outfname {output.fl_hgsc_merged} '
+        '>& {log}'
+
+rule cellassign_hierarchical:
+    input:
+        sce_hgsc=config['hgsc_analysis_results']['sce_annotated'],
+        sce_fl=config['follicular_analysis_results']['sce_annotated'],
+        sce_fl_lk=config['follicular_analysis_results']['sce_nonmalignant_bcell_annotated'],
+        sce_fl_hgsc_merged='{outdir}/supplemental_figures/sce_follicular_hgsc_merged.rds'.format(outdir=config['workdir']),
+        fit_combined=config['hierarchical_fits']['fit_combined'],
+        fit_fl=config['hierarchical_fits']['fit_fl'],
+        fit_hgsc=config['hierarchical_fits']['fit_hgsc'],
+        fit_fl_noother=config['hierarchical_fits']['fit_fl_noother'],
+        fit_fl_top=config['hierarchical_fits']['fit_fl_top_noother'],
+        fit_fl_bottom=config['hierarchical_fits']['fit_fl_bottom_noother'],
+        sce_koh=config['external_analysis_results']['koh_annotated'],
+        fit_koh_noother=config['hierarchical_fits']['koh_cellassign_noother'],
+        fit_koh_top=config['hierarchical_fits']['koh_cellassign_top'],
+        fit_koh_bottom=config['hierarchical_fits']['koh_cellassign_bottom'],
+    output:
+        cellassign_hierarchical='{outdir}/supplemental_figures/cellassign_hierarchical_plot.pdf'.format(outdir=config['outdir'])
+    params:
+        name='suppfigure-cellassign-hierarchical',
+        dimreduce_type=config['plot_dimreduce_type'],
+    log:
+        '{logdir}/logs/cellassign_hierarchical.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/cellassign_hierarchical.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/supplemental_figures/hierarchical_plot.R '
+        '--sce_hgsc {input.sce_hgsc} '
+        '--sce_follicular {input.sce_fl} '
+        '--sce_follicular_lk {input.sce_fl_lk} '
+        '--sce_fl_hgsc_merged {input.sce_fl_hgsc_merged} '
+        '--fit_combined {input.fit_combined} '
+        '--fit_hgsc {input.fit_hgsc} '
+        '--fit_fl {input.fit_fl} '
+        '--fit_fl_noother {input.fit_fl_noother} '
+        '--fit_fl_hierarchical_top {input.fit_fl_top} '
+        '--fit_fl_hierarchical_bottom {input.fit_fl_bottom} '
+        '--sce_koh {input.sce_koh} '
+        '--fit_koh {input.fit_koh_noother} '
+        '--fit_koh_hierarchical_top {input.fit_koh_top} '
+        '--fit_koh_hierarchical_bottom {input.fit_koh_bottom} '
+        '--dimreduce_type {params.dimreduce_type} '
+        '--outfname {output.cellassign_hierarchical} '
+        '>& {log}'
+
 
 
 ## Supplemental Tables
@@ -546,12 +894,14 @@ rule simulation_performance_table:
         deprob_result_dir_b_cd8=config['simulation_analysis_results']['deprob_result_b_cd8_dir'],
         wrongmarker_result_dir_naivecd8_naivecd4=config['simulation_analysis_results']['wrongmarker_result_naivecd8_naivecd4_dir'],
         wrongmarker_result_dir_b_cd8=config['simulation_analysis_results']['wrongmarker_result_dir'],
+        novel_extra_result_dir=config['simulation_analysis_results']['novel_extra_dir'],
     output:
         simulation_performance_table='{outdir}/supplemental_tables/simulation_performance_table.xlsx'.format(outdir=config['outdir']),
     params:
         name='supptable-simulation-performance-table',
         deprob_methods=config['deprob_methods'],
         eval_measures=config['eval_measures_to_report'],
+        method_description=config['method_description'],
     log:
         '{logdir}/logs/simulation_performance_table.log'.format(logdir=config['logdir'])
     benchmark:
@@ -562,8 +912,10 @@ rule simulation_performance_table:
         '--deprob_result_dir_b_cd8 {input.deprob_result_dir_b_cd8} '
         '--wrongmarker_result_dir_naivecd8_naivecd4 {input.wrongmarker_result_dir_naivecd8_naivecd4} '
         '--wrongmarker_result_dir_b_cd8 {input.wrongmarker_result_dir_b_cd8} '
+        '--novel_extra_result_dir {input.novel_extra_result_dir} '
         '--deprob_methods {params.deprob_methods} '
         '--eval_measures {params.eval_measures} '
+        '--method_description {params.method_description} '
         '--outfname {output.simulation_performance_table} '
         '>& {log}'
 
@@ -574,13 +926,19 @@ rule marker_gene_matrices_table:
         follicular_gene_list_specific=config['follicular_analysis_settings']['marker_lists']['big']['path'],
         follicular_gene_list_lambda_kappa=config['follicular_analysis_settings']['marker_lists']['lambdakappa']['path'],
         hgsc_gene_list=config['hgsc_analysis_settings']['marker_lists']['small']['path'],
+        fl_hgsc_gene_list=config['fl_hgsc_combined_settings']['marker_lists']['fl_hgsc_combined']['path'],
+        mcparland_alltypes_raw_gene_list=config['liver_analysis_settings']['marker_lists']['alltypes_raw']['path'],
+        mcparland_alltypes_revised_gene_list=config['liver_analysis_settings']['marker_lists']['alltypes_revised']['path'],
+        mcparland_3types_revised=config['liver_analysis_settings']['marker_lists']['3types_revised']['path'],
+        panglaodb_canonical=config['liver_analysis_settings']['marker_lists']['panglaodb_canonical']['path'],
+        cellbench_gene_list_20=config['cellbench_settings']['marker_lists']['tian_20']['path'],
+        cellbench_gene_list_30=config['cellbench_settings']['marker_lists']['tian_30']['path'],
+        cellbench_gene_list_50=config['cellbench_settings']['marker_lists']['tian_50']['path'],
+        cellbench_gene_list_73=config['cellbench_settings']['marker_lists']['tian_73']['path'],
     output:
         marker_gene_matrix_table='{outdir}/supplemental_tables/marker_gene_matrix_table.xlsx'.format(outdir=config['outdir']),
     params:
         name='supptable-marker-gene-matrices',
-        follicular_specific_other=config['follicular_analysis_settings']['marker_lists']['big']['include_other'],
-        follicular_lk_other=config['follicular_analysis_settings']['marker_lists']['lambdakappa']['include_other'],
-        hgsc_other=config['hgsc_analysis_settings']['marker_lists']['small']['include_other'],
     log:
         '{logdir}/logs/marker_gene_matrices_table.log'.format(logdir=config['logdir'])
     benchmark:
@@ -590,10 +948,16 @@ rule marker_gene_matrices_table:
         '--koh_rho {input.koh_rho} '
         '--follicular_gene_list_specific {input.follicular_gene_list_specific} '
         '--follicular_gene_list_lambda_kappa {input.follicular_gene_list_lambda_kappa} '
-        '--follicular_specific_other {params.follicular_specific_other} '
-        '--follicular_lk_other {params.follicular_lk_other} '
         '--hgsc_gene_list {input.hgsc_gene_list} '
-        '--hgsc_other {params.hgsc_other} '
+        '--hgsc_follicular_gene_list_combined {input.fl_hgsc_gene_list} '
+        '--mcparland_gene_list_raw {input.mcparland_alltypes_raw_gene_list} '
+        '--mcparland_gene_list_revised {input.mcparland_alltypes_revised_gene_list} '
+        '--mcparland_gene_list_3types_revised {input.mcparland_3types_revised} '
+        '--liver_panglaodb_gene_list {input.panglaodb_canonical} '
+        '--cellbench_gene_list_20 {input.cellbench_gene_list_20} '
+        '--cellbench_gene_list_30 {input.cellbench_gene_list_30} '
+        '--cellbench_gene_list_50 {input.cellbench_gene_list_50} '
+        '--cellbench_gene_list_73 {input.cellbench_gene_list_73} '
         '--outfname {output.marker_gene_matrix_table} '
         '>& {log}'
 
@@ -679,12 +1043,54 @@ rule compile_stats:
         de_site=config['hgsc_analysis_results']['differential_expression']['site'],
         de_site_fgsea=config['hgsc_analysis_results']['differential_expression']['site_fgsea'],
         de_site_epithelial=config['hgsc_analysis_results']['differential_expression']['epithelial_fgsea'],
+        sce_liver=config['liver_results']['sce_normalized'],
+        cellassign_liver_3markers_3types=config['liver_results']['cellassign_fit_3'],
+        cellassign_liver_4markers_3types=config['liver_results']['cellassign_fit_4'],
+        cellassign_liver_allmarkers_3types=config['liver_results']['cellassign_fit_11'],
+        cellassign_liver_3markers_4types=config['liver_results']['cellassign_fit_novel1'],
+        cellassign_liver_3markers_alltypes_raw=config['liver_results']['cellassign_fit_novel8_raw'],
+        cellassign_liver_3markers_alltypes=config['liver_results']['cellassign_fit_novel8'],
+        scina_liver_3markers_3types=config['liver_results']['scina_fit_3'],
+        scina_liver_4markers_3types=config['liver_results']['scina_fit_4'],
+        scina_liver_allmarkers_3types=config['liver_results']['scina_fit_11'],
+        scina_liver_allmarkers_3types_point1=config['liver_results']['scina_fit_11_0.1'],
+        scina_liver_3markers_4types=config['liver_results']['scina_fit_novel1'],
+        scina_liver_3markers_alltypes_raw=config['liver_results']['scina_fit_novel8_raw'],
+        scina_liver_3markers_alltypes=config['liver_results']['scina_fit_novel8'],
+        cellassign_liver_panglaodb=config['liver_results']['cellassign_fit_panglaodb'],
+        sce_pure_merged='{outdir}/supplemental_figures/sce_tian_pure_merged.rds'.format(outdir=config['workdir']),
+        sce_pure_10x=config['cellbench_results']['sce_tian_3_10x'],
+        sce_pure_celseq=config['cellbench_results']['sce_tian_3_celseq'],
+        sce_pure_dropseq=config['cellbench_results']['sce_tian_3_dropseq'],
+        sce_mix_merged='{outdir}/supplemental_figures/sce_tian_mixture_merged.rds'.format(outdir=config['workdir']),
+        cellassign_tian_pure_merged=config['cellbench_results']['fit_tian_pure'],
+        cellassign_tian_pure_10x=config['cellbench_results']['fit_tian_pure_10x'],
+        cellassign_tian_pure_celseq=config['cellbench_results']['fit_tian_pure_celseq'],
+        cellassign_tian_pure_dropseq=config['cellbench_results']['fit_tian_pure_dropseq'],
+        cellassign_tian_mix=config['cellbench_results']['fit_tian_50'],
+        sce_fl_hgsc_merged='{outdir}/supplemental_figures/sce_follicular_hgsc_merged.rds'.format(outdir=config['workdir']),
+        cellassign_fl_hgsc=config['hierarchical_fits']['fit_combined'],
+        cellassign_fl_combination=config['hierarchical_fits']['fit_fl'],
+        cellassign_hgsc_combination=config['hierarchical_fits']['fit_hgsc'],
+        cellassign_fl_noother=config['hierarchical_fits']['fit_fl_noother'],
+        cellassign_fl_top=config['hierarchical_fits']['fit_fl_top_noother'],
+        cellassign_fl_bottom=config['hierarchical_fits']['fit_fl_bottom_noother'],
+        cellassign_koh_noother=config['hierarchical_fits']['koh_cellassign_noother'],
+        cellassign_koh_top=config['hierarchical_fits']['koh_cellassign_top'],
+        cellassign_koh_bottom=config['hierarchical_fits']['koh_cellassign_bottom'],
+        cellassign_koh=config['external_analysis_results']['koh_cellassign'],
+        scina_koh=config['external_analysis_results']['koh_scina'],
     output:
         stats='{outdir}/stats/stats.tex'.format(outdir=config['outdir']),
     params:
         name='compile-stats',
         delta_deprobs=config['delta_deprobs'],
+        method_description=config['method_description'],
         follicular_tcell_labels=config['follicular_celltype_labels']['tcell'],
+        liver_3_celltypes=config['liver_plots']['novel_marker_celltypes'],
+        liver_4_celltypes=config['liver_plots']['celltypes_novel1'],
+        liver_all_celltypes=config['liver_plots']['celltypes_novel8'],
+        liver_panglaodb_markers=config['liver_analysis_settings']['marker_lists']['panglaodb_canonical']['path'],
     log:
         '{logdir}/logs/compile_stats.log'.format(logdir=config['logdir'])
     benchmark:
@@ -698,6 +1104,7 @@ rule compile_stats:
         '--follicular_tcell_labels {params.follicular_tcell_labels} '
         '--patient_progression {input.patient_events} '
         '--deprob_result_dir {input.deprob_result_dir_naivecd8_naivecd4} '
+        '--method_description {params.method_description} '
         '--delta_deprobs {params.delta_deprobs} '
         '--sce_follicular_nonmalignant_bcell {input.sce_nonmalignant_b} '
         '--cellassign_lambda_kappa {input.cellassign_lambda_kappa_result} '
@@ -711,6 +1118,47 @@ rule compile_stats:
         '--de_site {input.de_site} '
         '--de_site_fgsea {input.de_site_fgsea} '
         '--de_epithelial {input.de_site_epithelial} '
+        '--sce_liver {input.sce_liver} '
+        '--cellassign_liver_3markers_3types {input.cellassign_liver_3markers_3types} '
+        '--cellassign_liver_4markers_3types {input.cellassign_liver_4markers_3types} '
+        '--cellassign_liver_allmarkers_3types {input.cellassign_liver_allmarkers_3types} '
+        '--cellassign_liver_3markers_4types {input.cellassign_liver_3markers_4types} '
+        '--cellassign_liver_3markers_alltypes_raw {input.cellassign_liver_3markers_alltypes_raw} '
+        '--cellassign_liver_3markers_alltypes {input.cellassign_liver_3markers_alltypes} '
+        '--scina_liver_3markers_3types {input.scina_liver_3markers_3types} '
+        '--scina_liver_4markers_3types {input.scina_liver_4markers_3types} '
+        '--scina_liver_allmarkers_3types {input.scina_liver_allmarkers_3types} '
+        '--scina_liver_allmarkers_3types_point1 {input.scina_liver_allmarkers_3types_point1} '
+        '--scina_liver_3markers_4types {input.scina_liver_3markers_4types} '
+        '--scina_liver_3markers_alltypes_raw {input.scina_liver_3markers_alltypes_raw} '
+        '--scina_liver_3markers_alltypes {input.scina_liver_3markers_alltypes} '
+        '--cellassign_liver_panglaodb {input.cellassign_liver_panglaodb} '
+        '--sce_pure_merged {input.sce_pure_merged} '
+        '--sce_pure_10x {input.sce_pure_10x} '
+        '--sce_pure_celseq {input.sce_pure_celseq} '
+        '--sce_pure_dropseq {input.sce_pure_dropseq} '
+        '--sce_mix_merged {input.sce_mix_merged} '
+        '--cellassign_tian_pure_merged {input.cellassign_tian_pure_merged} '
+        '--cellassign_tian_pure_10x {input.cellassign_tian_pure_10x} '
+        '--cellassign_tian_pure_celseq {input.cellassign_tian_pure_celseq} '
+        '--cellassign_tian_pure_dropseq {input.cellassign_tian_pure_dropseq} '
+        '--cellassign_tian_mix {input.cellassign_tian_mix} '
+        '--sce_fl_hgsc_merged {input.sce_fl_hgsc_merged} '
+        '--cellassign_fl_hgsc {input.cellassign_fl_hgsc} '
+        '--cellassign_fl_combination {input.cellassign_fl_combination} '
+        '--cellassign_hgsc_combination {input.cellassign_hgsc_combination} '
+        '--cellassign_fl_noother {input.cellassign_fl_noother} '
+        '--cellassign_fl_top {input.cellassign_fl_top} '
+        '--cellassign_fl_bottom {input.cellassign_fl_bottom} '
+        '--cellassign_koh_noother {input.cellassign_koh_noother} '
+        '--cellassign_koh_top {input.cellassign_koh_top} '
+        '--cellassign_koh_bottom {input.cellassign_koh_bottom} '
+        '--liver_3_celltypes {params.liver_3_celltypes} '
+        '--liver_4_celltypes {params.liver_4_celltypes} '
+        '--liver_all_celltypes {params.liver_all_celltypes} '
+        '--liver_panglaodb_markers {params.liver_panglaodb_markers} '
+        '--cellassign_koh {input.cellassign_koh} '
+        '--scina_koh {input.scina_koh} '
         '--outfname {output.stats} '
         '>& {log}'
     

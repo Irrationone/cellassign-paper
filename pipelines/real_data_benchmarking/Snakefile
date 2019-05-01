@@ -1,0 +1,121 @@
+configfile: "config/v1.yaml"
+
+singularity: "docker://alzhang/spectrum-master-rstudio:v1.4"
+
+rule all:
+    input:
+        expand(
+            '{workdir}/sce_normalized/{{dataset}}.rds'.format(workdir=config['workdir']),
+            dataset=config['datasets']
+        ),
+        expand(
+            '{outdir}/cellassign/{{fit}}.rds'.format(outdir=config['outdir']),
+            fit=config['cellassign']
+        ),
+        expand(
+            '{outdir}/scina/{{scina_fit}}.rds'.format(outdir=config['outdir']),
+            scina_fit=config['scina']
+        )
+
+
+# Filter and normalize SingleCellExperiment
+rule preprocess_sce:
+    input:
+        raw=lambda wildcards: config['datasets'][wildcards.dataset],
+    output:
+        normalized='{workdir}/sce_normalized/{{dataset}}.rds'.format(workdir=config['workdir']),
+    params:
+        name='preprocess-sce-{dataset}',
+        mito_thres=lambda wildcards: config['preprocessing'][wildcards.dataset]['max_mito'],
+        ribo_thres=lambda wildcards: config['preprocessing'][wildcards.dataset]['max_ribo'],
+        nmads=lambda wildcards: config['preprocessing'][wildcards.dataset]['nmads'],
+        umap_neighbors=lambda wildcards: config['preprocessing'][wildcards.dataset]['umap_neighbors'],
+        umap_min_dist=lambda wildcards: config['preprocessing'][wildcards.dataset]['umap_min_dist'],
+        extra_opts=lambda wildcards: config['preprocessing'][wildcards.dataset]['extra_opts'],
+    log:
+        '{logdir}/logs/preprocess_sce/{{dataset}}.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/preprocess_sce/{{dataset}}.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/preprocess.R '
+        '--sce {input.raw} '
+        '--mito_thres {params.mito_thres} '
+        '--ribo_thres {params.ribo_thres} '
+        '--nmads {params.nmads} '
+        '--umap_neighbors {params.umap_neighbors} '
+        '--umap_min_dist {params.umap_min_dist} '
+        '{params.extra_opts} '
+        '--outfname {output.normalized} '
+        '>& {log}'
+
+rule cellassign_sce:
+    input:
+        normalized=lambda wildcards: expand(
+            '{workdir}/sce_normalized/{{dataset}}.rds'.format(
+                workdir=config['workdir']
+            ),
+            dataset=config['cellassign'][wildcards.fit]['dataset']
+        ),
+        marker_list=lambda wildcards: config['cellassign'][wildcards.fit]['marker_list'],
+    output:
+        fit='{outdir}/cellassign/{{fit}}.rds'.format(outdir=config['outdir']),
+    params:
+        name='cellassign-{fit}',
+        include_other=lambda wildcards: config['cellassign'][wildcards.fit]['include_other'],
+        num_runs=lambda wildcards: config['cellassign'][wildcards.fit]['num_runs'],
+        B=lambda wildcards: config['cellassign'][wildcards.fit]['B'],
+        formula=lambda wildcards: config['cellassign'][wildcards.fit]['design_formula'],
+        celltypes=lambda wildcards: config['cellassign'][wildcards.fit]['celltypes'],
+        extra_opts=lambda wildcards: config['cellassign'][wildcards.fit]['extra_opts'],
+    threads: 20
+    log:
+        '{logdir}/logs/cellassign/{{fit}}.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/cellassign/{{fit}}.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/cellassign_sce.R '
+        '--sce {input.normalized} '
+        '--marker_list {input.marker_list} '
+        '--include_other {params.include_other} '
+        '--num_runs {params.num_runs} '
+        '--rbf_pieces {params.B} '
+        '--design_formula {params.formula} '
+        '--celltypes {params.celltypes} '
+        '{params.extra_opts} '
+        '--outfname {output.fit} '
+        '>& {log}'
+
+rule scina_sce:
+    input:
+        normalized=lambda wildcards: expand(
+            '{workdir}/sce_normalized/{{dataset}}.rds'.format(
+                workdir=config['workdir']
+            ),
+            dataset=config['scina'][wildcards.scina_fit]['dataset']
+        ),
+        marker_list=lambda wildcards: config['scina'][wildcards.scina_fit]['marker_list'],
+    output:
+        fit='{outdir}/scina/{{scina_fit}}.rds'.format(outdir=config['outdir']),
+    params:
+        name='scina-{scina_fit}',
+        celltypes=lambda wildcards: config['scina'][wildcards.scina_fit]['celltypes'],
+        extra_opts=lambda wildcards: config['scina'][wildcards.scina_fit]['extra_opts'],
+        allow_unknown=lambda wildcards: config['scina'][wildcards.scina_fit]['allow_unknown'],
+        rm_overlap=lambda wildcards: config['scina'][wildcards.scina_fit]['rm_overlap'],
+        sensitivity_cutoff=lambda wildcards: config['scina'][wildcards.scina_fit]['sensitivity_cutoff'],
+    threads: 1
+    log:
+        '{logdir}/logs/scina/{{scina_fit}}.log'.format(logdir=config['logdir'])
+    benchmark:
+        '{logdir}/benchmarks/scina/{{scina_fit}}.txt'.format(logdir=config['logdir'])
+    shell:
+        'Rscript R/scina_sce.R '
+        '--sce {input.normalized} '
+        '--marker_list {input.marker_list} '
+        '--celltypes {params.celltypes} '
+        '--allow_unknown {params.allow_unknown} '
+        '--rm_overlap {params.rm_overlap} '
+        '--sensitivity_cutoff {params.sensitivity_cutoff} '
+        '{params.extra_opts} '
+        '--outfname {output.fit} '
+        '>& {log}'

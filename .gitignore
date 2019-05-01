@@ -1,40 +1,65 @@
+# Dotfiles
 .DS_Store
 .Rhistory
-flow/
-TODO.txt
 .snakemake/
 .singularity/
-test/
 .cache/
 .Rproj
-data/
-Rplots.pdf
-results/scratch/
-results/logs/
-sessions/
-**/Rmd/*.nb.html
-results/
-.snakemake/
 .snakemake*
+.keras/
+.ExperimentHub/
+.ipynb_checkpoints/
+.snakemake_timestamp
+
+# Private files
+data/
+flow/
+TODO.txt
+manuscript/
+results/
+sessions/
+workspaces/
+intermediates/
+github_private_key
+analysis/Rmd/private/
+analysis/jupyter/modeling_differential_expression_testing.ipynb
+*.rds
+
+# Test files
+test/
 temp/
+
+# Old files
+resources/marker_lists/koh_markers_3types_full.yaml
+resources/marker_lists/koh_markers_3types.yaml
+resources/marker_lists/liver_mcparland_3types_2.yaml
+resources/marker_lists/liver_mcparland_3types_2_revised.yaml
+resources/marker_lists/liver_mcparland_alltypes_revised.yaml
+resources/marker_lists/liver_panglaodb_human_full.yaml
+resources/marker_lists/liver_panglaodb_human_canonical.yaml
+resources/marker_lists/hgsc_big_3types.yaml
+pipelines/simulation_analysis_v2/naive_cd4_vs_naive_cd8_fixed_extra.yaml
+resources/external/azizi2018/Table_S4.xls
+pipelines/novel_missing_simulation_analysis/config/b_vs_cd8.yaml
+pipelines/novel_missing_simulation_analysis/config/naive_cd4_vs_naive_cd8.yaml
+pipelines/cellassign-sim-comparison/
+drawings/v1/
+drawings/v2/
+drawings/v3/
+drawings/v4/
+bibliography/
+
+# Miscellaneous
+Rplots.pdf
+**/Rmd/*.nb.html
 *_cache/
 *_files/
-github_private_key
-*.rds
-workspaces/
-.ipynb_checkpoints/
 ~$*
 ipynb/*.svg
-intermediates/
 *.bin
 *.weights
 *.tree
 *.log
-.keras/
-.ExperimentHub/
-analysis/jupyter/modeling_differential_expression_testing.ipynb
-.snakemake_timestamp
-analysis/Rmd/private/
 
 ## Allow
 !sce_t4k_params.rds

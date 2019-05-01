@@ -1,7 +1,8 @@
 
-configfile: "config/v1.yaml"
+configfile: "config/revised1.yaml"
 
-singularity: "docker://alzhang/scrna-analysis-sim-3.5:v1.14"
+# singularity: "docker://alzhang/scrna-analysis-sim-3.5:v1.14"
+singularity: "docker://alzhang/spectrum-master-rstudio:v1.4"
 
 rule all:
     input:
@@ -74,6 +75,7 @@ rule run_cellassign:
         timeseed='{timeseed}',
         max_batch_size=5000,
         conda_env='r-tensorflow',
+    threads: 20
     log:
         '{logdir}/logs/run_cellassign/{{simtype}}/{{evaltype}}/{{seed}}_{{timeseed}}.log'.format(logdir=config['logdir']),
     benchmark:

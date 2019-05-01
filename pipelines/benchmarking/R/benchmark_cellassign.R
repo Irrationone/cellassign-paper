@@ -74,19 +74,17 @@ n_batches <- ceiling(ncol(sce_specific)/args$max_batch_size)
 
 print(n_batches)
 
-timestats <- microbenchmark(res <- cellassign_em(exprs_obj = sce_specific, 
-                                                 s = s, 
-                                                 rho = rho, 
-                                                 X = X, 
-                                                 B = B, 
-                                                 use_priors = FALSE, 
-                                                 prior_type = "shrinkage", 
-                                                 delta_variance_prior = FALSE, 
-                                                 verbose = FALSE, 
-                                                 em_convergence_thres = 1e-3, 
-                                                 min_delta = 0, 
-                                                 num_runs = 1,
-                                                 n_batches = n_batches), times = 1)
+timestats <- microbenchmark(res <- cellassign(exprs_obj = sce_specific, 
+                                              s = s, 
+                                              marker_gene_info = rho, 
+                                              X = X, 
+                                              B = B, 
+                                              shrinkage = TRUE, 
+                                              verbose = FALSE, 
+                                              rel_tol_em = 1e-3, 
+                                              min_delta = 0, 
+                                              num_runs = 1,
+                                              n_batches = n_batches), times = 1)
 
 # Write outputs
 saveRDS(timestats, file = args$outtime)

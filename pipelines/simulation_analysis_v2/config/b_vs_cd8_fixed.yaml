@@ -1,0 +1,99 @@
+workdir: ../../results/scratch/simulation_analysis_v2/b_vs_cd8_fixed
+outdir: ../../results/outputs/simulation_analysis_v2/b_vs_cd8_fixed
+logdir: ../../results/logs/simulation_analysis_v2/b_vs_cd8_fixed
+
+
+simulation_settings:
+  variables:
+    de_prob:
+      - 0.05
+      - 0.15
+      - 0.25
+      - 0.35
+      - 0.45
+      - 0.55
+    down_prob:
+      - 0.5
+    seed:
+      - 8123
+      - 3143
+      - 8423
+      - 1719
+      - 5011
+      - 1594
+      - 3419
+      - 1258
+      - 6255
+  constants:
+    num_cells: 2000
+    num_groups: 3
+    group_probs:
+      - 0.33
+      - 0.33 
+      - 0.34
+    num_batches: 1
+    batch_probs:
+      - 1
+    de_facloc: 0.04
+    de_facscale: 0.0237
+    de_nu: 0.959
+    de_min: 1
+    de_max: 1000
+    batch_facloc: 1
+    batch_facscale: 1
+    base_params: ../cellassign-sim-comparison/data/sce_t4k_params.rds
+
+cluster_settings:
+  dimreduce_method: PCA
+  clustering_methods:
+    phenograph:
+      - full
+      - markers
+    SC3:
+      - full
+      - markers
+    kmeans:
+      - full
+      - markers
+    seurat_0.4:
+      - full
+      - markers
+    seurat_0.8:
+      - full
+      - markers
+    seurat_1.2:
+      - full
+      - markers
+    densitycut:
+      - full
+      - markers
+    scmap:
+      - full
+      - markers
+    Zheng_cor:
+      - full
+      - markers
+    dynamicTreeCut:
+      - full
+      - markers
+  conda_env: r-tensorflow
+  fc_percentile: 0.95
+  expr_percentile: 0.9
+  frac_genes: 1
+  max_genes: 
+    - 15
+  test_proportion: 0.5
+
+assign_celltype_settings:
+  methods:
+    - cellassign
+    - scina
+  conda_env: r-tensorflow
+  fc_percentile: 0.95
+  expr_percentile: 0.9
+  frac_genes: 1
+  max_genes: 
+    - 15
+  wrong_marker_proportion: 
+    - 0
+  test_proportion: 0.5

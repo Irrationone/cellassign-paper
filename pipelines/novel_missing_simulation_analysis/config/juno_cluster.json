@@ -1,0 +1,32 @@
+{
+    "__default__" :
+    {
+        "queue"     : "general",
+        "nCPUs"     : "1",
+        "memory"    : 8,
+        "time"      : "1:00",
+        "resources" : "\"select[mem>8] rusage[mem=8] span[hosts=1]\"",
+        "name"      : "simulations.{rule}.{wildcards}",
+        "output"    : "../../results/logs/simulation_analysis_v2/cluster_logs/output/{rule}/{wildcards}.out",
+        "error"     : "../../results/logs/simulation_analysis_v2/cluster_logs/error/{rule}/{wildcards}.err"
+    },
+    "assign_celltypes_sce" :
+    {
+        "nCPUs"     : 8,
+        "memory"    : 16,
+        "time"      : "2:00",
+        "resources" : "\"select[mem>16] rusage[mem=16] span[hosts=1]\"",
+        "name"      : "assign_celltypes_sce.{rule}.{wildcards}",
+        "output"    : "../../results/logs/simulation_analysis_v2/cluster_logs/output/{rule}/{wildcards}.out",
+        "error"     : "../../results/logs/simulation_analysis_v2/cluster_logs/error/{rule}/{wildcards}.err"
+    },
+    "evaluate_celltypes" :
+    {
+        "memory"    : 32,
+        "time"      : "2:00",
+        "resources" : "\"select[mem>32] rusage[mem=32] span[hosts=1]\"",
+        "name"      : "evaluate_celltypes.{rule}.{wildcards}",
+        "output"    : "../../results/logs/simulation_analysis_v2/cluster_logs/output/{rule}/{wildcards}.out",
+        "error"     : "../../results/logs/simulation_analysis_v2/cluster_logs/error/{rule}/{wildcards}.err"
+    }
+}

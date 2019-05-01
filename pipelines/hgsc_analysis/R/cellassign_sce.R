@@ -77,18 +77,16 @@ if (length(unique(sce_markers$patient)) > 1) {
   design <- NULL
 }
 
-cellassign_res <- cellassign_em(exprs_obj = sce_markers, 
-                                s = s, 
-                                rho = rho, 
-                                X = design,
-                                B = args$rbf_pieces, 
-                                use_priors = args$delta_prior, 
-                                prior_type = "shrinkage", 
-                                delta_variance_prior = args$variance_prior, 
-                                verbose = FALSE, 
-                                em_convergence_thres = 1e-5, 
-                                num_runs = args$num_runs, 
-                                min_delta = args$min_delta)
+cellassign_res <- cellassign(exprs_obj = sce_markers, 
+                             s = s, 
+                             marker_gene_info = rho, 
+                             X = design,
+                             B = args$rbf_pieces, 
+                             shrinkage = args$delta_prior, 
+                             verbose = FALSE, 
+                             rel_tol_em = 1e-5, 
+                             num_runs = args$num_runs, 
+                             min_delta = args$min_delta)
 
 # Write outputs
 saveRDS(cellassign_res, file = args$outfname)

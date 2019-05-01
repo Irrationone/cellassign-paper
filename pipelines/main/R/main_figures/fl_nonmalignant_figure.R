@@ -93,7 +93,6 @@ dr_bcell <- plotReducedDim(sce_bcell,
                            use_dimred = args$dimreduce_type, 
                            colour_by = "celltype_full",
                            point_alpha = 0.2, 
-                           add_ticks = FALSE,
                            point_size = 0.75)
 dr_bcell$layers[[1]]$aes_params$colour <- NULL
 dr_bcell$layers[[1]]$aes_params$shape <- 16
@@ -118,7 +117,6 @@ dr_bcell_sample <- plotReducedDim(sce_bcell,
                                   use_dimred = args$dimreduce_type, 
                                   colour_by = "dataset",
                                   point_alpha = 0.2, 
-                                  add_ticks = FALSE,
                                   point_size = 0.75)
 dr_bcell_sample$layers[[1]]$aes_params$colour <- NULL
 dr_bcell_sample$layers[[1]]$aes_params$shape <- 16
@@ -154,8 +152,7 @@ kappa_lambda_plots <- lapply(kappa_lambda_markers, function(mgene) {
                       use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_bcell_tmp),
                       point_alpha = 0.5,
-                      point_size = 0.75,
-                      add_ticks = FALSE)
+                      point_size = 0.75)
   p$layers[[1]]$aes_params$colour <- NULL
   p$layers[[1]]$aes_params$shape <- 16
   p$layers[[1]]$mapping$colour <- p$layers[[1]]$mapping$fill
@@ -189,7 +186,6 @@ scvis_plot <- plotReducedDim(sce_scvis_merged,
                              use_dimred = "scvis", 
                              colour_by = "category_full",
                              point_alpha = 0.1, 
-                             add_ticks = FALSE,
                              point_size = 0.75) 
 
 scvis_plot <- scvis_plot + 
@@ -206,7 +202,6 @@ dr_tcell <- plotReducedDim(sce_tcell,
                            use_dimred = args$dimreduce_type, 
                            colour_by = "celltype_full",
                            point_alpha = 0.4, 
-                           add_ticks = FALSE,
                            point_size = 0.75)
 dr_tcell$layers[[1]]$aes_params$colour <- NULL
 dr_tcell$layers[[1]]$aes_params$shape <- 16
@@ -226,7 +221,6 @@ dr_tcell_sample <- plotReducedDim(sce_tcell,
                                   use_dimred = args$dimreduce_type, 
                                   colour_by = "dataset",
                                   point_alpha = 0.4, 
-                                  add_ticks = FALSE,
                                   point_size = 0.75)
 dr_tcell_sample$layers[[1]]$aes_params$colour <- NULL
 dr_tcell_sample$layers[[1]]$aes_params$shape <- 16

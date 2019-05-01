@@ -74,7 +74,6 @@ dr_tcell <- plotReducedDim(sce_tcell,
                            colour_by = "celltype_full",
                            shape_by = "timepoint",
                            point_alpha = 0.5, 
-                           add_ticks = FALSE,
                            point_size = 2)
 dr_tcell <- dr_tcell + 
   geom_rug(alpha = 0.1, colour = "gray20") +

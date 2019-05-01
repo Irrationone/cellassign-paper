@@ -91,7 +91,7 @@ timepoint_plot <- ggplot(patient_progression, aes(x=years, y=patient)) +
 
 # Plot of timepoint
 dr_timepoint <- plotReducedDim(sce, use_dimred = args$dimreduce_type, 
-                               colour_by = "dataset", point_alpha = 0.1, add_ticks = FALSE)
+                               colour_by = "dataset", point_alpha = 0.1)
 dr_timepoint <- dr_timepoint + 
   guides(colour = guide_legend(title = "Sample", override.aes = list(alpha = 1,
                                                                      size = 2),
@@ -115,8 +115,7 @@ dr_celltype <- plotReducedDim(sce %>%
                                                                levels = c(nonother_types, "Unassigned"))), 
                               use_dimred = args$dimreduce_type,
                               colour_by = "celltype",
-                              point_alpha = 0.1, 
-                              add_ticks = FALSE)
+                              point_alpha = 0.1)
 dr_celltype <- dr_celltype + 
   guides(colour = guide_legend(title = "Predicted celltype", override.aes = list(alpha = 1,
                                                                                  size = 2),
@@ -151,8 +150,7 @@ marker_plots <- lapply(marker_genes, function(mgene) {
                       use_dimred = args$dimreduce_type,
                       colour_by = cellassign.utils::get_ensembl_id(mgene, sce_tmp),
                       point_alpha = 0.2,
-                      point_size = 0.5,
-                      add_ticks = FALSE)
+                      point_size = 0.5)
   p$layers[[1]]$aes_params$colour <- NULL
   p$layers[[1]]$aes_params$shape <- 16
   p$layers[[1]]$mapping$colour <- p$layers[[1]]$mapping$fill

@@ -95,7 +95,6 @@ gene_ids <- get_ensembl_id(rownames(sce_HL), sce_filtered)
 
 sce_subset <- sce_filtered[gene_ids,]
 colnames(sce_subset) <- sce_subset$cellname
-rownames(sce_subset) <- rownames(sce_HL)
 ```
 
 ```{r, eval = FALSE}
@@ -103,6 +102,8 @@ cells_intersect <- intersect(colnames(sce_HL),
                              colnames(sce_subset))
 
 sce_merged <- sce_HL[,cells_intersect]
+rowData(sce_merged) <- rowData(sce_subset)
+rownames(sce_merged) <- rownames(sce_subset)
 counts(sce_merged) <- counts(sce_subset[,cells_intersect])
 sce_merged$patient <- sce_subset[,cells_intersect]$patient
 ```

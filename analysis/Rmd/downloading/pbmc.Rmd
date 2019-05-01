@@ -1,0 +1,164 @@
+---
+title: "Downloading PBMC data"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 5
+---
+
+```{r global_chunk_options, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, tidy = FALSE, warning = FALSE, message = FALSE, cache = FALSE, cache.lazy = FALSE, fig.width = 8, fig.height = 4.5)
+```
+
+```{r}
+library(tidyverse)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(Matrix)
+library(Seurat)
+
+library(cellassign)
+library(cellassign.utils)
+library(scrna.utils)
+library(scrna.sceutils)
+```
+
+```{r}
+celltypes <- c("b_cells", "cd14_monocytes", "cd56_nk_cells", "naive_t_cells", "memory_t_cells", "naive_cytotoxic_cells", "cytotoxic_t_cells")
+
+celltypes_to_use <- c("b_cells", "cd14_monocytes", "cd56_nk_cells", "naive_t_cells", "memory_t_cells")
+```
+
+```{r}
+filtered_matrices <- Sys.glob(file.path("/datadrive/projects/cellassign-analysis/data/pure_pbmc", celltypes, "filtered_matrices_mex", "hg19"))
+```
+
+```{r}
+sce <- DropletUtils::read10xCounts(filtered_matrices)
+
+sce <- sce %>%
+  scater::mutate(celltype = basename(dirname(dirname(Sample))))
+```
+
+```{r}
+mito_genes <- as.character(rowData(sce)$Symbol[str_detect(rowData(sce)$Symbol, "^MT\\-") & !is.na(rowData(sce)$Symbol)]) %>% 
+  get_ensembl_id(sce)
+
+ribo_genes <- as.character(rowData(sce)$Symbol[str_detect(rowData(sce)$Symbol, "^RP(L|S)") & !is.na(rowData(sce)$Symbol)]) %>%
+  get_ensembl_id(sce)
+
+sce <- calculateQCMetrics(sce, exprs_values = "counts", feature_controls =
+                            list(mitochondrial=mito_genes, ribosomal=ribo_genes))
+```
+
+```{r}
+sce_subset <- sce %>%
+  scater::filter(celltype %in% celltypes_to_use)
+
+# Get 10000 cells 
+sce_subset <- sce_subset[,sample(1:ncol(sce_subset), size = 10000)]
+
+sce_filtered <- filter_cells(sce_subset, nmads = 3, type = "lower", 
+                             log = TRUE, max_mito = 10, max_ribo = 50)
+
+qclust <- quickCluster(sce_filtered, min.size = 100)
+sce_filtered <- computeSumFactors(sce_filtered, clusters = qclust)
+
+sce_filtered$size_factor <- sizeFactors(sce_filtered)
+
+sce_normalized <- normalize(sce_filtered)
+
+sce_normalized <- runPCA(sce_normalized, ntop = 1000, ncomponents = 50, exprs_values = "logcounts")
+sce_normalized <- runTSNE(sce_normalized, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+sce_normalized <- runUMAP(sce_normalized, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+```
+
+```{r}
+plotTSNE(sce_normalized, colour_by = "celltype")
+```
+
+
+```{r}
+train_idx <- sort(sample(1:ncol(sce_normalized), size = floor(ncol(sce_normalized)/2)))
+test_idx <- setdiff(1:ncol(sce_normalized), train_idx)
+
+sce_train <- sce_normalized[,train_idx]
+sce_test <- sce_normalized[,test_idx]
+```
+
+```{r}
+markers_train <- get_merged_markers(sce_train, clusters_col = "celltype", log10_total_counts_min = 2)
+
+markers_filtered <- markers_train %>%
+  dplyr::filter(cluster == "b_cells",
+                FDR < 0.05) 
+
+lfc_table <- markers_filtered %>%
+  dplyr::select_at(vars(contains("logFC"))) %>%
+  dplyr::mutate(logFC.b_cells=0)
+
+colnames(lfc_table) <- str_replace_all(colnames(lfc_table), "^logFC\\.", "")
+
+lfc_table <- (lfc_table - matrix(rep(rowMins(as.matrix(lfc_table)), each = ncol(lfc_table)), ncol = ncol(lfc_table), byrow = TRUE))
+rownames(lfc_table) <- markers_filtered$Gene
+```
+
+```{r}
+binarize <- function(x, threshold) {
+  x[x <= threshold] <- -Inf
+  x[x > -Inf] <- 1
+  x[x == -Inf] <- 0
+  return(x)
+}
+
+# Same code as the Koh et al. selection
+maxdiffs <- apply(lfc_table, 1, function(x) max(diff(sort(x))))
+thres_vals <- apply(lfc_table, 1, function(x) sort(x)[which.max(diff(sort(x)))])
+
+expr_mat_thres <- plyr::rbind.fill(lapply(1:nrow(lfc_table), function(i) {
+  lfc_table[i,] <- binarize(lfc_table[i,], thres_vals[i])
+}))
+rownames(expr_mat_thres) <- rownames(lfc_table)
+rho_master <- expr_mat_thres[(maxdiffs >= quantile(maxdiffs, c(.95))) & (thres_vals <= log(2)),] %>%
+  as.matrix
+```
+
+```{r}
+pairs <- as.list(as.data.frame(combn(colnames(rho_master), 2)))
+pair_markers <- lapply(pairs, function(x) {
+  elems <- as.character(x)
+  rownames(rho_master)[which(rho_master[,elems[1]] != rho_master[,elems[2]])]
+})
+
+sampled_markers <- lapply(pair_markers, function(x) {
+  set.seed(101)
+  sample(x, size = 30)
+})
+
+marker_genes <- Reduce(union, sampled_markers)
+```
+
+```{r}
+rho <- rho_master[marker_genes,]
+```
+
+```{r}
+s <- sizeFactors(sce_test)
+
+sce_markers <- sce_test[rownames(rho),]
+rownames(sce_markers) <- rownames(rho)
+counts(sce_markers) <- as.matrix(counts(sce_markers))
+
+cellassign_res <- cellassign(exprs_obj = sce_markers, 
+                             s = s, 
+                             marker_gene_info = rho, 
+                             X = NULL,
+                             B = 20, 
+                             shrinkage = TRUE,  
+                             verbose = FALSE, 
+                             rel_tol_em = 1e-5, 
+                             num_runs = 1, 
+                             min_delta = quantile(maxdiffs, c(.95)))
+```
+

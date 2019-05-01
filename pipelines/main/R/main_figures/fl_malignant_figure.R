@@ -82,8 +82,7 @@ proliferation_plots <- lapply(patients, function(pat) {
                         use_dimred = args$dimreduce_type,
                         colour_by = cellassign.utils::get_ensembl_id(mgene, sce_bcell_tmp),
                         point_alpha = 0.5,
-                        point_size = 0.75,
-                        add_ticks = FALSE)
+                        point_size = 0.75)
     p$layers[[1]]$aes_params$colour <- NULL
     p$layers[[1]]$aes_params$shape <- 16
     p$layers[[1]]$mapping$colour <- p$layers[[1]]$mapping$fill
@@ -108,6 +107,12 @@ proliferation_plots <- lapply(patients, function(pat) {
 })
 names(proliferation_plots) <- patients
 
+proliferation_plots$FL2001 <- lapply(proliferation_plots$FL2001, function(p) {
+  p <- p + 
+    xlim(c(NA, 3)) + 
+    ylim(c(NA, -3))
+  return(p)
+})
 
 # B cell dr figures
 bcell_timepoint_plots <- lapply(patients, function(pat) {
@@ -115,8 +120,7 @@ bcell_timepoint_plots <- lapply(patients, function(pat) {
                                                                  patient == pat), 
                                     use_dimred = args$dimreduce_type, 
                                     colour_by = "timepoint",
-                                    point_alpha = 0.2, 
-                                    add_ticks = FALSE,
+                                    point_alpha = 0.2,
                                     point_size = 0.75)
   bcell_timepoint$layers[[1]]$aes_params$colour <- NULL
   bcell_timepoint$layers[[1]]$aes_params$shape <- 16
@@ -131,10 +135,15 @@ bcell_timepoint_plots <- lapply(patients, function(pat) {
     theme_bw() + 
     theme_Publication() + 
     theme_nature() + 
-    scale_colour_manual(values = categorical_palettes$timepoint)
+    scale_colour_manual(values = categorical_palettes$timepoint) 
   return(bcell_timepoint)
 })
 names(bcell_timepoint_plots) <- patients
+
+## Clip axis -- only for visualization
+bcell_timepoint_plots[[2]] <- bcell_timepoint_plots[[2]] + 
+  xlim(c(NA, 3)) + 
+  ylim(c(NA, -3))
 
 # Cell cycle pairplots
 

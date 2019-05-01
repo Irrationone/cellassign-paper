@@ -1,0 +1,305 @@
+---
+title: "CellBench data"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 5
+---
+
+
+# Bulk RNA-seq data
+
+We take bulk RNA-seq data from [Holik et al. Nucleic Acids Research 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5389713/). 
+
+```{r}
+library(org.Hs.eg.db)
+library(edgeR)
+
+bulkrna_counts <- fread('/datadrive/data/external/bulkrna/holik2017/GSE86337_reverse.stranded.unfiltered.count.matrix.txt')
+
+rownames(bulkrna_counts) <- bulkrna_counts$`Entrez Gene IDs`
+
+bulkrna_counts <- as.data.frame(bulkrna_counts)[,2:11]
+```
+
+
+# Single cell RNA-seq data
+
+```{r}
+sces <- list(
+  'sce_sc_10x_qc'=sce_sc_10x_qc,
+  'sce_sc_CELseq2_qc'=sce_sc_CELseq2_qc,
+  'sce_sc_Dropseq_qc'=sce_sc_Dropseq_qc,
+  'sce_SC3_qc'=sce_SC3_qc
+)
+
+sces <- lapply(sces, function(x) {
+  x <- getBMFeatureAnnos(x, 
+                         filters = "ensembl_gene_id",
+                         attributes = c("ensembl_gene_id", "hgnc_symbol", "entrezgene",
+                                        "start_position", "end_position", "chromosome_name"),
+                         dataset = "hsapiens_gene_ensembl")
+  colnames(rowData(x))[1:2] <- c("ID", "Symbol")
+  return(x)
+})
+
+sces_filtered <- lapply(sces, function(x) {
+  if ("poor_quality" %in% colnames(colData(x))) {
+    x <- x %>%
+      scater::filter(as.character(poor_quality) == "NO")
+  }
+  
+  if ("demuxlet_cls" %in% colnames(colData(x))) {
+    x <- x %>%
+      scater::filter(as.character(demuxlet_cls) == "SNG")
+  }
+  
+  return(x)
+})
+```
+
+```{r}
+for (i in seq_along(sces)) {
+  saveRDS(sces[[i]], file = file.path('/datadrive/data/external/scrna/tian2018', paste0(names(sces)[i], ".rds")))
+}
+```
+
+```{r}
+for (i in seq_along(sces_filtered)) {
+  saveRDS(sces_filtered[[i]], file = file.path('/datadrive/data/external/scrna/tian2018_qc', paste0(names(sces_filtered)[i], ".rds")))
+}
+```
+
+
+# Scratch
+
+Get marker genes out of bulk. 
+
+```{r}
+entrez_map <- select(org.Hs.eg.db, as.character(bulkrna_counts$`Entrez Gene IDs`), c("SYMBOL"), "ENTREZID")
+
+gene_annotations <- entrez_map %>%
+  dplyr::rename(GeneID=ENTREZID,
+                Symbol=SYMBOL)
+
+# From preprocessing.tar.gz on their website
+cell.line <- rep(c("HCC827", "H2228", "H838", "A549","H1975"), each = 2)
+
+dge <- DGEList(counts = bulkrna_counts, group = cell.line, genes = gene_annotations, remove.zeros = TRUE)
+
+keep <- rowSums(cpm(dge$counts)>0.5)>=2
+summary(keep)
+dge_filt <- dge[keep,]
+
+dge_filt <- calcNormFactors(dge_filt, method="TMM")
+```
+
+```{r}
+dge_subset <- dge_filt[,dge_filt$samples$group %in% c("HCC827", "H2228", "H1975")]
+
+design <- model.matrix(~ 0+dge_subset$samples$group)
+colnames(design) <- levels(dge_subset$samples$group)
+v <- voom(dge_subset, design)
+fit <- lmFit(v, design)
+contrast.matrix <- makeContrasts(H2228-H1975, HCC827-H1975, HCC827-H2228, levels = design)
+fit2 <- contrasts.fit(fit, contrast.matrix)
+fit2 <- eBayes(fit2)
+```
+
+```{r}
+tt <- topTable(fit2, n=Inf)
+
+tt_sig <- tt %>%
+  dplyr::filter(adj.P.Val < 0.05)
+```
+
+## Marker gene derivation
+
+```{r}
+lfc_table <- tt_sig[,c("H2228...H1975", "HCC827...H1975")]
+
+lfc_table <- lfc_table %>%
+  dplyr::mutate(H1975=0,
+                H2228=H2228...H1975,
+                HCC827=HCC827...H1975) %>%
+  dplyr::select(H1975, H2228, HCC827)
+rownames(lfc_table) <- tt_sig$GeneID
+
+lfc_table <- (lfc_table - matrix(rep(rowMins(as.matrix(lfc_table)), each = 3), ncol = 3, byrow = TRUE))
+```
+
+```{r}
+binarize <- function(x, threshold) {
+  x[x <= threshold] <- -Inf
+  x[x > -Inf] <- 1
+  x[x == -Inf] <- 0
+  return(x)
+}
+
+# Same code as the Koh et al. selection
+maxdiffs <- apply(lfc_table, 1, function(x) max(diff(sort(x))))
+thres_vals <- apply(lfc_table, 1, function(x) sort(x)[which.max(diff(sort(x)))])
+
+expr_mat_thres <- plyr::rbind.fill(lapply(1:nrow(lfc_table), function(i) {
+  lfc_table[i,] <- binarize(lfc_table[i,], thres_vals[i])
+}))
+rownames(expr_mat_thres) <- rownames(lfc_table)
+rho_master <- expr_mat_thres[maxdiffs >= quantile(maxdiffs, c(.98)),] %>%
+  as.matrix
+```
+
+```{r}
+symbols <- df_as_map(dge_subset$genes, rownames(rho_master), from = "GeneID", to = "Symbol")
+
+rho_master <- rho_master[!is.na(symbols),]
+rownames(rho_master) <- symbols[!is.na(symbols)]
+```
+
+## CellAssign test
+
+```{r}
+tian_3_10x <- readRDS('/datadrive/projects/cellassign-paper/results/scratch/novel_celltype_analysis/v1/sce_normalized/tian_3_10x.rds')
+tian_3_celseq <- readRDS('/datadrive/projects/cellassign-paper/results/scratch/novel_celltype_analysis/v1/sce_normalized/tian_3_CELseq2.rds')
+tian_3_mixture <- readRDS('/datadrive/projects/cellassign-paper/results/scratch/novel_celltype_analysis/v1/sce_normalized/tian_mixture3.rds')
+```
+
+```{r}
+sce <- tian_3_10x
+
+rho <- rho_master[intersect(rownames(rho_master), rowData(sce)$Symbol),]
+s <- sizeFactors(sce)
+
+sce_markers <- sce[get_ensembl_id(rownames(rho), sce),]
+rownames(sce_markers) <- rownames(rho)
+counts(sce_markers) <- as.matrix(counts(sce_markers))
+
+cellassign_res <- cellassign(exprs_obj = sce_markers, 
+                             s = s, 
+                             marker_gene_info = rho, 
+                             X = NULL,
+                             B = 20, 
+                             shrinkage = TRUE,  
+                             verbose = FALSE, 
+                             rel_tol_em = 1e-5, 
+                             num_runs = 1, 
+                             min_delta = 2)
+```
+
+```{r}
+sce$cellassign_cluster <- cellassign_res$cell_type
+```
+
+```{r}
+plotTSNE(sce, colour_by = "cellassign_cluster")
+```
+
+```{r}
+tian_3_celseq_labeled <- tian_3_celseq %>%
+  scater::mutate(sample_id='pure')
+
+cell_line_proportions <- data.frame(cell=colnames(tian_3_celseq_labeled), cell_line=tian_3_celseq_labeled$cell_line, proportion=1) %>% spread(cell_line, proportion) %>% dplyr::select(-c(cell))
+cell_line_proportions[is.na(cell_line_proportions)] <- 0
+
+colData(tian_3_celseq_labeled) <- colData(tian_3_celseq_labeled) %>% 
+  cbind(cell_line_proportions)
+
+tian_3_mixture_labeled <- tian_3_mixture %>%
+  scater::mutate(H1975=H1975/9,
+                 H2228=H2228/9,
+                 HCC827=HCC827/9,
+                 sample_id='mixture')
+
+common_genes <- intersect(rownames(tian_3_celseq_labeled), rownames(tian_3_mixture_labeled))
+common_coldat <- intersect(colnames(colData(tian_3_celseq_labeled)), colnames(colData(tian_3_mixture_labeled)))
+
+tian_merged <- do.call(cbind, lapply(list(tian_3_celseq_labeled[common_genes,], tian_3_mixture_labeled[common_genes,]), function(x) {
+  rowData(x) <- rowData(x)[,c("ID", "Symbol", "entrezgene", "start_position", "end_position", "chromosome_name")]
+  colData(x) <- colData(x)[,common_coldat,drop=FALSE]
+  x
+}))
+```
+
+```{r}
+qclust <- quickCluster(tian_merged, min.size = 30)
+tian_merged <- computeSumFactors(tian_merged, clusters = qclust)
+
+tian_merged$size_factor <- sizeFactors(tian_merged)
+
+tian_merged <- normalize(tian_merged)
+
+tian_merged <- runPCA(tian_merged, ntop = 1000, ncomponents = 50, exprs_values = "logcounts")
+tian_merged <- runTSNE(tian_merged, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+tian_merged <- runUMAP(tian_merged, use_dimred = "PCA", n_dimred = 50, ncomponents = 2)
+```
+
+```{r}
+sce <- tian_merged
+
+# set.seed(1241109852)
+# keep_cols <- c(which(tian_merged$sample_id == "pure"), sample(which(tian_merged$sample_id == "mixture"), size = floor(table(tian_merged$sample_id)['pure']/10))) %>% sort
+# 
+# sce <- sce[,keep_cols]
+
+rho <- rho_master[intersect(rownames(rho_master), rowData(sce)$Symbol),]
+set.seed(101)
+rho <- rho[sample(1:nrow(rho), size = 50),]
+#rho["IGFBP7","H2228"] <- 0
+# rho <- cbind(rho, data.frame('other'=0)) %>%
+#   as.matrix
+s <- sizeFactors(sce)
+
+sce_markers <- sce[get_ensembl_id(rownames(rho), sce),]
+rownames(sce_markers) <- rownames(rho)
+counts(sce_markers) <- as.matrix(counts(sce_markers))
+
+design <- model.matrix(~ sample_id, colData(sce_markers))
+
+cellassign_res3 <- cellassign(exprs_obj = sce_markers, 
+                             s = s, 
+                             marker_gene_info = rho, 
+                             X = design,
+                             B = 20, 
+                             shrinkage = TRUE,  
+                             verbose = FALSE, 
+                             rel_tol_em = 1e-5, 
+                             num_runs = 1, 
+                             min_delta = log(2),
+                             dirichlet_concentration = 1)
+```
+
+```{r}
+sce$cellassign_cluster <- cellassign_res3$cell_type
+
+probs <- cellassign_res3$mle_params$gamma
+colnames(probs) <- paste0(colnames(probs), "_prob")
+
+sce$max_prob <- rowMaxs(probs) 
+
+colData(sce) <- colData(sce) %>% 
+  cbind(probs)
+```
+
+```{r}
+plotTSNE(sce, colour_by = "cellassign_cluster")
+```
+
+```{r}
+df <- colData(sce) %>%
+  as.data.frame %>%
+  dplyr::select(sample_id, H1975, HCC827, H2228, H1975_prob, HCC827_prob, H2228_prob) %>%
+  dplyr::mutate(row=1:n())
+
+cell_props <- melt(df, id.vars = c("sample_id", "row"), measure.vars = c("H1975", "HCC827", "H2228"),
+                   variable.name = "cell_line", value.name = "prop_cells")
+mix_probs <- melt(df, id.vars = c("sample_id", "row"), measure.vars = c("H1975_prob", "HCC827_prob", "H2228_prob"),
+                  variable.name = "cell_line", value.name = "cellassign_prob") %>%
+  dplyr::mutate(cell_line = str_replace_all(cell_line, "_prob", ""))
+
+combined2 <- cell_props %>% dplyr::inner_join(mix_probs)
+total_cells <- combined2 %>% dplyr::group_by(row) %>% dplyr::summarise(total = sum(prop_cells * 9))
+complete_cells <- total_cells %>%
+  dplyr::filter(total == 9)
+
+ggplot(combined2 %>%
+         dplyr::filter(row %in% complete_cells$row), aes(x=factor(prop_cells * 9), y = cellassign_prob)) + geom_boxplot(outlier.size = -1) +  geom_point(aes(colour=sample_id), position = position_jitter(width = 0.2, height = 0)) + theme_bw() + theme_Publication() + theme_nature() + facet_wrap(~ cell_line, ncol = 1)
+```

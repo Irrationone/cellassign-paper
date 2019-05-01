@@ -1,0 +1,24 @@
+Cholangiocytes:
+  - KRT19
+  - EPCAM
+  - FXYD2
+  - CLDN4
+  - CLDN10
+  - SOX9
+  - MMP7
+  - CXCL1
+  - CFTR
+  - TFF2
+  - KRT7
+  - CD24
+Mature B cells:
+  - MS4A1
+  - CD19
+  - IGHD
+Hepatocytes:
+  - ALB
+  - HAMP
+  - ARG1
+  - PCK1
+  - AFP
+  - BCHE
