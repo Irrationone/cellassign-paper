@@ -82,9 +82,12 @@ fit_koh_hierarchical_top <- readRDS(args$fit_koh_hierarchical_top)
 fit_koh_hierarchical_bottom <- readRDS(args$fit_koh_hierarchical_bottom)
 
 sce_follicular_hgsc_merged$celltype_combined <- fit_combined$cell_type %>%
-  plyr::mapvalues(from = c("B cells (lambda)", "B cells (kappa)", "other"), to = c("B cells", "B cells", "Unassigned"))
-sce_follicular_hgsc_merged$celltype_individual <- c(fit_fl$cell_type, fit_hgsc$cell_type) %>%
-  plyr::mapvalues(from = c("B cells (lambda)", "B cells (kappa)", "other"), to = c("B cells", "B cells", "Unassigned"))
+  plyr::mapvalues(from = c("other"), to = c("Unassigned"))
+sce_follicular_hgsc_merged$celltype_combined[sce_follicular_hgsc_merged$dataset == "HGSC"] <- sce_follicular_hgsc_merged$celltype_combined[sce_follicular_hgsc_merged$dataset == "HGSC"] %>%
+  plyr::mapvalues(from = c("B cells (lambda)", "B cells (kappa)"), to = c("B cells", "B cells"))
+sce_follicular_hgsc_merged$celltype_individual <- c(fit_fl$cell_type, fit_hgsc$cell_type %>%
+                                                      plyr::mapvalues(from = c("B cells (lambda)", "B cells (kappa)"), to = c("B cells", "B cells"))) %>%
+  plyr::mapvalues(from = c("other"), to = c("Unassigned"))
 
 plot_titles <- c("CellAssign (separate)", "CellAssign (combined)")
 categories <- c("celltype_individual", "celltype_combined")

@@ -161,7 +161,10 @@ de_plots <- lapply(elist, function(gs) {
     stripped_theme() + 
     facet_grid(measure~de_prob, 
                scales = "free") + 
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.8)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.8),
+          axis.title = element_text(size = 9.5, face = "bold"),
+          plot.title = element_text(size = 11, face = "plain"),
+          strip.text = element_text(size = 9.5, face = "plain")) + 
     xlab("Method") + ylab("Score") + 
     guides(fill = FALSE) + 
     geom_text(data = paired_pvals_cast,
@@ -206,7 +209,10 @@ wm_plots <- plot_simulation_performance(wm_eval_measures,
 wm_plot_cellassign <- wm_plots$cellassign + 
   xlab("Proportion of incorrect entries in rho") + 
   guides(fill = FALSE) + 
-  scale_fill_manual(values = clust_methods_palette)
+  scale_fill_manual(values = clust_methods_palette) + 
+  theme(axis.title = element_text(size = 9.5, face = "bold"),
+        plot.title = element_text(size = 11, face = "plain"),
+        strip.text = element_text(size = 9.5, face = "plain"))
 
 # Wrong marker figure (2)
 # wm_eval_measures2 <- load_annotation_files(wrongmarker_result_dir2, pattern = "*_eval_measures.tsv")
@@ -227,7 +233,10 @@ wm_plots2 <- plot_simulation_performance(wm_eval_measures2,
 wm_plot_cellassign2 <- wm_plots2$cellassign + 
   xlab("Proportion of incorrect entries in rho") + 
   guides(fill = FALSE) + 
-  scale_fill_manual(values = clust_methods_palette)
+  scale_fill_manual(values = clust_methods_palette) + 
+  theme(axis.title = element_text(size = 9.5, face = "bold"),
+        plot.title = element_text(size = 11, face = "plain"),
+        strip.text = element_text(size = 9.5, face = "plain"))
 
 # Delta plots
 
@@ -259,7 +268,10 @@ delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) +
   guides(colour = FALSE) + 
   facet_wrap(~ de_prob, ncol = length(delta_deprobs)) +  
   geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1.05, vjust = 1.2, parse = TRUE,
-            size = 0.35*8)
+            size = 0.35*9.5) + 
+  theme(axis.title = element_text(size = 9.5, face = "bold"),
+        plot.title = element_text(size = 11, face = "plain"),
+        strip.text = element_text(size = 9.5, face = "plain"))
 
 
 whitespace_width <- 0.4
@@ -294,9 +306,9 @@ final_plot <- cowplot::plot_grid(de_plot_markers,
                                  wm_row,
                                  nrow = 4,
                                  labels = c('a', '', 'b', ''),
-                                 rel_heights= c(1, 0.1, 1, 1))
+                                 rel_heights= c(1.25, 0.1, 1, 1))
 
-pdf(args$outfname, width = 10, height = 10, useDingbats = FALSE)
+pdf(args$outfname, width = 10, height = 11, useDingbats = FALSE)
 plot(final_plot)
 dev.off()
 
