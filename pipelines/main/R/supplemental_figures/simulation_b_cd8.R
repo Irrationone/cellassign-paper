@@ -148,7 +148,10 @@ de_plots <- lapply(elist, function(gs) {
     theme_bw() + theme_Publication() + 
     theme_nature() + stripped_theme() + facet_grid(measure~de_prob, 
                                                    scales = "free") + 
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.88)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.88),
+          axis.title = element_text(size = 9.5, face = "bold"),
+          plot.title = element_text(size = 11, face = "plain"),
+          strip.text = element_text(size = 9.5, face = "plain")) + 
     xlab("Method") + ylab("Score") + 
     guides(fill = FALSE) + 
     geom_text(data = paired_pvals_cast,
@@ -219,7 +222,10 @@ delta_plots <- ggplot(delta_table, aes(x=true_delta, y=inferred_delta)) +
   guides(colour = FALSE) + 
   facet_wrap(~ de_prob, ncol = length(delta_deprobs)) + 
   geom_text(data = rval_labels, aes(x=Inf, y=Inf, label=r_label), hjust = 1, vjust = 1, parse = TRUE,
-            size = 0.35*8)
+            size = 0.35*9.5) + 
+  theme(axis.title = element_text(size = 9.5, face = "bold"),
+        plot.title = element_text(size = 11, face = "plain"),
+        strip.text = element_text(size = 9.5, face = "plain"))
 
 # Wrong marker figure
 wrongmarker_de_files <- Sys.glob(file.path(wrongmarker_result_dir, "evaluate", "celltypes", "*", "cellassign*.tsv"))
@@ -239,7 +245,10 @@ wm_plots <- plot_simulation_performance(wm_eval_measures %>%
 wm_plot_cellassign <- wm_plots$cellassign + 
   xlab("Proportion of incorrect entries in rho") + 
   guides(fill = FALSE) + 
-  scale_fill_manual(values = clust_methods_palette)
+  scale_fill_manual(values = clust_methods_palette) + 
+  theme(axis.title = element_text(size = 9.5, face = "bold"),
+        plot.title = element_text(size = 11, face = "plain"),
+        strip.text = element_text(size = 9.5, face = "plain"))
 
 
 # Final plot

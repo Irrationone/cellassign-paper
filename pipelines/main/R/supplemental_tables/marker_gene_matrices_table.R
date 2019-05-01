@@ -44,6 +44,8 @@ parser$add_argument('--cellbench_gene_list_30', metavar = 'FILE', type = 'charac
                     help="Path to CellBench marker gene list (30)")
 parser$add_argument('--cellbench_gene_list_50', metavar = 'FILE', type = 'character',
                     help="Path to CellBench marker gene list (50)")
+parser$add_argument('--cellbench_gene_list_73', metavar = 'FILE', type = 'character',
+                    help="Path to CellBench marker gene list (73)")
 parser$add_argument('--outfname', type = 'character', metavar = 'FILE',
                     help="Output path for table")
 args <- parser$parse_args()
@@ -63,6 +65,7 @@ liver_panglaodb_gene_list_path <- args$liver_panglaodb_gene_list
 cellbench_gene_list_20_path <- args$cellbench_gene_list_20
 cellbench_gene_list_30_path <- args$cellbench_gene_list_30
 cellbench_gene_list_50_path <- args$cellbench_gene_list_50
+cellbench_gene_list_73_path <- args$cellbench_gene_list_73
 
 gene_list_paths <- c(follicular_gene_list_specific_path,
                      follicular_gene_list_lambda_kappa_path,
@@ -74,7 +77,8 @@ gene_list_paths <- c(follicular_gene_list_specific_path,
                      liver_panglaodb_gene_list_path,
                      cellbench_gene_list_20_path,
                      cellbench_gene_list_30_path,
-                     cellbench_gene_list_50_path)
+                     cellbench_gene_list_50_path,
+                     cellbench_gene_list_73_path)
 gene_list_names <- c("Koh et al.",
                      "FL celltype",
                      "FL light chain",
@@ -82,11 +86,12 @@ gene_list_names <- c("Koh et al.",
                      "HGSC and FL combined",
                      "McParland et al. liver",
                      "McParland et al. liver revised",
-                     "McParland et al. liver revised subset",
+                     "McParland et al. revised 3 types",
                      "Liver PanglaoDB canonical",
                      "CellBench 20 genes",
                      "CellBench 30 genes",
-                     "CellBench 50 genes")
+                     "CellBench 50 genes",
+                     "CellBench all 73 genes")
 
 rho_dfs <- lapply(seq_along(gene_list_paths), function(i) {
   f <- gene_list_paths[i]

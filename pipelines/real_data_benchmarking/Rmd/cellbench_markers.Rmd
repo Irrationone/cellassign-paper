@@ -114,8 +114,8 @@ rownames(rho_master) <- symbols[!is.na(symbols)]
 ```
 
 ```{r}
-tian_3_celseq <- readRDS('/datadrive/projects/cellassign-paper/results/scratch/novel_celltype_analysis/v1/sce_normalized/tian_3_CELseq2.rds')
-tian_3_mixture <- readRDS('/datadrive/projects/cellassign-paper/results/scratch/novel_celltype_analysis/v1/sce_normalized/tian_mixture3.rds')
+tian_3_celseq <- readRDS('/datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v1/sce_normalized/tian_3_CELseq2.rds')
+tian_3_mixture <- readRDS('/datadrive/projects/cellassign-paper/results/scratch/real_data_benchmarking/v1/sce_normalized/tian_mixture3.rds')
 ```
 
 ## Subset for genes only in the SCEs

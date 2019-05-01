@@ -185,7 +185,10 @@ de_plots <- lapply(elist, function(gs) {
     stripped_theme() + 
     facet_grid(measure~de_prob, 
                scales = "free") + 
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.8)) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.8),
+          axis.title = element_text(size = 9.5, face = "bold"),
+          plot.title = element_text(size = 11, face = "plain"),
+          strip.text = element_text(size = 9.5, face = "plain")) + 
     xlab("Method") + ylab("Score") + 
     guides(fill = FALSE) + 
     geom_text(data = paired_pvals_cast,
@@ -309,7 +312,10 @@ novel_plot <- ggplot(novel_df,
             aes(label=symbol, x=clustering_method, y=novel_min_val-0.15*(1-novel_min_val)),
             colour = clust_methods_palette["cellassign"]) + 
   coord_cartesian(ylim = c(novel_min_val, 1), clip = 'off') + 
-  theme(panel.spacing.y = unit(2, "lines")) + 
+  theme(panel.spacing.y = unit(2, "lines"),
+        axis.title = element_text(size = 9.5, face = "bold"),
+        plot.title = element_text(size = 11, face = "plain"),
+        strip.text = element_text(size = 9.5, face = "plain")) + 
   scale_fill_manual(values = clust_methods_palette) + 
   guides(fill = FALSE) + 
   ggtitle("Number of unknown cell types (out of 6)")
@@ -328,7 +334,10 @@ superset_plot <- ggplot(superset_df,
   geom_text(data = superset_pvals %>% dplyr::rename(clustering_method=method2),
             aes(label=symbol, x=clustering_method, y=superset_min_val-0.15*(1-superset_min_val)),
             colour = clust_methods_palette["cellassign"]) +
-  theme(panel.spacing.y = unit(2, "lines")) + 
+  theme(panel.spacing.y = unit(2, "lines"),
+        axis.title = element_text(size = 9.5, face = "bold"),
+        plot.title = element_text(size = 11, face = "plain"),
+        strip.text = element_text(size = 9.5, face = "plain")) + 
   scale_fill_manual(values = clust_methods_palette) + 
   guides(fill = FALSE) + 
   ggtitle("Number of removed cell types in the data (out of 6)")

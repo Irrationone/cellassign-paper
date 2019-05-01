@@ -175,14 +175,10 @@ hgsc_epithelial_cluster_hallmark_pathways$leadingEdge <- sapply(hgsc_epithelial_
 
 
 # Write supplemental table xlsx
-excel_export(list(timepoint_pathways,
-                  hallmark_pathways,
-                  hgsc_hallmark_pathways %>% as.data.frame,
+excel_export(list(hgsc_hallmark_pathways %>% as.data.frame,
                   hgsc_epithelial_cluster_hallmark_pathways %>% as.data.frame),
              file = args$outfname,
-             table_names = c("T2 vs. T1 reactome pathways (by celltype)",
-                             "T2 vs. T1 hallmark pathways (malignant B cells)",
-                             "Left ovary vs. right ovary hallmark pathways (epithelial cells)",
+             table_names = c("Left ovary vs. right ovary hallmark pathways (epithelial cells)",
                              "Epithelial cell clusters hallmark pathways"))
 
 cat("Completed.\n")

@@ -143,7 +143,10 @@ de_plots_combined <- lapply(c(deprob_result_dir1, deprob_result_dir2), function(
       theme_bw() + theme_Publication() + 
       theme_nature() + stripped_theme() + facet_grid(measure~de_prob, 
                                                      scales = "free") + 
-      theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.88)) + 
+      theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7, vjust = 0.88),
+            axis.title = element_text(size = 9.5, face = "bold"),
+            plot.title = element_text(size = 11, face = "plain"),
+            strip.text = element_text(size = 9.5, face = "plain")) + 
       xlab("Method") + ylab("Score") + 
       guides(fill = FALSE) + 
       geom_text(data = paired_pvals_cast,
